@@ -1,0 +1,217 @@
+---
+title: eth_getUncleByBlockHashAndIndex - Retrieve Uncle Block by Block Hash and Index | Ethereum API Methods
+description: Learn how to use the eth_getUncleByBlockHashAndIndex method to fetch uncle (ommer) block information using a block hash and uncle index.
+keywords: eth_getUncleByBlockHashAndIndex, uncle blocks, ommer blocks, ethereum uncles, block rewards, network security, block hash
+---
+
+# eth_getUncleByBlockHashAndIndex
+
+The `eth_getUncleByBlockHashAndIndex` method returns information about an uncle (ommer) block by a block hash and uncle index position.
+
+## Use Cases
+
+- Analyzing blockchain network health
+- Verifying uncle rewards distribution
+- Researching mining/validation competition
+- Studying blockchain throughput and latency
+- Understanding network security through uncle rate
+- Mining strategy analysis
+- Historical blockchain research
+- Block confirmation verification
+
+## Method Details
+
+Returns information about the uncle (ommer) block by the block hash and uncle index position.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getUncleByBlockHashAndIndex',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockHash',
+			required: true,
+			type: 'string',
+			desc: 'Hash of the block containing the uncle',
+			value: '0xc8df1f061abb4d0c107b2b1a794ade8780b3120e681f723fe55a7be586d95ba6', // Example block with uncle
+		},
+		{
+			id: 'uncleIndex',
+			required: true,
+			type: 'string',
+			desc: 'The index position of the uncle (hex)',
+			value: '0x0',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'Uncle block object, or null if no uncle exists at that index',
+			fields: [
+				{
+					id: 'number',
+					type: 'string',
+					desc: "Uncle block's number (hex)",
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: 'Hash of the uncle block',
+				},
+				{
+					id: 'parentHash',
+					type: 'string',
+					desc: 'Hash of the parent block',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'Nonce used in block mining/validation (PoW blocks only)',
+				},
+				{
+					id: 'sha3Uncles',
+					type: 'string',
+					desc: 'SHA3 hash of the uncles data in the block',
+				},
+				{
+					id: 'logsBloom',
+					type: 'string',
+					desc: 'Bloom filter for light clients to quickly retrieve related logs',
+				},
+				{
+					id: 'transactionsRoot',
+					type: 'string',
+					desc: 'Root of the transaction trie for this block',
+				},
+				{
+					id: 'stateRoot',
+					type: 'string',
+					desc: 'Root of the state trie for this block',
+				},
+				{
+					id: 'receiptsRoot',
+					type: 'string',
+					desc: 'Root of the receipts trie for this block',
+				},
+				{
+					id: 'miner',
+					type: 'string',
+					desc: 'Address that received the mining reward',
+				},
+				{
+					id: 'difficulty',
+					type: 'string',
+					desc: 'Difficulty target for this block (hex)',
+				},
+				{
+					id: 'totalDifficulty',
+					type: 'string',
+					desc: 'Total difficulty of chain up to this block (hex)',
+				},
+				{
+					id: 'extraData',
+					type: 'string',
+					desc: 'Extra data included by the miner in the block',
+				},
+				{
+					id: 'size',
+					type: 'string',
+					desc: 'Block size in bytes (hex)',
+				},
+				{
+					id: 'gasLimit',
+					type: 'string',
+					desc: 'Maximum gas allowed in this block (hex)',
+				},
+				{
+					id: 'gasUsed',
+					type: 'string',
+					desc: 'Total gas used by all transactions in this block (hex)',
+				},
+				{
+					id: 'timestamp',
+					type: 'string',
+					desc: 'Unix timestamp when block was collated (hex)',
+				},
+				{
+					id: 'uncles',
+					type: 'array',
+					desc: 'Array of uncle hashes (will be empty for uncle blocks)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockHash || null, fields?.uncleIndex || null]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"difficulty": "0x57f17a09378",
+		"extraData": "0x476574682f76312e302e302f6c696e75782f676f312e342e32",
+		"gasLimit": "0x1388",
+		"gasUsed": "0x0",
+		"hash": "0x932bdf904546a2287a2c9b2ede37925f698a7657484b172d4e5184f80bdd464d",
+		"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+		"miner": "0xbb7b8287f3f0a933474a79eae42cbca977791171",
+		"mixHash": "0x4500aa4ee2b3044a155252e35273770edeb2ab6f8cb19ca8e732771484462169",
+		"nonce": "0x24732773618271bc",
+		"number": "0x299",
+		"parentHash": "0xa779859b1ee558258b7008bbabff272280136c5dd3eb3ea3bfa8f6ae03bf91e5",
+		"receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+		"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+		"size": "0x21d",
+		"stateRoot": "0x2604fbf5183f5360da249b51f1b9f1e0f315d2ff3ffa1a4143ff221ad9ca1fec",
+		"timestamp": "0x55ba4827",
+		"totalDifficulty": null,
+		"transactionsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+		"uncles": []
+	}
+}
+```
+
+## Understanding Uncle Blocks
+
+Uncle blocks (also called ommers) are valid blocks that were mined but not included in the main blockchain. This happens when two miners find a valid block at nearly the same time, but only one can be accepted into the main chain.
+
+### Why Uncle Blocks Matter
+
+- **Network Security**: A high uncle rate may indicate network latency or high mining competition
+- **Rewards**: Miners of uncle blocks receive partial rewards (2/32 of block reward pre-EIP-1559)
+- **Block Inclusion**: Uncles are referenced in regular blocks (up to 2 per block)
+- **Chain Confirmation**: Uncles contribute to blockchain security despite not being in the main chain
+
+### Uncle Rewards Calculation
+
+Uncle block miners receive rewards based on the formula:
+
+```
+((Uncle Block Number + 8) - Main Block Number) * (Block Reward / 8)
+```
+
+Where:
+- Uncle Block Number is the block number of the uncle block
+- Main Block Number is the block number that included the uncle reference
+- Block Reward is the standard block reward (varies by network upgrade)
+
+### Important Notes
+
+- Uncle blocks contain header information only, no transactions
+- Uncles must be within 6 blocks of the including block
+- Post-Merge (PoS), uncles no longer exist as validators produce blocks in slots
+- The uncle rate is an important network health metric
+- Uncle information can be vital for analyzing historical blockchain data
+
+## See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockNumberAndIndex" title="Retrieve uncle blocks using block number">eth_getUncleByBlockNumberAndIndex</Link> - Get uncle block data using the block number and uncle index
+- <Link to="/docs/ethereum/core-methods/eth_getUncleCountByBlockHash" title="Count uncles in a specific block">eth_getUncleCountByBlockHash</Link> - Count the number of uncles in a block using its hash
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Get complete block details by hash">eth_getBlockByHash</Link> - Get full block information including uncle references

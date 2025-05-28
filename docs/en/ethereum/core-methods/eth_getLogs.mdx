@@ -1,0 +1,357 @@
+---
+title: eth_getLogs - Query Blockchain Events | Ethereum API Methods
+description: Learn how to use eth_getLogs to directly query blockchain events and logs matching specific filter criteria - essential for dApp development, data analysis, and historical event tracking.
+keywords: eth_getLogs, blockchain events, ethereum events, smart contract logs, event filtering, blockchain data, contract events, transaction logs, event history, indexed parameters
+---
+
+# eth_getLogs
+
+The `eth_getLogs` method returns an array of all logs matching a given filter object, allowing developers to query historical event data directly without first creating a filter. This is among the most powerful and frequently used methods for retrieving blockchain event data, essential for dApp development and blockchain data analysis.
+
+## Use Cases
+
+- Tracking token transfer history for wallets
+- Building user activity timelines in dApps
+- Monitoring protocol events for analytics
+- Analyzing historical trade activity on DEXs
+- Auditing contract interactions and governance voting
+- Indexing blockchain data for faster application access
+- Reconstructing state from events for contract verification
+- Creating notifications for user-relevant contract events
+- Detecting security incidents through anomalous events
+- Generating comprehensive transaction receipts
+
+## Method Details
+
+This method accepts a filter object with criteria for the logs to return and is one of the most query-intensive RPC calls.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_getLogs",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterObject',
+      required: true,
+      type: 'object',
+      desc: "Log filter options object",
+      fields: [
+        {
+          id: 'fromBlock',
+          type: 'string',
+          desc: "Block number/tag to start searching from",
+          value: "0x118F6B0"  // Block 18,350,000
+        },
+        {
+          id: 'toBlock',
+          type: 'string',
+          desc: "Block number/tag to search until",
+          value: "0x118F6B5"  // Block 18,350,005 (range of 5 blocks)
+        },
+        {
+          id: 'address',
+          type: 'string',
+          desc: "Contract address(es) to filter logs",
+          value: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"  // WETH contract
+        },
+        {
+          id: 'topics',
+          type: 'array',
+          desc: "Array of topic filters (event signatures and indexed parameters)",
+          value: [
+            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"  // Transfer event signature
+          ]
+        },
+        {
+          id: 'blockHash',
+          type: 'string',
+          desc: "Hash of block to get logs from (alternative to fromBlock/toBlock)",
+          value: ""
+        }
+      ]
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'array',
+      desc: "Array of log objects matching the filter criteria",
+      fields: [
+        {
+          id: 'address',
+          type: 'string',
+          desc: "Address from which this log originated"
+        },
+        {
+          id: 'topics',
+          type: 'array',
+          desc: "Array of indexed log arguments (up to 4 topics)"
+        },
+        {
+          id: 'data',
+          type: 'string',
+          desc: "Non-indexed log data (hex encoded)"
+        },
+        {
+          id: 'blockNumber',
+          type: 'string',
+          desc: "Block number containing this log (hex)"
+        },
+        {
+          id: 'transactionHash',
+          type: 'string',
+          desc: "Transaction hash that created this log"
+        },
+        {
+          id: 'transactionIndex',
+          type: 'string',
+          desc: "Index of transaction in the block"
+        },
+        {
+          id: 'blockHash',
+          type: 'string',
+          desc: "Hash of block containing this log"
+        },
+        {
+          id: 'logIndex',
+          type: 'string',
+          desc: "Index position of this log in the block"
+        },
+        {
+          id: 'removed',
+          type: 'boolean',
+          desc: "Whether this log was removed due to chain reorg"
+        }
+      ]
+    }
+  ]}
+  getParams={(fields) => {
+    const filterObject = {};
+
+    if (fields?.filterObject?.fromBlock)
+      filterObject.fromBlock = fields.filterObject.fromBlock;
+
+    if (fields?.filterObject?.toBlock)
+      filterObject.toBlock = fields.filterObject.toBlock;
+
+    if (fields?.filterObject?.address)
+      filterObject.address = fields.filterObject.address;
+
+    if (fields?.filterObject?.topics && fields.filterObject.topics.length > 0)
+      filterObject.topics = fields.filterObject.topics;
+
+    if (fields?.filterObject?.blockHash)
+      filterObject.blockHash = fields.filterObject.blockHash;
+
+    return [filterObject];
+  }}
+/>
+
+### Response Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "topics": [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x00000000000000000000000068b3465833fb72a70ecdf485e0e4c7bd8665fc45",
+        "0x00000000000000000000000027182842e098f60e3d576794a5bffb0777e025d3"
+      ],
+      "data": "0x000000000000000000000000000000000000000000000043e1f92f1839951800",
+      "blockNumber": "0x10d4f40",
+      "transactionHash": "0x7d5b3f1d5b32c2b6da53acaace3894412f3b1ec2384a9b8e6c1a52325e880db2",
+      "transactionIndex": "0xc1",
+      "blockHash": "0xe2ccfc7b29eb6cad4bd3e55a00275a3b05d2d5f984ef63683f115e92d213d5b2",
+      "logIndex": "0x5a",
+      "removed": false
+    }
+  ]
+}
+```
+
+### Understanding Log Objects
+
+Each log object returned contains:
+
+- **address**: Contract address that generated the event
+- **topics**: Array of 0-4 32-byte topics (indexed parameters)
+  - First topic is typically the event signature hash (keccak256 of event signature)
+  - Subsequent topics are indexed event parameters (each limited to 32 bytes)
+- **data**: Contains the non-indexed event parameters (hex string)
+- **blockNumber**: Block number where the log was created
+- **transactionHash**: Transaction hash that generated the log
+- **transactionIndex**: Transaction's index position in the block
+- **blockHash**: Hash of the block where the log was created
+- **logIndex**: Log index position in the block
+- **removed**: `true` if the log was removed due to a chain reorganization
+
+### Topic Filtering Deep Dive
+
+The `topics` parameter offers powerful filtering capabilities:
+
+1. **Simple Topic Match**:
+   ```json
+   "topics": ["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"]
+   ```
+   This matches all ERC-20 Transfer events.
+
+2. **Position-Specific Matching** (AND logic between positions):
+   ```json
+   "topics": [
+     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+     "0x000000000000000000000000abc123..."
+   ]
+   ```
+   This matches Transfer events FROM a specific address.
+
+3. **OR Logic Within a Position**:
+   ```json
+   "topics": [
+     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+     ["0x000000000000000000000000abc123...", "0x000000000000000000000000def456..."]
+   ]
+   ```
+   This matches Transfer events FROM either of two addresses.
+
+4. **Skipping Positions with `null`**:
+   ```json
+   "topics": [
+     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+     null,
+     "0x000000000000000000000000xyz789..."
+   ]
+   ```
+   This matches Transfer events TO a specific address (ignoring the FROM field).
+
+### Common Usage Patterns
+
+Here are complete examples for common use cases:
+
+```javascript
+// 1. Get all ERC-20 transfer events for a specific token
+async function getTokenTransfers(tokenAddress, fromBlock = '0x0', toBlock = 'latest') {
+  // Transfer event signature: keccak256("Transfer(address,address,uint256)")
+  const transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+
+  return await provider.send('eth_getLogs', [{
+    address: tokenAddress,
+    topics: [transferEventSignature],
+    fromBlock,
+    toBlock
+  }]);
+}
+
+// 2. Get transfers to or from a specific wallet address
+async function getUserTransfers(tokenAddress, userAddress, fromBlock = '0x0', toBlock = 'latest') {
+  const transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+  const paddedAddress = userAddress.replace('0x', '0x000000000000000000000000');
+
+  // Topic array to match events where user is sender OR receiver
+  return await provider.send('eth_getLogs', [{
+    address: tokenAddress,
+    topics: [
+      transferEventSignature,
+      [paddedAddress, null],  // From user (OR)
+      [paddedAddress, null]   // To user (OR)
+    ],
+    fromBlock,
+    toBlock
+  }]);
+}
+
+// 3. Track NFT minting events
+async function getNFTMints(nftAddress, fromBlock = '0x0', toBlock = 'latest') {
+  // Transfer event from 0x0 address is a mint
+  const transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+  const zeroAddress = '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+  return await provider.send('eth_getLogs', [{
+    address: nftAddress,
+    topics: [
+      transferEventSignature,
+      zeroAddress  // From address is zero address (mint)
+    ],
+    fromBlock,
+    toBlock
+  }]);
+}
+
+// 4. Complete decoder for ERC-20 Transfer events
+function decodeTransferEvent(log) {
+  // Parse indexed parameters from topics
+  const from = '0x' + log.topics[1].substring(26);
+  const to = '0x' + log.topics[2].substring(26);
+
+  // Parse amount from data field
+  const amount = BigInt(log.data);
+
+  return {
+    from,
+    to,
+    amount,
+    blockNumber: parseInt(log.blockNumber, 16),
+    txHash: log.transactionHash
+  };
+}
+```
+
+### Performance Considerations
+
+For efficient use of `eth_getLogs`:
+
+- **Block Range Limitations**: Most providers limit the block range (e.g., 2000-10000 blocks) per request
+- **Pagination Strategy**: For large queries, paginate by block ranges:
+  ```javascript
+  async function paginatedLogs(filter, maxBlocksPerPage = 2000) {
+    const fromBlock = parseInt(filter.fromBlock === 'earliest' ? '0x0' : filter.fromBlock, 16);
+    const latestBlock = parseInt(await provider.send('eth_blockNumber', []), 16);
+    const toBlock = filter.toBlock === 'latest' ? latestBlock : parseInt(filter.toBlock, 16);
+
+    let allLogs = [];
+    for (let i = fromBlock; i <= toBlock; i += maxBlocksPerPage) {
+      const pageToBlock = Math.min(i + maxBlocksPerPage - 1, toBlock);
+      const pageFilter = {
+        ...filter,
+        fromBlock: '0x' + i.toString(16),
+        toBlock: '0x' + pageToBlock.toString(16)
+      };
+
+      const logs = await provider.send('eth_getLogs', [pageFilter]);
+      allLogs = allLogs.concat(logs);
+    }
+
+    return allLogs;
+  }
+  ```
+
+- **Topic Specificity**: More specific topic filters reduce data transfer and processing time
+- **Address Filtering**: Querying a single contract is more efficient than multiple contracts
+- **Provider Optimization**: Some providers like Infura have specialized endpoints for log queries
+- **Rate Limiting**: This method often has stricter rate limits and may count as multiple requests
+- **Caching**: Consider caching results for frequently accessed historical data
+- **Archive Nodes**: Some queries may require archive nodes rather than full nodes
+
+### Common Event Signatures
+
+Here are frequently used event signatures for filtering:
+
+- ERC-20 Transfer: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`
+- ERC-20 Approval: `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925`
+- ERC-721 Transfer: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` (same as ERC-20)
+- Uniswap V2 Swap: `0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822`
+- ERC-1155 TransferSingle: `0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62`
+- ERC-1155 TransferBatch: `0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb`
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Create event filters">eth_newFilter</Link> - Create a filter for logs
+- <Link to="/docs/ethereum/core-methods/eth_getFilterLogs" title="Get all logs for a filter">eth_getFilterLogs</Link> - Get all logs matching a filter
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Poll for new logs">eth_getFilterChanges</Link> - Get new logs since last poll
+- <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Latest block number">eth_blockNumber</Link> - Get the latest block number

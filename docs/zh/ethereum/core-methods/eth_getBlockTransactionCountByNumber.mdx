@@ -1,0 +1,159 @@
+---
+title: eth_getBlockTransactionCountByNumber - 按区块高度统计交易 | 以太坊 API 方法
+description: 了解如何使用 eth_getBlockTransactionCountByNumber 方法获取通过区块高度标识的以太坊区块中的交易数量。
+keywords: eth_getBlockTransactionCountByNumber, 交易数量, 区块高度, 区块交易, 以太坊区块, 网络活动, 区块密度, 交易量, 链上指标
+---
+
+# eth_getBlockTransactionCountByNumber
+
+`eth_getBlockTransactionCountByNumber` 方法返回通过区块高度或区块标签标识的区块中的交易数量。这种轻量级方法提供了一种简单的方式来检查交易量和网络活动，而无需检索完整的区块数据，使其成为监控链上活动的重要工具。
+
+## 使用场景
+
+- 网络拥堵监控和 gas 价格预测
+- 历史交易量分析和趋势研究
+- 区块浏览器功能和交易列表
+- 网络可扩展性研究和性能分析
+- 费用估算算法以优化交易时机
+- 交易吞吐量测量和网络扩容分析
+- 区块填充率跟踪和拥堵模式分析
+- 基于网络条件的应用性能调优
+- 钱包交易费用优化
+- 与市场事件的历史相关性分析
+
+## 方法详情
+
+此方法允许查询链上任何区块的交易数量，包括"最新"和"待处理"等特殊区块标签。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBlockTransactionCountByNumber',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '十六进制格式的区块高度或标签：latest, earliest, pending, safe, finalized',
+			value: '0x118F61F', // 区块 18,350,623（高活动）
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '指定区块中的交易数量（十六进制）',
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x9B" // 155 笔交易
+}
+```
+
+### 区块标签选项
+
+此方法支持以下特殊区块标签作为参数：
+
+- `latest`：最近被挖出的区块（最常用）
+- `earliest`：创世区块（区块 0）
+- `pending`：当前待处理的区块（等待被挖出的内存池中的交易）
+- `safe`：网络认为安全的最新区块（正在进行最终确认）
+- `finalized`：已经达到最终确认的最新区块（仅合并后适用）
+
+### 转换响应
+
+响应是一个需要转换为十进制的十六进制字符串：
+
+```javascript
+// 将十六进制交易数量转换为十进制
+const txCountHex = "0x9B";
+const txCountDecimal = parseInt(txCountHex, 16); // 155
+```
+
+### 交易数量的重要性
+
+交易数量提供了以下有价值的见解：
+
+1. **网络拥堵**：更高的数量通常表示网络拥堵
+2. **Gas 价格**：区块填充率在 EIP-1559 模型中直接影响 gas 价格
+3. **网络健康**：交易吞吐量反映网络容量利用率
+4. **DApp 活动**：峰值通常与主要 DApp 事件或促销相关
+5. **市场相关性**：通常与价格波动和市场波动相关
+
+### 实际示例
+
+```javascript
+// 示例：随时间跟踪交易吞吐量
+async function analyzeNetworkThroughput(startBlock, blockCount = 100) {
+	const counts = [];
+	let totalTxs = 0;
+
+	for (let i = 0; i < blockCount; i++) {
+		const blockNum = (BigInt(startBlock) + BigInt(i)).toString(16);
+		const txCount = await provider.send('eth_getBlockTransactionCountByNumber', [`0x${blockNum}`]);
+
+		const block = await provider.send('eth_getBlockByNumber', [`0x${blockNum}`, false]);
+
+		const timestamp = parseInt(block.timestamp, 16);
+		const count = parseInt(txCount, 16);
+
+		counts.push({
+			blockNumber: `0x${blockNum}`,
+			timestamp,
+			transactionCount: count,
+		});
+
+		totalTxs += count;
+	}
+
+	// 计算平均值和趋势
+	const avgTxPerBlock = totalTxs / blockCount;
+	const timespan = counts[counts.length - 1].timestamp - counts[0].timestamp;
+	const txPerSecond = totalTxs / timespan;
+
+	return {
+		blocks: counts,
+		averageTransactionsPerBlock: avgTxPerBlock,
+		transactionsPerSecond: txPerSecond,
+		totalTransactions: totalTxs,
+		timeSpanSeconds: timespan,
+	};
+}
+
+// 使用方法
+const stats = await analyzeNetworkThroughput('0x118F500', 50);
+console.log(`平均 TPS: ${stats.transactionsPerSecond.toFixed(2)}`);
+console.log(`平均每区块交易数: ${stats.averageTransactionsPerBlock.toFixed(2)}`);
+```
+
+### 网络比较
+
+不同以太坊兼容网络的交易数量差异显著：
+
+- **以太坊主网**：每区块 100-300+ 笔（12 秒出块）
+- **Polygon**：每区块 50-100+ 笔（2 秒出块）
+- **Arbitrum**：每批次 100-1000+ 笔（压缩的 L2 交易）
+- **Optimism**：每批次 50-500+ 笔（压缩的 L2 交易）
+- **Avalanche C-Chain**：每区块 5-50+ 笔（2 秒出块）
+- **BNB Smart Chain**：每区块 50-100+ 笔（3 秒出块）
+- **Base**：每批次 50-300+ 笔（L2 乐观卷叠）
+
+这种差异反映了区块时间、费用结构和生态系统使用模式的不同。
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockTransactionCountByHash" title="按哈希统计交易">eth_getBlockTransactionCountByHash</Link> - 使用区块哈希而非区块高度返回交易数量
+- <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="获取最新区块高度">eth_blockNumber</Link> - 返回最新的区块高度
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="获取区块详情">eth_getBlockByNumber</Link> - 返回区块的完整信息
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockNumberAndIndex" title="获取交易详情">eth_getTransactionByBlockNumberAndIndex</Link> - 返回指定位置的交易详情

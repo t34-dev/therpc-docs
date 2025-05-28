@@ -1,0 +1,58 @@
+---
+title: Guía de Bloques Tío | Entendiendo los Ommers en Ethereum
+description: Guía completa sobre bloques tío de Ethereum (ommers), incluyendo su propósito en la seguridad de la red, estructura de recompensas, métodos de recuperación e impacto en la economía de minería.
+keywords: bloques tío, bloques ommer, minería ethereum, recompensas de bloques, bloques obsoletos, consenso ethereum, recompensa tío, economía de minería, tíos blockchain, seguridad de red
+---
+
+# Guía de Bloques Tío
+
+Los bloques tío (también conocidos como bloques ommer) son bloques válidos que no fueron incluidos en la cadena principal pero que aún son recompensados en Ethereum. Entenderlos es importante para la minería y la validación de bloques.
+
+## Entendiendo los Bloques Tío
+
+- Qué son los bloques tío
+- Por qué existen
+- Estructura de recompensas
+- Impacto en la seguridad de la red
+
+## Ejemplos de Implementación
+
+```javascript
+// Obtener cantidad de tíos para un bloque
+const getUncleCount = async (blockNumber) => {
+	const block = await web3.eth.getBlock(blockNumber);
+	return block.uncles.length;
+};
+
+// Obtener bloque tío por índice
+const getUncleBlock = async (blockNumber, uncleIndex) => {
+	return await web3.eth.getUncle(blockNumber, uncleIndex);
+};
+
+// Monitorear tasas de tíos
+const calculateUncleRate = async (blockRange = 100) => {
+	const latestBlock = await web3.eth.getBlockNumber();
+	const startBlock = latestBlock - blockRange;
+
+	let totalUncles = 0;
+	for (let i = startBlock; i <= latestBlock; i++) {
+		const uncleCount = await getUncleCount(i);
+		totalUncles += uncleCount;
+	}
+
+	return totalUncles / blockRange;
+};
+```
+
+## Mejores Prácticas
+
+1. Considerar los bloques tío en las confirmaciones de bloques
+2. Monitorear las tasas de tíos para la salud de la red
+3. Contabilizar las recompensas de tíos en los cálculos de minería
+4. Manejar adecuadamente las referencias a tíos
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockHashAndIndex" title="Método API para recuperar bloque tío por hash e índice">eth_getUncleByBlockHashAndIndex</Link> - Recuperar bloque tío por hash e índice
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockNumberAndIndex" title="Método API para recuperar bloque tío por número e índice">eth_getUncleByBlockNumberAndIndex</Link> - Recuperar bloque tío por número e índice
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="Aprende técnicas fundamentales para trabajar con bloques de Ethereum">Trabajando con Bloques</Link> - Manejo general de bloques

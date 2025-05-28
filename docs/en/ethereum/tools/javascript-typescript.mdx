@@ -1,0 +1,137 @@
+---
+title: JavaScript & TypeScript Tools for Ethereum | Web3.js and Ethers.js Guide
+description: Comprehensive guide to JavaScript and TypeScript libraries for Ethereum blockchain development, including Web3.js and Ethers.js with practical code examples and integration patterns
+keywords: javascript ethereum, web3.js, ethers.js, ethereum javascript, web3 typescript, ethereum typescript, javascript dapp, typescript smart contracts, node.js ethereum, javascript blockchain, typescript web3, browser ethereum, frontend blockchain
+---
+
+# JavaScript/TypeScript Tools
+
+JavaScript offers several powerful libraries for Ethereum development, with web3.js and ethers.js being the most popular choices.
+
+<PayAttention category="Javascript/Typescript" />
+
+## # Web3.js
+
+The original and most widely used Ethereum JavaScript API.
+
+```javascript
+import Web3 from 'web3';
+const web3 = new Web3('YOUR_ETHEREUM_NODE_URL');
+
+// Get balance
+const getBalance = async (address) => {
+	const balance = await web3.eth.getBalance(address);
+	const balanceInEth = web3.utils.fromWei(balance, 'ether');
+	return balanceInEth;
+};
+
+// Send transaction
+const sendTransaction = async (from, to, value) => {
+	const tx = {
+		from,
+		to,
+		value: web3.utils.toWei(value, 'ether'),
+	};
+	return await web3.eth.sendTransaction(tx);
+};
+```
+
+- **GitHub**: <Link to="https://github.com/web3/web3.js" target="_blank" absolute>web3.js</Link>
+- **Documentation**: <Link to="https://web3js.readthedocs.io/" target="_blank" absolute>web3js.readthedocs.io</Link>
+- **Features**:
+  - Complete Ethereum API coverage
+  - Extensive community support
+  - WebSocket support
+  - Contract interactions
+  - ENS support
+
+## # Ethers.js
+
+Modern, complete and compact library.
+
+```javascript
+import { ethers } from 'ethers';
+const provider = new ethers.JsonRpcProvider('YOUR_ETHEREUM_NODE_URL');
+
+// Get balance
+const getBalance = async (address) => {
+	const balance = await provider.getBalance(address);
+	return ethers.formatEther(balance);
+};
+
+// Send transaction
+const sendTransaction = async (wallet, to, value) => {
+	const tx = await wallet.sendTransaction({
+		to,
+		value: ethers.parseEther(value),
+	});
+	return await tx.wait();
+};
+```
+
+- **GitHub**: <Link to="https://github.com/ethers-io/ethers.js/" target="_blank" absolute>ethers.js</Link>
+- **Documentation**: <Link to="https://docs.ethers.org/" target="_blank" absolute>docs.ethers.org</Link>
+- **Features**:
+  - TypeScript support
+  - Smaller bundle size
+  - Better security features
+  - ENS support
+  - Extensive testing
+
+## # TypeScript Support
+
+Both libraries provide excellent TypeScript support. When using TypeScript, you get:
+
+- Type definitions out of the box
+- Better IDE support
+- Compile-time error checking
+- Enhanced code documentation
+
+```typescript
+import { BigNumber } from 'ethers';
+
+interface TransactionData {
+	to: string;
+	value: BigNumber;
+	gasLimit?: BigNumber;
+}
+
+const createTransaction = async (data: TransactionData) => {
+	// Your implementation
+};
+```
+
+## # Node.js Usage
+
+Both libraries work seamlessly in Node.js environments:
+
+```javascript
+// Web3.js in Node.js
+const Web3 = require('web3');
+const web3 = new Web3('YOUR_ETHEREUM_NODE_URL');
+
+// Ethers.js in Node.js
+const { ethers } = require('ethers');
+const provider = new ethers.JsonRpcProvider('YOUR_ETHEREUM_NODE_URL');
+```
+
+## # Browser Usage
+
+For browser environments, you can use either library with bundlers like webpack or vite:
+
+```javascript
+// Using ES modules
+import { Web3 } from 'web3';
+// or
+import { ethers } from 'ethers';
+
+// Using window.ethereum (MetaMask)
+const provider = new ethers.BrowserProvider(window.ethereum);
+```
+
+### See also
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">Tools Overview</Link> - All Available SDKs and Tools
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">Authentication Guide</Link> - Detailed Authentication Information
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">Basic Operations</Link> - Fundamental Blockchain Operations
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">Available Methods</Link> - Explore API Capabilities

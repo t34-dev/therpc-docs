@@ -1,0 +1,125 @@
+---
+title: eth_newPendingTransactionFilter - Monitor Pending Transactions | Ethereum API Methods
+description: Learn how to use eth_newPendingTransactionFilter to monitor the Ethereum mempool in real-time - essential for transaction tracking, gas price optimization, and market analysis.
+keywords: eth_newPendingTransactionFilter, ethereum mempool, pending transactions, transaction monitoring, mempool analysis, transaction tracking, gas price optimization, ethereum transaction pool, unconfirmed transactions, blockchain queue, tx monitoring, tx mempool, gas fee analysis, pending tx, ethereum pending tx, blockchain monitoring, transaction waiting pool
+---
+
+# eth_newPendingTransactionFilter
+
+The `eth_newPendingTransactionFilter` method creates a filter in the node to notify when new pending transactions are received in the mempool. This allows applications to monitor the transaction mempool without continuously polling, helping you track transactions before they're included in blocks.
+
+## Use Cases
+
+- Mempool monitoring and analysis for research
+- Front-running detection in trading applications
+- Gas price optimization for transaction submission
+- Transaction confirmation tracking in wallets
+- Market sentiment analysis for trading strategies
+- DEX trading monitoring for arbitrage opportunities
+- Network congestion monitoring for gas fee estimation
+- MEV (Miner Extractable Value) research and exploitation
+- Detecting large token transfers before confirmation
+- Monitoring smart contract interactions in real-time
+
+## Method Details
+
+This method takes no parameters and returns a filter ID that can be used with `eth_getFilterChanges` to poll for new pending transactions.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_newPendingTransactionFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[]}
+  returns={[
+    {
+      id: 'result',
+      type: 'string',
+      desc: "Filter ID (hex string) used for polling with eth_getFilterChanges"
+    }
+  ]}
+  getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x4b8a92d14d798e3be84ffa20c5d5b2e2"
+}
+```
+
+### How Pending Transaction Filters Work
+
+1. When you create a pending transaction filter, the Ethereum node assigns it a unique ID
+2. The node tracks which transactions it has already reported to your filter
+3. When you poll using `eth_getFilterChanges`, it returns transaction hashes for any new pending transactions since your last poll
+4. If no new transactions have been received, it returns an empty array
+
+### Return Value Format
+
+When polling with `eth_getFilterChanges`, this filter returns an array of transaction hashes:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    "0xc2f1070ef9d620c0cb1a90656a1a4a6c7d74fb99cb2a000f935e8f99d1ca3351",
+    "0x924a1f97deed4a9e1d76429139d7c2a41c8fabe3c96f2818ad3591a5c5ecf2cd",
+    "0x6611d7717c853b7548215f5cb3a04956ea6578b756e4b3d62c2f1a397e3429cc"
+  ]
+}
+```
+
+### Transaction Data Retrieval
+
+The filter only returns transaction hashes. To get the full transaction data, you must make additional calls using:
+
+- `eth_getTransactionByHash` - Get a transaction's details using its hash
+
+### Important Considerations
+
+1. **High Volume**: The Ethereum mempool can be extremely active, producing hundreds of transactions per minute
+2. **Filter Expiration**: Filters expire after a period of inactivity (typically around 5 minutes)
+3. **Rate Limits**: Due to the high volume, polling too frequently might lead to rate limiting
+4. **Missing Transactions**: Very short-lived pending transactions might be missed between polls
+5. **Resource Intensive**: This filter can be resource-intensive for both the client and the node
+6. **Not For Production**: Many production applications should use WebSocket subscriptions instead
+7. **Transaction Status**: Pending transactions might never be mined or may be replaced
+8. **Node Implementation**: Some nodes might limit the number of pending transactions they track
+9. **Data Volume**: During high activity periods, this filter may return hundreds of transactions per poll
+10. **Transaction Privacy**: Some nodes may not reveal all pending transactions in their mempool
+
+### Mempool Analysis Applications
+
+Monitoring pending transactions can reveal valuable insights:
+
+1. **Gas Price Trends**: Analyze current market rates for transaction fees
+2. **Network Congestion**: Assess current network load
+3. **Token Movements**: Detect large token transfers before they're confirmed
+4. **Smart Contract Interactions**: Monitor interactions with specific contracts
+5. **Arbitrage Opportunities**: Detect price discrepancies between exchanges
+6. **Market Sentiment**: Gauge market activity during volatile periods
+7. **Front-running Protection**: Monitor for transactions that might front-run yours
+
+### Comparison with Other Notification Methods
+
+| Method                           | Purpose                                   | Results                        | Best For                                 |
+|----------------------------------|-----------------------------------------|--------------------------------|------------------------------------------|
+| `eth_newPendingTransactionFilter`| Notifies about pending transactions      | Array of transaction hashes    | Mempool monitoring                       |
+| `eth_newBlockFilter`             | Notifies about new blocks                | Array of block hashes          | Block-level monitoring                   |
+| `eth_newFilter`                  | Notifies about specific log events       | Array of log objects           | Event-based applications                 |
+| WebSocket `eth_subscribe`        | Push notifications (no polling)          | Varies by subscription type    | Real-time applications                   |
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Poll for new pending transactions since last check">eth_getFilterChanges</Link> - Retrieve new transaction hashes since last poll
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Clean up filters when no longer needed">eth_uninstallFilter</Link> - Remove a filter when no longer needed
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Get detailed transaction information using hash">eth_getTransactionByHash</Link> - Get transaction details by hash
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Create filters for smart contract events">eth_newFilter</Link> - Create a filter for event logs
+- <Link to="/docs/ethereum/core-methods/eth_newBlockFilter" title="Monitor for new blocks in the blockchain">eth_newBlockFilter</Link> - Create filter for new blocks

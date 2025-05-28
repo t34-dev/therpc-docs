@@ -1,0 +1,78 @@
+---
+title: eth_getUncleCountByBlockNumber - Get Uncle Count by Block Number | Ethereum API Methods
+description: Learn how to use the eth_getUncleCountByBlockNumber method to retrieve the number of uncle blocks in a specified block height on the Ethereum blockchain.
+keywords: eth_getUncleCountByBlockNumber, uncle blocks, ommer blocks, ethereum uncle count, block number, mining statistics
+---
+
+# eth_getUncleCountByBlockNumber
+
+The `eth_getUncleCountByBlockNumber` method returns the number of uncles (ommer blocks) in a block specified by the block number or tag. Uncle blocks are valid blocks that weren't included in the main chain but are still referenced and partially rewarded in Ethereum.
+
+## Use Cases
+
+- Real-time network monitoring
+- Block explorer functionality
+- Mining reward calculations
+- Network health assessment
+- Historical data analysis
+- Uncle rate tracking
+- Mining pool operations
+- Consensus research
+
+## Method Details
+
+This method returns a count of uncle blocks for a specific block identified by its number or a block tag.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getUncleCountByBlockNumber',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Block number in hex format or tags: latest, earliest, pending, safe, finalized',
+			value: '0xE4E1C0', // Example block number (15,000,000)
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'Integer of the number of uncles in this block (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null]}
+/>
+
+### Response Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x0" // 0 uncles in this block
+}
+```
+
+
+### Block Tag Support
+
+The `blockNumber` parameter accepts several special tags:
+
+- `latest`: The most recent block
+- `earliest`: Genesis block
+- `pending`: Currently pending block
+- `safe`: Latest safe block
+- `finalized`: Latest finalized block
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockHashAndIndex">eth_getUncleByBlockHashAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockNumberAndIndex">eth_getUncleByBlockNumberAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getUncleCountByBlockHash">eth_getUncleCountByBlockHash</Link>
+- <Link to="/docs/ethereum/guides/uncle-blocks">Uncle Blocks Guide</Link>

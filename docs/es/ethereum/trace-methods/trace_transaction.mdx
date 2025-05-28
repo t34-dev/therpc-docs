@@ -1,0 +1,267 @@
+---
+title: trace_transaction - Recuperar el Rastro de Transacción | Métodos de la API de Ethereum
+description: Aprenda a usar el método trace_transaction para recuperar información detallada del rastro de ejecución para una transacción específica mediante su hash.
+keywords: trace_transaction, rastro ethereum, rastro de transacción, rastro de ejecución, depuración de contratos inteligentes, llamadas internas
+---
+
+# trace_transaction
+
+El método `trace_transaction` recupera información detallada del rastro para una transacción identificada por su hash. Este método proporciona información sobre cada paso de la ejecución de la transacción, incluidas las llamadas internas entre contratos, permitiendo un análisis y depuración en profundidad.
+
+## Casos de Uso
+
+- Depuración de transacciones específicas para identificar errores
+- Análisis del consumo de gas para operaciones individuales
+- Seguimiento de llamadas internas dentro de una transacción
+- Comprensión de interacciones complejas entre contratos
+- Investigación de fallos en transacciones
+- Auditoría de seguridad y análisis de vulnerabilidades
+- Verificación del comportamiento esperado del contrato
+- Seguimiento del flujo de fondos a través de múltiples contratos
+- Análisis de patrones de ejecución de transacciones similares
+- Depuración de transacciones fallidas o revertidas
+
+## Detalles del Método
+
+Este método devuelve un array de rastros para todas las operaciones ejecutadas durante la transacción.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'trace_transaction',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'transactionHash',
+			required: true,
+			type: 'string',
+			desc: 'El hash de la transacción a rastrear',
+			value: '0x02d4a872e096445e80d05276ee756cefef7f3b376bcec14246469c0cd97dad8f',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: 'Un array de objetos de rastro para todas las operaciones en la transacción',
+			fields: [
+				{
+					id: 'action',
+					type: 'object',
+					desc: 'Detalles sobre la acción de llamada',
+					fields: [
+						{
+							id: 'callType',
+							type: 'string',
+							desc: 'Tipo de llamada (call, delegatecall, etc.)',
+						},
+						{
+							id: 'from',
+							type: 'string',
+							desc: 'Dirección del remitente',
+						},
+						{
+							id: 'gas',
+							type: 'string',
+							desc: 'Gas proporcionado para la llamada (hex)',
+						},
+						{
+							id: 'input',
+							type: 'string',
+							desc: 'Datos de entrada para la llamada (hex)',
+						},
+						{
+							id: 'to',
+							type: 'string',
+							desc: 'Dirección del destinatario',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: 'Valor transferido en wei (hex)',
+						},
+					],
+				},
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: 'Hash del bloque que contiene este rastro',
+				},
+				{
+					id: 'blockNumber',
+					type: 'integer',
+					desc: 'Número de bloque que contiene este rastro',
+				},
+				{
+					id: 'result',
+					type: 'object',
+					desc: 'Resultado de la llamada',
+					fields: [
+						{
+							id: 'gasUsed',
+							type: 'string',
+							desc: 'Cantidad de gas utilizado (hex)',
+						},
+						{
+							id: 'output',
+							type: 'string',
+							desc: 'Datos de salida de la llamada (hex)',
+						},
+					],
+				},
+				{
+					id: 'subtraces',
+					type: 'integer',
+					desc: 'Número de sub-rastros',
+				},
+				{
+					id: 'traceAddress',
+					type: 'array',
+					desc: 'Ruta de dirección de la ubicación del rastro en el árbol de llamadas',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: 'Hash de la transacción que se está rastreando',
+				},
+				{
+					id: 'transactionPosition',
+					type: 'integer',
+					desc: 'Posición índice de la transacción en el bloque',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: 'Tipo de operación (call, create, suicide)',
+				},
+				{
+					id: 'error',
+					type: 'string',
+					desc: 'Mensaje de error si la llamada falló (opcional)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.transactionHash || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x83806d539d4ea1c140489a06660319c9a303f874",
+				"gas": "0x1a1f8",
+				"input": "0x",
+				"to": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+				"value": "0x7a16c911b4d00000"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3068185,
+			"result": {
+				"gasUsed": "0x2982",
+				"output": "0x"
+			},
+			"subtraces": 2,
+			"traceAddress": [],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		},
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+				"gas": "0x13e99",
+				"input": "0x16c72721",
+				"to": "0x2bd2326c993dfaef84f696526064ff22eba5b362",
+				"value": "0x0"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3068185,
+			"result": {
+				"gasUsed": "0x183",
+				"output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+			},
+			"subtraces": 0,
+			"traceAddress": [0],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		},
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+				"gas": "0x8fc",
+				"input": "0x",
+				"to": "0x70faa28a6b8d6829a4b1e649d26ec9a2a39ba413",
+				"value": "0x7a16c911b4d00000"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3068185,
+			"result": {
+				"gasUsed": "0x0",
+				"output": "0x"
+			},
+			"subtraces": 0,
+			"traceAddress": [1],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		}
+	]
+}
+```
+
+### Comprendiendo el Árbol de Rastros
+
+El árbol de rastros representa el flujo de ejecución de la transacción:
+
+1. **Rastro de nivel raíz**: La transacción principal (con `traceAddress` vacío)
+2. **Nivel 1 de sub-rastro**: Llamadas internas directamente desde la transacción principal (`traceAddress` de `[0]`, `[1]`, etc.)
+3. **Niveles más profundos**: Llamadas internas subsiguientes (`traceAddress` de `[0, 0]`, `[0, 1]`, etc.)
+
+### Tipos de Llamada
+
+El campo `callType` puede tener diferentes valores:
+
+- **call**: Una llamada de mensaje regular
+- **delegatecall**: Una llamada donde el código se ejecuta en el contexto del llamador
+- **staticcall**: Una llamada de solo lectura (no se permiten modificaciones de estado)
+- **callcode**: Similar a delegatecall pero con el valor pasado (legado)
+
+### Tipos de Rastro
+
+El campo `type` indica el tipo de operación:
+
+- **call**: Una llamada de mensaje
+- **create**: Una creación de contrato
+- **suicide**: Una autodestrucción de contrato (opcode SELFDESTRUCT)
+
+### Notas Importantes
+
+- Este método requiere que las APIs de rastro estén habilitadas en el nodo Ethereum
+- La respuesta puede ser muy grande para transacciones complejas con muchas llamadas internas
+- El método es computacionalmente intensivo y puede tardar tiempo en completarse para transacciones complejas
+- No todos los clientes de Ethereum soportan este método
+- Las transacciones históricas solo pueden rastrearse si el nodo mantiene datos de archivo
+- Algunos clientes pueden tener limitaciones sobre hasta qué punto se pueden rastrear las transacciones
+- Para rastros de ejecución más detallados a nivel de VM, considere usar `trace_replayTransaction`
+- A diferencia de los logs de eventos, los rastros capturan todas las interacciones de contrato, incluidas las que no emiten eventos
+- Las transacciones fallidas seguirán produciendo rastros hasta el punto de fallo
+- Las operaciones SELFDESTRUCT aparecen con el tipo "suicide" por razones históricas
+
+### Véase también
+
+- <Link to="/docs/ethereum/trace-methods/trace_filter" title="Filtrar y buscar rastros de transacciones a través de bloques">trace_filter</Link> - Buscar rastros basados en criterios
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="Obtener rastros de ejecución para todas las transacciones en un bloque">trace_block</Link> - Recuperar rastros para todas las transacciones en un bloque
+- <Link to="/docs/ethereum/trace-methods/trace_replayTransaction" title="Reproducir transacción con rastreo de VM y cambios de estado">trace_replayTransaction</Link> - Obtener rastros más detallados con cambios de estado
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Obtener detalles de ejecución de bajo nivel de EVM para una transacción">debug_traceTransaction</Link> - Rastreo de transacciones detallado alternativo

@@ -1,0 +1,121 @@
+---
+title: eth_unsubscribe - Cancel Event Subscriptions | Ethereum API Methods
+description: Learn how to use the eth_unsubscribe method to cancel WebSocket-based subscriptions to Ethereum blockchain events and efficiently manage connection resources.
+keywords: eth_unsubscribe, cancel subscription, ethereum websocket, event unsubscribe, terminate subscription, websocket management, blockchain events, subscription cleanup, resource optimization, eth subscription management, real-time event cancellation, ethereum notification control, web3 subscription, dapp event management, websocket resource management, subscription lifecycle, eth event handling, blockchain notification system, network traffic optimization, ethereum event stream
+---
+
+# eth_unsubscribe
+
+The `eth_unsubscribe` method cancels an existing WebSocket subscription to stop receiving event notifications. This method helps manage resources and network traffic by removing subscriptions that are no longer needed.
+
+## Use Cases
+
+- Stopping event notifications when a user navigates away from a page
+- Managing resources on both client and server to prevent memory leaks
+- Cleaning up inactive subscriptions after data processing is complete
+- Handling application state changes requiring different subscription parameters
+- Keeping within provider limits on concurrent subscriptions
+- Implementing subscription rotation for high-volume event monitoring
+- Ensuring graceful shutdown of dApp event monitoring components
+- Switching between different blockchain event types
+- Freeing up server resources for other users in multi-tenant environments
+- Managing sessions for user-specific event tracking
+
+## Method Details
+
+This method cancels a subscription using its subscription ID.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_unsubscribe',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'subscription_id',
+			required: true,
+			type: 'string',
+			desc: 'The subscription ID to cancel',
+			value: '0x9cef478923ff08bf67fde6c64013158d',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'boolean',
+			desc: 'Indicates whether the subscription was successfully cancelled',
+		},
+	]}
+	getParams={(fields) => [fields?.subscription_id || null]}
+/>
+
+### Request Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"method": "eth_unsubscribe",
+	"params": ["0x9cef478923ff08bf67fde6c64013158d"]
+}
+```
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": true
+}
+```
+
+### Response Values
+
+- `true`: The subscription was successfully canceled
+- `false`: No subscription existed with the given ID
+
+### Error Scenarios
+
+| Error Code | Message | Description |
+|------------|---------|-------------|
+| -32602 | invalid subscription id | The provided subscription ID does not exist or is invalid |
+| -32000 | subscription not found | The subscription was already canceled or never existed |
+| -32603 | Internal error | Server encountered an unexpected condition |
+
+### Error Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"error": {
+		"code": -32602,
+		"message": "invalid subscription id"
+	}
+}
+```
+
+### Important Notes
+
+- This method must be called over the same WebSocket connection that created the subscription
+- Closing the WebSocket connection automatically unsubscribes all associated subscriptions
+- The subscription ID comes from the result of a previous eth_subscribe call
+- You should unsubscribe from subscriptions that are no longer needed to free up server resources
+- The same subscription ID cannot be reused after unsubscribing
+- Some providers may limit the number of concurrent subscriptions per connection
+- Subscription IDs are unique per connection and not globally unique
+- If reconnecting to a different server in a load-balanced environment, old subscription IDs will not be valid
+- Some RPC providers may automatically unsubscribe inactive subscriptions after a certain period
+- Multiple unsubscribe attempts for the same ID are safe but will return false after the first successful attempt
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Create real-time blockchain event subscriptions">eth_subscribe</Link> - Create WebSocket event subscriptions
+- <Link to="/docs/ethereum/guides/websocket-connections" title="Set up and manage WebSocket connections">WebSocket Connection Guide</Link> - Working with persistent connections
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Query historical event logs">eth_getLogs</Link> - Alternative for historical event queries
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Create local event filters">eth_newFilter</Link> - HTTP-based alternative for event filtering
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Poll for filter updates">eth_getFilterChanges</Link> - Poll-based alternative to WebSockets
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Remove polling filters">eth_uninstallFilter</Link> - HTTP equivalent for cleaning up filters

@@ -1,0 +1,202 @@
+---
+title: Rust Tools for Ethereum Blockchain Development | Web3-rs Integration Guide
+description: Comprehensive guide to Rust libraries for Ethereum development, including Web3-rs, smart contract integration, async patterns, and performance optimization techniques
+keywords: rust ethereum, web3-rs, ethereum rust, rust blockchain, rust web3, rust smart contracts, ethereum async rust, blockchain rust, ethereum client rust, tokio ethereum, rust dapp, high performance ethereum
+---
+
+# Rust Tools
+
+Rust provides several libraries for Ethereum development, with web3-rs being the primary choice for blockchain interactions.
+
+<PayAttention category="Rust" />
+
+## # Web3-rs
+
+Rust implementation of Web3 library.
+
+```rust
+use web3::Web3;
+use web3::types::{Address, H256, TransactionParameters, U256};
+use std::str::FromStr;
+
+struct EthereumClient {
+    web3: Web3<web3::transports::Http>,
+}
+
+impl EthereumClient {
+    pub async fn new(url: &str) -> Result<Self, web3::Error> {
+        let transport = web3::transports::Http::new(url)?;
+        let web3 = Web3::new(transport);
+        Ok(Self { web3 })
+    }
+
+    pub async fn get_balance(&self, address: &str) -> Result<U256, web3::Error> {
+        let address = Address::from_str(address)
+            .map_err(|_| web3::Error::InvalidAddress)?;
+
+        self.web3.eth().balance(address, None).await
+    }
+
+    pub async fn send_transaction(
+        &self,
+        from: Address,
+        to: Address,
+        value: U256,
+    ) -> Result<H256, web3::Error> {
+        let tx = TransactionParameters {
+            to: Some(to),
+            value,
+            from,
+            ..Default::default()
+        };
+
+        self.web3.eth().send_transaction(tx).await
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/tomusdrw/rust-web3" target="_blank" absolute>rust-web3</Link>
+- **Documentation**: <Link to="https://docs.rs/web3" target="_blank" absolute>docs.rs/web3</Link>
+- **Features**:
+  - Async support
+  - Type-safe interfaces
+  - Contract interactions
+  - Transaction management
+  - ENS support
+  - WebSocket support
+
+## # Contract Integration
+
+Working with smart contracts in Rust:
+
+```rust
+use web3::contract::{Contract, Options};
+use web3::types::{Address, U256};
+
+struct SmartContract {
+    contract: Contract<web3::transports::Http>,
+}
+
+impl SmartContract {
+    pub async fn new(
+        web3: Web3<web3::transports::Http>,
+        address: Address,
+        abi: &[u8],
+    ) -> Result<Self, web3::Error> {
+        let contract = Contract::from_json(
+            web3.eth(),
+            address,
+            abi,
+        )?;
+
+        Ok(Self { contract })
+    }
+
+    pub async fn call_method<T: serde::de::DeserializeOwned>(
+        &self,
+        method: &str,
+        params: &[web3::contract::tokens::Tokenize],
+    ) -> Result<T, web3::Error> {
+        let result = self.contract.query(
+            method,
+            params,
+            None,
+            Options::default(),
+            None,
+        ).await?;
+
+        Ok(result)
+    }
+}
+```
+
+## # Error Handling
+
+Robust error handling in Rust:
+
+```rust
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum EthereumError {
+    #[error("Web3 error: {0}")]
+    Web3Error(#[from] web3::Error),
+
+    #[error("Invalid address: {0}")]
+    InvalidAddress(String),
+
+    #[error("Contract error: {0}")]
+    ContractError(String),
+
+    #[error("Transaction failed: {0}")]
+    TransactionError(String),
+}
+
+impl EthereumClient {
+    pub async fn safe_get_balance(&self, address: &str) -> Result<f64, EthereumError> {
+        let wei = self.get_balance(address).await?;
+        let eth = wei.as_u128() as f64 / 1e18;
+        Ok(eth)
+    }
+}
+```
+
+## # Async Event Handling
+
+Subscribe to Ethereum events:
+
+```rust
+use futures::StreamExt;
+
+impl EthereumClient {
+    pub async fn monitor_blocks(&self) -> Result<(), web3::Error> {
+        let mut stream = self.web3.eth_subscribe().subscribe_new_heads().await?;
+
+        while let Some(block) = stream.next().await {
+            match block {
+                Ok(header) => {
+                    println!("New block: {}", header.number.unwrap_or_default());
+                }
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+```
+
+## # Testing
+
+Example of testing Ethereum interactions:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tokio;
+
+    #[tokio::test]
+    async fn test_balance_query() {
+        let client = EthereumClient::new("http://localhost:8545")
+            .await
+            .expect("Failed to create client");
+
+        let balance = client
+            .get_balance("0x742d35Cc6634C0532925a3b844Bc454e4438f44e")
+            .await
+            .expect("Failed to get balance");
+
+        assert!(balance > U256::zero());
+    }
+}
+```
+
+### See also
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">Tools Overview</Link> - All Available SDKs and Tools
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">Authentication Guide</Link> - Detailed Authentication Information
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">Basic Operations Guide</Link> - Fundamental Operations
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">Available Methods</Link> - Explore API Capabilities

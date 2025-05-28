@@ -1,0 +1,133 @@
+---
+title: Herramientas Python para Desarrollo Blockchain Ethereum | Guía de Web3.py y Eth-brownie
+description: Guía completa de bibliotecas Python para desarrollo Ethereum incluyendo Web3.py y Eth-brownie, con ejemplos de código detallados, integración de contratos inteligentes y patrones asincrónicos
+keywords: python ethereum, web3.py, eth-brownie, ethereum python, python blockchain, python web3, python dapp, ethereum async python, contratos inteligentes python, blockchain python, testing python ethereum, python type hints web3
+---
+
+# Herramientas Python
+
+Python proporciona bibliotecas robustas para el desarrollo en Ethereum, adecuadas tanto para scripts simples como para aplicaciones complejas.
+
+<PayAttention category="Python" />
+
+## # Web3.py
+
+Biblioteca oficial Python para Ethereum.
+
+```python
+from web3 import Web3
+from eth_account import Account
+import json
+
+# Initialize web3
+web3 = Web3(Web3.HTTPProvider('YOUR_ETHEREUM_NODE_URL'))
+
+# Get balance
+def get_balance(address):
+    balance_wei = web3.eth.get_balance(address)
+    balance_eth = web3.from_wei(balance_wei, 'ether')
+    return balance_eth
+
+# Send transaction
+def send_transaction(private_key, to_address, value_eth):
+    account = Account.from_key(private_key)
+    transaction = {
+        'nonce': web3.eth.get_transaction_count(account.address),
+        'to': to_address,
+        'value': web3.to_wei(value_eth, 'ether'),
+        'gas': 21000,
+        'gasPrice': web3.eth.gas_price
+    }
+    signed_txn = account.sign_transaction(transaction)
+    tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
+    return web3.eth.wait_for_transaction_receipt(tx_hash)
+```
+
+- **GitHub**: <Link to="https://github.com/ethereum/web3.py" target="_blank" absolute>web3.py</Link>
+- **Documentación**: <Link to="https://web3py.readthedocs.io/" target="_blank" absolute>web3py.readthedocs.io</Link>
+- **Características**:
+  - Soporte completo para API Ethereum
+  - Interfaces sincrónicas y asincrónicas
+  - Sugerencias de tipo
+  - Soporte para middleware
+  - Soporte para ENS
+
+## # Eth-brownie
+
+Framework Python para desarrollo Ethereum.
+
+```python
+from brownie import *
+
+# Deploy contract
+def deploy_contract():
+    account = accounts[0]
+    return MyContract.deploy({'from': account})
+
+# Interact with contract
+def interact_with_contract(contract_address):
+    contract = MyContract.at(contract_address)
+    return contract.myFunction({'from': accounts[0]})
+
+# Test contract
+def test_contract(Contract):
+    account = accounts[0]
+    contract = account.deploy(Contract)
+    assert contract.myFunction() == expected_value
+```
+
+- **GitHub**: <Link to="https://github.com/eth-brownie/brownie" target="_blank" absolute>eth-brownie</Link>
+- **Documentación**: <Link to="https://eth-brownie.readthedocs.io/" target="_blank" absolute>eth-brownie.readthedocs.io</Link>
+- **Características**:
+  - Framework de pruebas para contratos
+  - Gestión de despliegues
+  - Consola interactiva
+  - Gestión de redes
+  - REPL de Python
+
+## # Soporte Asincrónico
+
+Web3.py proporciona soporte asincrónico para mejor rendimiento:
+
+```python
+from web3.auto import w3
+import asyncio
+
+async def get_latest_blocks(count):
+    latest = await w3.eth.get_block_number()
+    blocks = []
+    for i in range(count):
+        block = await w3.eth.get_block(latest - i)
+        blocks.append(block)
+    return blocks
+
+# Usage
+blocks = asyncio.run(get_latest_blocks(10))
+```
+
+## # Sugerencias de Tipo
+
+Web3.py incluye sugerencias de tipo completas para mejor soporte de IDE:
+
+```python
+from web3.types import TxParams, Wei, Address
+from typing import Optional
+
+def prepare_transaction(
+    to: Address,
+    value: Wei,
+    gas_price: Optional[Wei] = None
+) -> TxParams:
+    return {
+        'to': to,
+        'value': value,
+        'gasPrice': gas_price or web3.eth.gas_price
+    }
+```
+
+### Ver también
+
+- <Link to="/docs/ethereum/tools/overview" title="Visión general completa de herramientas y SDKs disponibles para desarrollo Ethereum">Visión General de Herramientas</Link> - Todos los SDKs y Herramientas Disponibles
+- <Link to="/docs/ethereum/authentication" title="Guía para autenticarse con nodos Ethereum y servicios API">Guía de Autenticación</Link> - Información Detallada de Autenticación
+- <Link to="/docs/ethereum/basic-operations" title="Aprende operaciones fundamentales de blockchain Ethereum para desarrolladores">Guía de Operaciones Básicas</Link> - Operaciones Fundamentales
+- <Link to="/docs/ethereum/all-methods" title="Referencia completa de todos los métodos API de Ethereum disponibles">Métodos Disponibles</Link> - Explora las Capacidades de la API

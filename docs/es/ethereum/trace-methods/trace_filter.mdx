@@ -1,0 +1,337 @@
+---
+title: trace_filter - Consultar Trazas de Transacciones Ethereum | Métodos API Ethereum
+description: Aprende a usar el método trace_filter para buscar y filtrar efectivamente trazas de transacciones basadas en múltiples criterios, incluyendo dirección, rango de bloques y más.
+keywords: trace_filter, búsqueda de trazas ethereum, filtro de transacciones, consulta de trazas, datos blockchain, interacciones de contratos inteligentes, transacciones internas, filtrado de trazas, forensia ethereum, filtro de llamadas, análisis de trazas, búsqueda de rango de bloques, filtro de direcciones, monitoreo de transacciones, indexación de trazas, trazado de contratos inteligentes, llamadas a contratos, llamadas a funciones, transferencias de valor, consulta de trazas
+---
+
+# trace_filter
+
+El método `trace_filter` te permite buscar trazas específicas dentro de un rango de bloques, filtrando por varios criterios como direcciones de origen/destino, rango de bloques y tipos de traza. Esto proporciona una manera poderosa de analizar la actividad de la blockchain para contratos o cuentas específicas.
+
+## Casos de Uso
+
+- Encontrar todas las transacciones internas para una dirección específica
+- Rastrear transferencias de tokens que no son visibles en los registros de transacciones
+- Análisis forense de interacciones de contratos y vulnerabilidades
+- Monitorear llamadas a contratos específicos a través de un rango de bloques
+- Auditar interacciones contrato-a-contrato para revisión de seguridad
+- Analizar patrones de ejecución de contratos inteligentes
+- Detectar actividades MEV y adelantamiento de transacciones
+- Rastrear rutas de arbitraje a través de protocolos DeFi
+- Construir exploradores de bloques integrales
+- Validar flujos financieros complejos en aplicaciones DeFi
+
+## Detalles del Método
+
+Este método recupera trazas de transacciones basadas en los criterios de filtro especificados.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'trace_filter',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'filterParams',
+			required: true,
+			type: 'object',
+			desc: 'Parámetros de filtro',
+			fields: [
+				{
+					id: 'fromBlock',
+					type: 'string',
+					desc: 'Desde bloque (número de bloque hex o "latest", "earliest", "pending")',
+					value: '0x3d0000',
+				},
+				{
+					id: 'toBlock',
+					type: 'string',
+					desc: 'Hasta bloque (número de bloque hex o "latest", "earliest", "pending")',
+					value: '0x3d0100',
+				},
+				{
+					id: 'fromAddress',
+					type: 'array',
+					desc: 'Filtrar trazas por direcciones de remitente (array de strings de dirección)',
+					value: ['0x8bbb73bcb5d553b5a556358d27625323fd781d37'],
+				},
+				{
+					id: 'toAddress',
+					type: 'array',
+					desc: 'Filtrar trazas por direcciones de destinatario (array de strings de dirección)',
+					value: ['0x6090a6e47849629b7245dfa1ca21d94cd15878ef'],
+				},
+				{
+					id: 'after',
+					type: 'integer',
+					desc: 'Desplazar la traza después del índice dado',
+					value: 1000,
+				},
+				{
+					id: 'count',
+					type: 'integer',
+					desc: 'Número máximo de trazas a devolver',
+					value: 100,
+				},
+			],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: 'Array de objetos de traza',
+			fields: [
+				{
+					id: 'action',
+					type: 'object',
+					desc: 'Información sobre la acción realizada',
+					fields: [
+						{
+							id: 'callType',
+							type: 'string',
+							desc: 'Tipo de llamada (p.ej., "call", "delegatecall", "staticcall")',
+						},
+						{
+							id: 'from',
+							type: 'string',
+							desc: 'Dirección del remitente',
+						},
+						{
+							id: 'to',
+							type: 'string',
+							desc: 'Dirección del destinatario',
+						},
+						{
+							id: 'gas',
+							type: 'string',
+							desc: 'Gas proporcionado para esta parte de la ejecución',
+						},
+						{
+							id: 'input',
+							type: 'string',
+							desc: 'Datos de entrada de la llamada',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: 'Valor transferido en wei',
+						},
+						{
+							id: 'init',
+							type: 'string',
+							desc: 'Código de inicialización del constructor (para trazas "create")',
+						},
+						{
+							id: 'address',
+							type: 'string',
+							desc: 'Dirección del contrato (para trazas "suicide")',
+						},
+						{
+							id: 'refundAddress',
+							type: 'string',
+							desc: 'Dirección que recibe el reembolso (para trazas "suicide")',
+						},
+						{
+							id: 'balance',
+							type: 'string',
+							desc: 'Balance del contrato en el momento de la destrucción (para trazas "suicide")',
+						},
+					],
+				},
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: 'Hash del bloque que contiene esta traza',
+				},
+				{
+					id: 'blockNumber',
+					type: 'integer',
+					desc: 'Número de bloque que contiene esta traza',
+				},
+				{
+					id: 'result',
+					type: 'object',
+					desc: 'Resultado de la llamada',
+					fields: [
+						{
+							id: 'gasUsed',
+							type: 'string',
+							desc: 'Cantidad de gas utilizado',
+						},
+						{
+							id: 'output',
+							type: 'string',
+							desc: 'Datos de salida de la llamada',
+						},
+						{
+							id: 'address',
+							type: 'string',
+							desc: 'Dirección del contrato creado (para trazas "create")',
+						},
+						{
+							id: 'code',
+							type: 'string',
+							desc: 'Código del contrato desplegado (para trazas "create")',
+						},
+					],
+				},
+				{
+					id: 'subtraces',
+					type: 'integer',
+					desc: 'Número de subtrazas',
+				},
+				{
+					id: 'traceAddress',
+					type: 'array',
+					desc: 'Ruta de dirección de la ubicación de la traza en el árbol de llamadas',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: 'Hash de la transacción que está siendo trazada',
+				},
+				{
+					id: 'transactionPosition',
+					type: 'integer',
+					desc: 'Posición de índice de la transacción en el bloque',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: 'Tipo de traza (call, create, suicide)',
+				},
+				{
+					id: 'error',
+					type: 'string',
+					desc: 'Mensaje de error si la llamada falló (opcional)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.filterParams || {}]}
+/>
+
+### Parámetros de Filtro
+
+| Parámetro | Tipo | Descripción |
+| --- | --- | --- |
+| `fromBlock` | string | Número de bloque inicial (hex) o etiqueta ("latest", "earliest", "pending") |
+| `toBlock` | string | Número de bloque final (hex) o etiqueta ("latest", "earliest", "pending") |
+| `fromAddress` | array | Array opcional de direcciones de remitente para filtrar |
+| `toAddress` | array | Array opcional de direcciones de destinatario para filtrar |
+| `after` | integer | Parámetro opcional de paginación - desplazar trazas después del índice dado |
+| `count` | integer | Número máximo opcional de trazas a devolver |
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x8bbb73bcb5d553b5a556358d27625323fd781d37",
+				"to": "0x6090a6e47849629b7245dfa1ca21d94cd15878ef",
+				"gas": "0x12a94",
+				"input": "0x0000000000000000000000000000000000000000000000000000000000000000",
+				"value": "0x0"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3928366,
+			"result": {
+				"gasUsed": "0xd979",
+				"output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+			},
+			"subtraces": 1,
+			"traceAddress": [],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		}
+	]
+}
+```
+
+### Estrategias de Filtrado
+
+Se pueden usar diferentes combinaciones de filtros para responder preguntas específicas:
+
+**Para encontrar todas las llamadas a un contrato específico:**
+```json
+{
+  "toAddress": ["0x1234567890123456789012345678901234567890"]
+}
+```
+
+**Para encontrar todas las transacciones internas desde un contrato:**
+```json
+{
+  "fromAddress": ["0x1234567890123456789012345678901234567890"]
+}
+```
+
+**Para encontrar interacciones entre dos direcciones específicas:**
+```json
+{
+  "fromAddress": ["0x1234567890123456789012345678901234567890"],
+  "toAddress": ["0xabcdef0123456789abcdef0123456789abcdef01"]
+}
+```
+
+**Para analizar actividad dentro de un rango de bloques específico:**
+```json
+{
+  "fromBlock": "0x429d3b",
+  "toBlock": "0x429d3d"
+}
+```
+
+### Paginación
+
+Para conjuntos de resultados grandes, usa los parámetros `after` y `count` para paginar a través de los resultados:
+
+1. Primera solicitud: `{ "after": 0, "count": 100, ... }`
+2. Siguiente solicitud: `{ "after": 100, "count": 100, ... }`
+3. Continúa incrementando `after` por el valor de `count`
+
+### Consideraciones de Rendimiento
+
+- Filtrar a través de rangos de bloques grandes puede consumir muchos recursos
+- Siempre especifica el rango de bloques más estrecho necesario
+- Usa filtrado por dirección para reducir el tamaño del conjunto de resultados
+- Considera dividir consultas grandes en rangos de bloques más pequeños
+- Para uso intensivo, considera ejecutar tu propio nodo de archivo con indexación de trazas
+
+### Tipos de Traza
+
+El método devuelve diferentes tipos de trazas:
+
+- **call**: Una llamada de mensaje a una dirección
+- **create**: Una creación de contrato
+- **suicide**: Una operación de autodestrucción de contrato (también conocida como SELFDESTRUCT)
+
+### Notas Importantes
+
+- Este método requiere que las APIs de traza estén habilitadas en el nodo Ethereum
+- No todos los clientes Ethereum soportan el filtrado de trazas (principalmente Geth con `--gcmode=archive` y OpenEthereum/Nethermind)
+- Los proveedores públicos de RPC a menudo limitan o deshabilitan los métodos de traza debido a su intensidad de recursos
+- Los filtros se aplican solo a las trazas almacenadas, no a los eventos de registro (usa eth_getLogs para registros de eventos)
+- El tamaño de la respuesta puede ser muy grande para rangos de bloques amplios o direcciones populares
+- Las restricciones de rango de bloques pueden ser impuestas por el proveedor de RPC (a menudo limitadas a unos pocos miles de bloques)
+- Llamar a este método en un nodo no archivo devolverá resultados incompletos
+- El filtrado de trazas consume significativamente más recursos que las consultas de transacciones regulares
+- A diferencia de los eventos, las trazas no están indexadas por temas sino solo por direcciones y números de bloque
+- Las transacciones que fallaron debido a falta de gas o reversiones aún producen trazas hasta el punto de fallo
+
+### Ver también
+
+- <Link to="/docs/ethereum/trace-methods/trace_transaction" title="Obtener trazas de ejecución detalladas para una transacción específica">trace_transaction</Link> - Recuperar trazas para una sola transacción
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="Obtener trazas de ejecución para todas las transacciones en un bloque">trace_block</Link> - Recuperar trazas para todas las transacciones en un bloque
+- <Link to="/docs/ethereum/trace-methods/trace_call" title="Trazar una llamada sin crear una transacción">trace_call</Link> - Ejecutar y trazar una llamada sin crear una transacción
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Consultar registros de eventos basados en criterios de filtro">eth_getLogs</Link> - Alternativa para filtrar registros de eventos
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Obtener detalles de ejecución de bajo nivel de EVM para una transacción">debug_traceTransaction</Link> - Obtener detalles de ejecución de nivel inferior para transacciones

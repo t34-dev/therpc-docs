@@ -1,0 +1,114 @@
+---
+title: eth_newBlockFilter - Crear Filtro de Notificación de Bloques | Métodos API de Ethereum
+description: Aprenda a usar eth_newBlockFilter para monitorear nuevos bloques en la blockchain de Ethereum - esencial para rastrear confirmaciones de transacciones, sincronizar aplicaciones y construir exploradores de blockchain en tiempo real.
+keywords: eth_newBlockFilter, filtro de bloques ethereum, notificación de nuevos bloques, monitoreo de blockchain, filtro de cabeceras de bloques, seguimiento de bloques, sistema de notificación ethereum, monitoreo de cadena, alertas de bloques, sondeo ethereum, observador de bloques, sincronización blockchain, detección de bloques, eventos de nodo ethereum, blockchain en tiempo real, observador de bloques
+---
+
+# eth_newBlockFilter
+
+El método `eth_newBlockFilter` crea un filtro en el nodo para notificar cuando llega un nuevo bloque. Esta es una alternativa más simple y eficiente que consultar repetidamente `eth_blockNumber`, ya que permite recibir notificaciones solo cuando se detectan nuevos bloques.
+
+## Casos de Uso
+
+- Sincronización de bloques para aplicaciones y exploradores
+- Activación de acciones basadas en bloques en sistemas automatizados
+- Seguimiento de confirmaciones para transacciones en billeteras
+- Detección de reorganización de la cadena para integridad de datos
+- Monitoreo de blockchain en tiempo real para análisis
+- Monitoreo de tendencias de precio de gas para optimización de tarifas
+- Seguimiento de minería/validación en análisis de red
+- Detección de estancamientos de red cuando los bloques dejan de llegar
+- Sistemas de alerta para infraestructura blockchain
+- Mantenimiento de consistencia de caché con el estado de la blockchain
+
+## Detalles del Método
+
+Este método no toma parámetros y devuelve un ID de filtro que puede usarse con `eth_getFilterChanges` para consultar nuevos bloques.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_newBlockFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[]}
+  returns={[
+    {
+      id: 'result',
+      type: 'string',
+      desc: "ID del filtro (cadena hexadecimal) usado para consultar con eth_getFilterChanges"
+    }
+  ]}
+  getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x3a85885a2facbe4b9c99d543b3e42359"
+}
+```
+
+### Cómo Funcionan los Filtros de Bloques
+
+1. Cuando crea un filtro de bloques, el nodo Ethereum le asigna un ID único
+2. El nodo rastrea el último bloque que ha mostrado a su filtro
+3. Cuando consulta usando `eth_getFilterChanges`, devuelve hashes de bloques para cualquier bloque nuevo desde su última consulta
+4. Si no se han producido nuevos bloques, devuelve un array vacío
+
+### Formato del Valor de Retorno
+
+Al consultar con `eth_getFilterChanges`, este filtro devuelve un array de hashes de bloques:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    "0x1a4b5aad3a859c5c6cbbdab46f565475c5c61c163a45e0c2cb732e7221efbe77",
+    "0x2573c838b310ca595c83c20ee437139f96658f596afe8a0f726d82db3d9647c2"
+  ]
+}
+```
+
+### Recuperación de Datos de Bloques
+
+El filtro solo devuelve hashes de bloques. Para obtener los datos completos del bloque, debe realizar llamadas adicionales usando:
+
+- `eth_getBlockByHash` - Obtener los detalles de un bloque usando su hash
+
+### Consideraciones Importantes
+
+1. **Expiración de Filtros**: Los filtros expiran después de un período de inactividad (normalmente alrededor de 5 minutos)
+2. **Frecuencia de Consulta**: Equilibrio entre actualizaciones oportunas y límites de llamadas RPC
+3. **Reorganizaciones de Bloques**: Tenga en cuenta que los bloques pueden reorganizarse, especialmente los recientes
+4. **Consistencia de Cadena**: Los filtros de bloques ayudan a mantener el estado de la aplicación sincronizado con la blockchain
+5. **Enfoques Alternativos**:
+   - WebSocket `eth_subscribe` para notificaciones push en tiempo real
+   - Consultar directamente `eth_blockNumber` (menos eficiente)
+6. **Límites de Tasa**: El sondeo excesivo puede llevar a limitaciones de tasa de los proveedores RPC
+7. **Bloques Perdidos**: Si los intervalos de sondeo son demasiado grandes, es posible que deba manejar múltiples bloques a la vez
+8. **Gestión de Filtros**: Siempre desinstale los filtros cuando ya no sean necesarios
+9. **Manejo de Errores**: Implemente lógica de reintento para problemas temporales de red
+10. **Procesamiento de Bloques**: Considere procesar bloques secuencialmente para mantener la consistencia de datos
+
+### Comparación con Otros Métodos de Notificación
+
+| Método                           | Propósito                                 | Resultados                     | Mejor Para                              |
+|----------------------------------|-----------------------------------------|--------------------------------|------------------------------------------|
+| `eth_newBlockFilter`             | Notifica sobre nuevos bloques             | Array de hashes de bloques     | Monitoreo a nivel de bloque             |
+| `eth_newFilter`                  | Notifica sobre eventos de log específicos | Array de objetos de log        | Aplicaciones basadas en eventos         |
+| `eth_newPendingTransactionFilter`| Notifica sobre transacciones pendientes   | Array de hashes de transacciones | Monitoreo de mempool                    |
+| WebSocket `eth_subscribe`        | Notificaciones push (sin sondeo)          | Varía según tipo de suscripción | Aplicaciones en tiempo real             |
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Recuperar nuevos bloques desde la última consulta">eth_getFilterChanges</Link> - Recuperar nuevos hashes de bloques desde la última consulta
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Limpiar filtros cuando ya no sean necesarios">eth_uninstallFilter</Link> - Eliminar un filtro cuando ya no sea necesario
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Obtener información detallada del bloque usando hash">eth_getBlockByHash</Link> - Obtener detalles del bloque por hash
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Crear filtros para eventos de contratos inteligentes">eth_newFilter</Link> - Crear un filtro para registros de eventos
+- <Link to="/docs/ethereum/core-methods/eth_newPendingTransactionFilter" title="Monitorear transacciones pendientes en el mempool">eth_newPendingTransactionFilter</Link> - Crear filtro para transacciones pendientes

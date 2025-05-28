@@ -1,0 +1,292 @@
+---
+title: debug_traceBlockByNumber - Rastrear Todas las Transacciones en un Bloque por Número | Métodos de API de Ethereum
+description: Aprenda a utilizar el método debug_traceBlockByNumber para obtener un rastreo completo de todos los opcodes invocados de todas las transacciones incluidas en un bloque específico de Ethereum identificado por su número.
+keywords: debug_traceBlockByNumber, rastreo de bloques, rastreo de opcodes, rastreo de transacciones, depuración ethereum, número de bloque, rastreo de ejecución
+---
+
+# debug_traceBlockByNumber
+
+El método `debug_traceBlockByNumber` devuelve un rastreo completo de todos los opcodes invocados de todas las transacciones incluidas en el bloque especificado, identificado por su número de bloque. Este método proporciona información detallada de ejecución de bajo nivel útil para depurar y analizar el comportamiento de las transacciones.
+
+## Casos de Uso
+
+- Depuración de transacciones fallidas en un bloque específico
+- Análisis del flujo de ejecución de contratos inteligentes
+- Optimización y perfilado de uso de gas
+- Auditoría de seguridad de contratos desplegados
+- Verificación del comportamiento de transacciones
+- Comprensión de interacciones complejas entre contratos
+- Análisis de bloques históricos por su número
+- Monitoreo de patrones de ejecución de transacciones
+- Encontrar casos extremos en el diseño de contratos
+- Verificar la ejecución determinista a través de diferentes nodos
+
+## Detalles del Método
+
+Este método rastrea la ejecución de todas las transacciones en un bloque, identificado por su número, a nivel de opcode.
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    "method": "debug_traceBlockByNumber",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'blockNumber',
+      required: true,
+      type: 'string',
+      desc: "Número de bloque en formato hexadecimal o la etiqueta: latest, earliest, o pending",
+      value: "0xA1"
+    },
+    {
+      id: 'options',
+      type: 'object',
+      desc: "Opciones de rastreo",
+      fields: [
+        {
+          id: 'disableStorage',
+          type: 'boolean',
+          desc: "Establecer esto a true desactiva la captura de almacenamiento",
+          value: false
+        },
+        {
+          id: 'disableMemory',
+          type: 'boolean',
+          desc: "Establecer esto a true desactiva la captura de memoria",
+          value: false
+        },
+        {
+          id: 'disableStack',
+          type: 'boolean',
+          desc: "Establecer esto a true desactiva la captura de pila",
+          value: false
+        },
+        {
+          id: 'tracer',
+          type: 'string',
+          desc: "Usar un trazador personalizado (disponibles: callTracer, prestateTracer, etc.)",
+          value: "callTracer"
+        },
+        {
+          id: 'timeout',
+          type: 'string',
+          desc: "Anula el tiempo de espera predeterminado de 5 segundos para el rastreo basado en JavaScript",
+          value: "10s"
+        }
+      ]
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'array',
+      desc: "Array de rastreos de transacciones dentro del bloque",
+      fields: [
+        {
+          id: 'gas',
+          type: 'integer',
+          desc: "Gas utilizado por la transacción"
+        },
+        {
+          id: 'failed',
+          type: 'boolean',
+          desc: "Si la transacción falló"
+        },
+        {
+          id: 'returnValue',
+          type: 'string',
+          desc: "El valor de retorno de la transacción"
+        },
+        {
+          id: 'structLogs',
+          type: 'array',
+          desc: "Array de registros estructurados de operaciones EVM",
+          fields: [
+            {
+              id: 'pc',
+              type: 'integer',
+              desc: "Posición del contador de programa"
+            },
+            {
+              id: 'op',
+              type: 'string',
+              desc: "El opcode ejecutado"
+            },
+            {
+              id: 'gas',
+              type: 'integer',
+              desc: "Gas restante"
+            },
+            {
+              id: 'gasCost',
+              type: 'integer',
+              desc: "Costo de gas para esta operación"
+            },
+            {
+              id: 'depth',
+              type: 'integer',
+              desc: "Profundidad de llamada"
+            },
+            {
+              id: 'memory',
+              type: 'array',
+              desc: "Contenido de memoria EVM (si no está desactivado)"
+            },
+            {
+              id: 'stack',
+              type: 'array',
+              desc: "Contenido de pila EVM (si no está desactivado)"
+            },
+            {
+              id: 'storage',
+              type: 'object',
+              desc: "Cambios de almacenamiento (si no está desactivado)"
+            }
+          ]
+        }
+      ]
+    }
+  ]}
+  getParams={(fields) => {
+    const params = [
+      fields?.blockNumber || null
+    ];
+
+    const options = {};
+
+    if (fields?.options?.disableStorage !== undefined) {
+      options.disableStorage = fields.options.disableStorage;
+    }
+
+    if (fields?.options?.disableMemory !== undefined) {
+      options.disableMemory = fields.options.disableMemory;
+    }
+
+    if (fields?.options?.disableStack !== undefined) {
+      options.disableStack = fields.options.disableStack;
+    }
+
+    if (fields?.options?.tracer) {
+      options.tracer = fields.options.tracer;
+    }
+
+    if (fields?.options?.timeout) {
+      options.timeout = fields.options.timeout;
+    }
+
+    if (Object.keys(options).length > 0) {
+      params.push(options);
+    } else {
+      params.push(null);
+    }
+
+    return params;
+
+}}
+/>
+
+### Ejemplo de Respuesta (Simplificado)
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"gas": 21000,
+			"failed": false,
+			"returnValue": "",
+			"structLogs": [
+				{
+					"pc": 0,
+					"op": "PUSH1",
+					"gas": 68232,
+					"gasCost": 3,
+					"depth": 1,
+					"stack": [],
+					"memory": [],
+					"storage": {}
+				},
+				{
+					"pc": 2,
+					"op": "MSTORE",
+					"gas": 68229,
+					"gasCost": 12,
+					"depth": 1,
+					"stack": ["0x60", "0x40"],
+					"memory": [
+						"0000000000000000000000000000000000000000000000000000000000000000",
+						"0000000000000000000000000000000000000000000000000000000000000000"
+					],
+					"storage": {}
+				}
+				// Many more opcode logs...
+			]
+		}
+		// Additional transaction traces...
+	]
+}
+```
+
+### Usando el Formato callTracer
+
+Cuando se utiliza la opción `callTracer`, la respuesta se formatea como un gráfico de llamadas:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"type": "CALL",
+			"from": "0x1923f626bb8dc025849e00f99c25fe2b2f7fb0db",
+			"to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+			"value": "0x0",
+			"gas": "0x13458",
+			"gasUsed": "0x8fc",
+			"input": "0xa9059cbb0000000000000000000000001f9840a85d5af5bf1d1762f925bdaddc4201f984000000000000000000000000000000000000000000000002b5e3af16b1880000",
+			"output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+			"calls": []
+		}
+		// Additional call traces...
+	]
+}
+```
+
+### Opciones de Etiquetas de Número de Bloque
+
+El parámetro `blockNumber` acepta varias etiquetas especiales:
+
+- `latest`: Bloque más reciente que ha sido confirmado por la red
+- `earliest`: Bloque génesis (bloque 0)
+- `pending`: Bloque pendiente con transacciones en el mempool (aún no minado)
+
+### Trazadores Personalizados
+
+El método debug_traceBlockByNumber admite varios trazadores incorporados:
+
+- **callTracer**: Captura el gráfico de llamadas de cada ejecución de transacción.
+- **prestateTracer**: Captura el estado previo de los contratos involucrados.
+- **4byteTracer**: Recopila selectores de funciones (primeros 4 bytes de calldata).
+- **noopTracer**: Simplemente rastrea sin recopilar datos (para pruebas de rendimiento).
+
+### Notas Importantes
+
+- Este método es computacionalmente intensivo y puede llevar tiempo completarse
+- Requiere que las APIs de depuración estén habilitadas en el nodo Ethereum
+- No todos los clientes de Ethereum admiten este método
+- La respuesta puede ser muy grande para bloques con transacciones complejas
+- Considere usar opciones de rastreo para reducir el tamaño de la respuesta si es necesario
+- Especificar un bloque muy antiguo puede requerir un nodo de archivo
+- Para información regular del bloque sin rastreo, use eth_getBlockByNumber
+- Diferentes clientes pueden exponer diferentes opciones de trazador
+- Los trazadores personalizados pueden mejorar significativamente el rendimiento para necesidades de análisis específicas
+- Los rastreos históricos pueden no estar disponibles más allá de ciertas edades de bloque en algunos nodos
+
+### Ver también
+
+- <Link to="/docs/ethereum/debug-methods/debug_traceBlock" title="Rastrear todas las transacciones en un bloque usando su forma codificada en RLP en bruto">debug_traceBlock</Link> - Rastrear transacciones en un bloque usando bloque codificado en RLP
+- <Link to="/docs/ethereum/debug-methods/debug_traceBlockByHash" title="Rastrear todas las transacciones en un bloque usando su hash">debug_traceBlockByHash</Link> - Rastrear transacciones en un bloque usando el hash del bloque
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Obtener un rastreo de ejecución detallado para una transacción específica">debug_traceTransaction</Link> - Rastrear una sola transacción por hash

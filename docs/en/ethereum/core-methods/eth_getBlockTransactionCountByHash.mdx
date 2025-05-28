@@ -1,0 +1,140 @@
+---
+title: eth_getBlockTransactionCountByHash - Count Transactions in Block | Ethereum API Methods
+description: Learn how to use the eth_getBlockTransactionCountByHash method to retrieve the number of transactions in an Ethereum block identified by its hash.
+keywords: eth_getBlockTransactionCountByHash, transaction count, block transaction count, ethereum block hash, blockchain transactions, block size, tx count, transaction volume
+---
+
+# eth_getBlockTransactionCountByHash
+
+The `eth_getBlockTransactionCountByHash` method returns the number of transactions in a block, identified by the block's hash. This lightweight method provides a quick way to check transaction volume without retrieving the full block data, making it useful for block explorers and network analysis tools.
+
+## Use Cases
+
+- Block explorer functionalities and transaction listings
+- Network activity monitoring and volume analysis
+- Transaction volume analysis and historical tracking
+- Block size estimation and gas usage prediction
+- Chain reorganization detection and validation
+- Synchronization verification between nodes
+- Transaction throughput measurement
+- Blockchain analytics and usage metrics
+- Block verification and validation checks
+- MEV (Maximal Extractable Value) research
+
+## Method Details
+
+This method accepts a block hash and returns the number of transactions in that block, providing a simple yet efficient way to gauge block activity.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBlockTransactionCountByHash',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'hash',
+			required: true,
+			type: 'string',
+			desc: 'The hash (32 bytes) of the block',
+			value: '0xdc0818cf78f21a8e70579cb46a43643f78291264dda342ae31049421c82d21ae',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The number of transactions in the specified block (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.hash || null]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x134" // 308 transactions in decimal
+}
+```
+
+### Understanding the Response
+
+The response is a hexadecimal string representing the number of transactions in the block:
+- `"0x0"` means the block has no transactions (empty block)
+- `"0x1"` means there is only one transaction
+- `"0x134"` (as shown above) converts to 308 in decimal, indicating 308 transactions
+
+To convert the hex response to decimal in JavaScript:
+```javascript
+const txCount = parseInt("0x134", 16); // 308
+```
+
+### Block Hash vs. Block Number
+
+This method uses a block hash as an identifier, which has these characteristics:
+- **Uniqueness**: Even in case of chain reorganizations, the block hash uniquely identifies a specific block
+- **Immutability**: The block hash never changes, unlike block numbers which can be reassigned
+- **Verifiability**: The hash can be independently verified as it's derived from the block's contents
+
+If you have a block number instead of a hash, use `eth_getBlockTransactionCountByNumber` instead.
+
+### Practical Example
+
+```javascript
+// Example: Find blocks with high transaction counts
+const significantBlockHashes = [
+	'0xba9ded5ca1ec9adb9451bf053b33cbf5bd60f2a7ea39256278db165de9a88e5c', // Example high-activity block
+	'0xb37a9f99b47975acc1ea43bd2e02e0567566bd3dad8f034ab676b4a94d1bac9a', // Another block to check
+	'0x98c3125c2993d90b396f638115821ba17b9852e4001869061b800d32f96cdd2b', // Yet another block
+];
+
+async function findHighActivityBlocks(blockHashes, threshold = 100) {
+	const results = [];
+
+	for (const hash of blockHashes) {
+		const count = await provider.send('eth_getBlockTransactionCountByHash', [hash]);
+		const txCount = parseInt(count, 16);
+
+		if (txCount > threshold) {
+			results.push({
+				blockHash: hash,
+				transactionCount: txCount,
+			});
+		}
+	}
+
+	return results.sort((a, b) => b.transactionCount - a.transactionCount);
+}
+
+// Usage
+const highActivityBlocks = await findHighActivityBlocks(significantBlockHashes);
+console.log('Blocks with high transaction counts:', highActivityBlocks);
+```
+
+### Historical Context
+
+Transaction counts per block have evolved significantly throughout Ethereum's history:
+
+- Early Ethereum (2015-2016): 0-50 transactions per block
+- 2017 ICO boom: 70-150 transactions per block
+- 2020 DeFi summer: 150-250 transactions per block
+- Post-London upgrade (EIP-1559): 200-300+ transactions per block
+- Post-Merge (2022+): 200-400+ transactions per block depending on network demand
+
+High transaction counts typically correlate with:
+- Higher gas prices due to increased demand
+- Network congestion during peak usage
+- Major market moves or significant events
+- Popular NFT mints or token launches
+- DeFi yield farming opportunities
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockTransactionCountByNumber" title="Count transactions by block number">eth_getBlockTransactionCountByNumber</Link> - Returns the number of transactions in a block by block number
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Get block details by hash">eth_getBlockByHash</Link> - Returns detailed information about a block by hash
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockHashAndIndex" title="Get transaction by position">eth_getTransactionByBlockHashAndIndex</Link> - Returns transaction information by block hash and index position
+- <Link to="/docs/ethereum/core-methods/eth_getBlockReceipts" title="Get all receipts in a block">eth_getBlockReceipts</Link> - Returns all transaction receipts for a specified block

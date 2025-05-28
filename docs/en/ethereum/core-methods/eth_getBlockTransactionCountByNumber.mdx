@@ -1,0 +1,159 @@
+---
+title: eth_getBlockTransactionCountByNumber - Count Block Transactions | Ethereum API Methods
+description: Learn how to use the eth_getBlockTransactionCountByNumber method to retrieve the number of transactions in an Ethereum block identified by its number.
+keywords: eth_getBlockTransactionCountByNumber, transaction count, block number, block transactions, ethereum blocks, network activity, block density, transaction volume, chain metrics
+---
+
+# eth_getBlockTransactionCountByNumber
+
+The `eth_getBlockTransactionCountByNumber` method returns the number of transactions in a block, identified by the block's number or block tag. This lightweight method provides a simple way to check transaction volume and network activity without retrieving complete block data, making it essential for monitoring chain activity.
+
+## Use Cases
+
+- Network congestion monitoring and gas price prediction
+- Historical transaction volume analysis and trending
+- Block explorer functionality and transaction listings
+- Network scalability research and performance analysis
+- Fee estimation algorithms for optimal transaction timing
+- Transaction throughput measurement and network scaling
+- Block fullness tracking and congestion patterns
+- Application performance tuning based on network conditions
+- Wallet transaction fee optimization
+- Historical correlation analysis with market events
+
+## Method Details
+
+This method allows querying transaction counts for any block in the chain, including special block tags like 'latest' and 'pending'.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBlockTransactionCountByNumber',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Block number in hex format or tags: latest, earliest, pending, safe, finalized',
+			value: '0x118F61F', // Block 18,350,623 (high activity)
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The number of transactions in the specified block (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x9B" // 155 transactions
+}
+```
+
+### Block Tag Options
+
+This method supports these special block tags as parameters:
+
+- `latest`: Most recently mined block (most commonly used)
+- `earliest`: Genesis block (block 0)
+- `pending`: Currently pending block (transactions in mempool waiting to be mined)
+- `safe`: Latest block considered safe by network (finality in progress)
+- `finalized`: Latest block that has achieved finality (post-Merge only)
+
+### Converting the Response
+
+The response is a hexadecimal string that needs to be converted to decimal:
+
+```javascript
+// Convert hex transaction count to decimal
+const txCountHex = "0x9B";
+const txCountDecimal = parseInt(txCountHex, 16); // 155
+```
+
+### Significance of Transaction Count
+
+Transaction counts provide valuable insights into:
+
+1. **Network Congestion**: Higher counts typically indicate network congestion
+2. **Gas Prices**: Block fullness directly impacts gas prices in EIP-1559 model
+3. **Network Health**: Transaction throughput reflects network capacity utilization
+4. **DApp Activity**: Spikes often correlate with major DApp events or promotions
+5. **Market Correlation**: Often correlates with price action and market volatility
+
+### Practical Example
+
+```javascript
+// Example: Track transaction throughput over time
+async function analyzeNetworkThroughput(startBlock, blockCount = 100) {
+	const counts = [];
+	let totalTxs = 0;
+
+	for (let i = 0; i < blockCount; i++) {
+		const blockNum = (BigInt(startBlock) + BigInt(i)).toString(16);
+		const txCount = await provider.send('eth_getBlockTransactionCountByNumber', [`0x${blockNum}`]);
+
+		const block = await provider.send('eth_getBlockByNumber', [`0x${blockNum}`, false]);
+
+		const timestamp = parseInt(block.timestamp, 16);
+		const count = parseInt(txCount, 16);
+
+		counts.push({
+			blockNumber: `0x${blockNum}`,
+			timestamp,
+			transactionCount: count,
+		});
+
+		totalTxs += count;
+	}
+
+	// Calculate averages and trends
+	const avgTxPerBlock = totalTxs / blockCount;
+	const timespan = counts[counts.length - 1].timestamp - counts[0].timestamp;
+	const txPerSecond = totalTxs / timespan;
+
+	return {
+		blocks: counts,
+		averageTransactionsPerBlock: avgTxPerBlock,
+		transactionsPerSecond: txPerSecond,
+		totalTransactions: totalTxs,
+		timeSpanSeconds: timespan,
+	};
+}
+
+// Usage
+const stats = await analyzeNetworkThroughput('0x118F500', 50);
+console.log(`Average TPS: ${stats.transactionsPerSecond.toFixed(2)}`);
+console.log(`Average transactions per block: ${stats.averageTransactionsPerBlock.toFixed(2)}`);
+```
+
+### Network Comparison
+
+Transaction counts vary significantly across different Ethereum-compatible networks:
+
+- **Ethereum Mainnet**: 100-300+ per block (12 second blocks)
+- **Polygon**: 50-100+ per block (2 second blocks)
+- **Arbitrum**: 100-1000+ per batch (compressed L2 transactions)
+- **Optimism**: 50-500+ per batch (compressed L2 transactions)
+- **Avalanche C-Chain**: 5-50+ per block (2 second blocks)
+- **BNB Smart Chain**: 50-100+ per block (3 second blocks)
+- **Base**: 50-300+ per batch (L2 optimistic rollup)
+
+This variation reflects differences in blocktime, fee structures, and ecosystem usage patterns.
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockTransactionCountByHash" title="Count transactions by hash">eth_getBlockTransactionCountByHash</Link> - Returns transaction count using block hash instead of number
+- <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Get latest block number">eth_blockNumber</Link> - Returns the most recent block number
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Get block details">eth_getBlockByNumber</Link> - Returns complete information about a block
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockNumberAndIndex" title="Get transaction details">eth_getTransactionByBlockNumberAndIndex</Link> - Returns transaction details at specified position

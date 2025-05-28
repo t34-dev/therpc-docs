@@ -1,0 +1,135 @@
+---
+title: Authentication Guide | Ethereum API Security
+description: Complete guide to securing your Ethereum API requests using API keys, including implementation examples, best practices, and security recommendations
+keywords: api authentication, api key, bearer token, api security, therpc authentication, ethereum api security, blockchain api security, secure api access, ethereum api key management, web3 authentication
+---
+
+# Authentication
+
+All requests to TheRPC API require authentication using an API key. This guide explains how to obtain and use your API key securely.
+
+## # Getting an API Key
+
+1. Sign up at TheRPC.io
+2. Navigate to the Dashboard
+3. Go to API Keys section
+4. Generate a new API key
+
+## # Using Your API Key
+
+### HTTP Headers
+
+Include your API key in every request using the Bearer authentication scheme:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+### Example Requests
+
+Using curl:
+
+```bash
+curl --request POST 'YOUR_API_ENDPOINT' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+    "jsonrpc": "2.0",
+    "method": "eth_blockNumber",
+    "params": [],
+    "id": 1
+  }'
+```
+
+Using JavaScript:
+
+```javascript
+const response = await fetch('YOUR_API_ENDPOINT', {
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json',
+		Authorization: `Bearer ${API_KEY}`,
+	},
+	body: JSON.stringify({
+		jsonrpc: '2.0',
+		method: 'eth_blockNumber',
+		params: [],
+		id: 1,
+	}),
+});
+```
+
+## # Security Best Practices
+
+1. **Keep Keys Secret**
+
+- Never commit API keys to source control
+- Don't share keys in public forums
+- Use environment variables or secure vaults
+
+2. **Key Rotation**
+
+- Rotate keys periodically
+- Immediately revoke compromised keys
+- Use different keys for different environments
+
+3. **Access Control**
+
+- Use separate keys for different applications
+- Monitor key usage through dashboard
+- Implement proper key management
+
+## # Error Handling
+
+Common authentication errors:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32001,
+		"message": "Invalid authentication credentials"
+	},
+	"id": 1
+}
+```
+
+- Missing API key
+- Invalid API key format
+- Expired or revoked key
+- Rate limit exceeded
+
+## # Environment Setup
+
+### Environment Variables
+
+```bash
+# .env file
+THERPC_API_KEY=your_api_key_here
+```
+
+### Configuration Examples
+
+Node.js:
+
+```javascript
+require('dotenv').config();
+const API_KEY = process.env.THERPC_API_KEY;
+```
+
+Python:
+
+```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+API_KEY = os.getenv('THERPC_API_KEY')
+```
+
+### See also
+
+- <Link to="/docs/ethereum/rate-limits" title="Guide to API usage limits and quotas">Rate Limits</Link> - Understand Usage Quotas
+- <Link to="/docs/ethereum/quick-start" title="Get started quickly with the Ethereum API">Quick Start Guide</Link> - Basic Implementation
+- <Link to="/docs/ethereum/basic-operations" title="Common operations for Ethereum blockchain interaction">Basic Operations</Link> - Common Operations
+- <Link to="/docs/ethereum/faq" title="Frequently asked questions about Ethereum API usage">FAQ</Link> - Common Questions and Answers

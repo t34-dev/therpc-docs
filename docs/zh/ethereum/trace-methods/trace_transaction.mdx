@@ -1,0 +1,267 @@
+---
+title: trace_transaction - 检索交易追踪 | 以太坊 API 方法
+description: 学习如何使用 trace_transaction 方法通过交易哈希检索特定交易的详细执行追踪信息。
+keywords: trace_transaction, ethereum trace, transaction trace, execution trace, smart contract debugging, internal calls
+---
+
+# trace_transaction
+
+`trace_transaction` 方法检索由其哈希标识的交易的详细追踪信息。此方法提供了对交易执行的每一步的洞察，包括合约之间的内部调用，允许进行深入分析和调试。
+
+## 使用场景
+
+- 调试特定交易以识别错误
+- 分析单个操作的燃料消耗
+- 追踪交易内的内部调用
+- 理解复杂的合约交互
+- 调查交易失败
+- 安全审计和漏洞分析
+- 验证预期的合约行为
+- 跟踪资金在多个合约之间的流动
+- 分析类似交易的执行模式
+- 调试失败或回退的交易
+
+## 方法详情
+
+此方法返回交易执行期间所有操作的追踪数组。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'trace_transaction',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'transactionHash',
+			required: true,
+			type: 'string',
+			desc: '要追踪的交易的哈希',
+			value: '0x02d4a872e096445e80d05276ee756cefef7f3b376bcec14246469c0cd97dad8f',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: '交易中所有操作的追踪对象数组',
+			fields: [
+				{
+					id: 'action',
+					type: 'object',
+					desc: '关于调用操作的详情',
+					fields: [
+						{
+							id: 'callType',
+							type: 'string',
+							desc: '调用类型（call, delegatecall 等）',
+						},
+						{
+							id: 'from',
+							type: 'string',
+							desc: '发送者地址',
+						},
+						{
+							id: 'gas',
+							type: 'string',
+							desc: '为调用提供的燃料（十六进制）',
+						},
+						{
+							id: 'input',
+							type: 'string',
+							desc: '调用的输入数据（十六进制）',
+						},
+						{
+							id: 'to',
+							type: 'string',
+							desc: '接收者地址',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: '以 wei 为单位转移的价值（十六进制）',
+						},
+					],
+				},
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: '包含此追踪的区块的哈希',
+				},
+				{
+					id: 'blockNumber',
+					type: 'integer',
+					desc: '包含此追踪的区块号',
+				},
+				{
+					id: 'result',
+					type: 'object',
+					desc: '调用结果',
+					fields: [
+						{
+							id: 'gasUsed',
+							type: 'string',
+							desc: '使用的燃料量（十六进制）',
+						},
+						{
+							id: 'output',
+							type: 'string',
+							desc: '调用的输出数据（十六进制）',
+						},
+					],
+				},
+				{
+					id: 'subtraces',
+					type: 'integer',
+					desc: '子追踪数量',
+				},
+				{
+					id: 'traceAddress',
+					type: 'array',
+					desc: '调用树中追踪位置的地址路径',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: '被追踪的交易的哈希',
+				},
+				{
+					id: 'transactionPosition',
+					type: 'integer',
+					desc: '交易在区块中的索引位置',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: '操作类型（call, create, suicide）',
+				},
+				{
+					id: 'error',
+					type: 'string',
+					desc: '如果调用失败的错误消息（可选）',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.transactionHash || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x83806d539d4ea1c140489a06660319c9a303f874",
+				"gas": "0x1a1f8",
+				"input": "0x",
+				"to": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+				"value": "0x7a16c911b4d00000"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3068185,
+			"result": {
+				"gasUsed": "0x2982",
+				"output": "0x"
+			},
+			"subtraces": 2,
+			"traceAddress": [],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		},
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+				"gas": "0x13e99",
+				"input": "0x16c72721",
+				"to": "0x2bd2326c993dfaef84f696526064ff22eba5b362",
+				"value": "0x0"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3068185,
+			"result": {
+				"gasUsed": "0x183",
+				"output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+			},
+			"subtraces": 0,
+			"traceAddress": [0],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		},
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+				"gas": "0x8fc",
+				"input": "0x",
+				"to": "0x70faa28a6b8d6829a4b1e649d26ec9a2a39ba413",
+				"value": "0x7a16c911b4d00000"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3068185,
+			"result": {
+				"gasUsed": "0x0",
+				"output": "0x"
+			},
+			"subtraces": 0,
+			"traceAddress": [1],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		}
+	]
+}
+```
+
+### 理解追踪树
+
+追踪树表示交易的执行流程：
+
+1. **根级追踪**：主交易（空 `traceAddress`）
+2. **第一级子追踪**：直接来自主交易的内部调用（`traceAddress` 为 `[0]`、`[1]` 等）
+3. **更深层级**：后续内部调用（`traceAddress` 为 `[0, 0]`、`[0, 1]` 等）
+
+### 调用类型
+
+`callType` 字段可能有不同的值：
+
+- **call**：常规消息调用
+- **delegatecall**：在调用者上下文中执行代码的调用
+- **staticcall**：只读调用（不允许状态修改）
+- **callcode**：类似于 delegatecall 但传递值（遗留）
+
+### 追踪类型
+
+`type` 字段表示操作类型：
+
+- **call**：消息调用
+- **create**：合约创建
+- **suicide**：合约自毁（SELFDESTRUCT 操作码）
+
+### 重要注意事项
+
+- 此方法需要在以太坊节点上启用追踪 API
+- 对于具有许多内部调用的复杂交易，响应可能非常大
+- 该方法计算密集，对于复杂交易可能需要时间完成
+- 并非所有以太坊客户端都支持此方法
+- 如果节点保持存档数据，才能追踪历史交易
+- 一些客户端可能对可追踪的历史交易有限制
+- 对于更详细的虚拟机级执行追踪，考虑使用 `trace_replayTransaction`
+- 与事件日志不同，追踪捕获所有合约交互，包括那些不发出事件的交互
+- 失败的交易仍然会产生直到失败点的追踪
+- 出于历史原因，SELFDESTRUCT 操作以类型 "suicide" 出现
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/trace-methods/trace_filter" title="跨区块过滤和搜索交易追踪">trace_filter</Link> - 基于条件搜索追踪
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="获取区块中所有交易的执行追踪">trace_block</Link> - 检索区块中所有交易的追踪
+- <Link to="/docs/ethereum/trace-methods/trace_replayTransaction" title="使用 VM 追踪和状态变化重放交易">trace_replayTransaction</Link> - 获取带有状态变化的更详细追踪
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="获取交易的低级 EVM 执行详情">debug_traceTransaction</Link> - 替代详细交易追踪

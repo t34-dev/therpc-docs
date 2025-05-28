@@ -1,0 +1,164 @@
+---
+title: eth_getCode - Recuperar Bytecode de Contratos Inteligentes | Métodos de API de Ethereum
+description: Aprenda a usar el método eth_getCode para recuperar bytecode compilado de contratos inteligentes de Ethereum. Incluye ejemplos para verificación y análisis de bytecode.
+keywords: eth_getCode, bytecode de contrato inteligente, código de contrato, contrato ethereum, verificación de bytecode, código evm, análisis de contrato, bytecode de solidity, detección de contrato, contrato proxy
+---
+
+# eth_getCode
+
+El método `eth_getCode` devuelve el bytecode compilado de un contrato inteligente en una dirección específica. Este método esencial permite a los desarrolladores verificar implementaciones de contratos, realizar auditorías de seguridad y distinguir entre cuentas regulares y contratos inteligentes en la blockchain de Ethereum.
+
+## Casos de Uso
+
+- Verificación de contratos inteligentes y comprobación de implementación
+- Comparación de bytecode de contratos y validación de versiones
+- Flujos de trabajo de auditoría y análisis de seguridad de contratos
+- Diferenciación entre contratos y EOAs (Cuentas de Propiedad Externa)
+- Análisis de implementación de contratos para sistemas actualizables
+- Verificación de contratos proxy y comprobaciones de implementación delegada
+- Detección de contratos autodestruidos y existencia de contratos
+- Determinación de si una dirección es un contrato de token
+- Ingeniería inversa y análisis de contratos inteligentes
+- Análisis histórico de bytecode a través de diferentes bloques
+
+## Detalles del Método
+
+Este método recupera el bytecode EVM implementado en una dirección específica en la altura de bloque solicitada.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getCode',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: 'La dirección del contrato inteligente',
+			value: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', // Contrato de token UNI
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Número de bloque en formato hexadecimal o etiqueta de bloque',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'El bytecode de la dirección dada como una cadena hexadecimal',
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.blockNumber || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x60806040526004361061016a5763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166306fdde03811461016f578063095ea7b3146101f957806318160ddd1461023957806323b872dd14610260578063313ce567146102a..." // Truncado por brevedad
+}
+```
+
+### Casos Especiales y Valores de Retorno
+
+- **Contrato vacío**: Devuelve "0x" si no existe código en la dirección
+- **Dirección EOA**: Devuelve "0x" para direcciones de billetera regulares (Cuentas de Propiedad Externa)
+- **Contrato autodestruido**: Devuelve "0x" después de que un contrato ha sido destruido mediante `selfdestruct`
+- **Pre-despliegue**: Si se verifica un bloque antes del despliegue del contrato, devuelve "0x"
+- **Contratos estándar**: Devuelve el bytecode EVM completo para contratos típicos
+- **Contratos proxy**: Devuelve el código proxy, no el código de implementación al que delegan
+
+### Identificación de Tipos de Contratos
+
+Diferentes tipos de contratos tienen patrones de bytecode reconocibles:
+
+1. **Contratos Proxy**: A menudo contienen operaciones de llamada delegada
+2. **Tokens ERC20**: Incluyen funciones de transferencia y aprobación
+3. **NFTs ERC721**: Contienen interfaces estándar de NFT
+4. **Proxies Mínimos (EIP-1167)**: Comienzan con `0x363d3d37363d73...`
+5. **Proxies Diamond (EIP-2535)**: Incluyen lógica de gestión de facetas
+6. **Proxies UUPS**: Incluyen funcionalidad de actualización en la implementación
+
+### Ejemplo Práctico
+
+```javascript
+// Ejemplo: Verificar si una dirección es un contrato o EOA
+async function isContract(address) {
+	const code = await provider.send('eth_getCode', [address, 'latest']);
+	return code !== '0x';
+}
+
+// Ejemplo: Verificar implementación proxy
+async function verifyProxyImplementation(proxyAddress, expectedImplementation) {
+	// Para proxies EIP-1967, la dirección de implementación se almacena en un slot específico
+	const implementationSlot = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
+
+	const storageValue = await provider.send('eth_getStorageAt', [proxyAddress, implementationSlot, 'latest']);
+
+	// Extraer dirección del valor de almacenamiento (eliminar padding)
+	const implementationAddress = '0x' + storageValue.slice(26);
+
+	// Obtener bytecode de implementación
+	const implementationCode = await provider.send('eth_getCode', [implementationAddress, 'latest']);
+
+	const expectedCode = await provider.send('eth_getCode', [expectedImplementation, 'latest']);
+
+	return {
+		isProxy: implementationCode !== '0x',
+		implementationAddress,
+		implementationMatches: implementationCode === expectedCode,
+	};
+}
+
+// Uso
+const addressToCheck = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'; // Token UNI
+const isContractResult = await isContract(addressToCheck);
+console.log(`${addressToCheck} is ${isContractResult ? 'a contract' : 'an EOA'}`);
+```
+
+### Uso Avanzado: Detección de Tipo de Contrato
+
+```javascript
+// Detector simple de tipo de contrato basado en patrones de bytecode
+async function detectContractType(address) {
+    const code = await provider.send('eth_getCode', [address, 'latest']);
+    
+    if (code === '0x') return 'Not a contract (EOA or self-destructed)';
+    
+    // Verificar patrones de proxy
+    if (code.includes('363d3d37363d73')) return 'EIP-1167 Minimal Proxy';
+    if (code.includes('5c60806040527f360894')) return 'EIP-1967 Transparent Proxy';
+    
+    // Verificar estándares ERC comunes (simplificado)
+    if (code.includes('6e0a6eecd9d3362a2dcfb7fac5fea5d4bd0a73001ddb12dd96e21df6ab138d72')) 
+        return 'Likely ERC-20 Token';
+    if (code.includes('80ac58cd')) return 'Likely ERC-721 NFT';
+    if (code.includes('d9b67a26')) return 'Likely ERC-1155 Multi-Token';
+    
+    return 'Standard contract (type unknown)';
+}
+```
+
+### Prefijos Comunes de Bytecode de Contratos
+
+- **0x60806040**: Prefijo común de bytecode EVM para contratos Solidity (versión 0.4.x-0.8.x)
+- **0x6080604052**: Otro prefijo común para contratos Solidity
+- **0x363d3d373d3d3d363d73**: Prefijo común para contratos proxy
+- **0x363d3d37363d73**: Patrón común de proxy mínimo (EIP-1167)
+- **0x3d602d80600a3d3981f3**: Otra variación de proxy mínimo
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getStorageAt" title="Acceder al almacenamiento del contrato">eth_getStorageAt</Link> - Devuelve el valor de una posición específica de almacenamiento
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Ejecutar llamadas a contratos">eth_call</Link> - Ejecuta una llamada de solo lectura a un contrato
+- <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Verificar saldo de cuenta">eth_getBalance</Link> - Devuelve el saldo de ether de una cuenta
+- <Link to="/docs/ethereum/core-methods/eth_getProof" title="Generar pruebas de estado de contrato">eth_getProof</Link> - Genera prueba de valores de cuenta y almacenamiento

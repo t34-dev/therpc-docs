@@ -1,0 +1,84 @@
+---
+title: eth_gasPrice - Get Current Network Gas Price | Ethereum API Methods
+description: Learn how to use the eth_gasPrice method to retrieve the current gas price from the Ethereum network. Includes examples and practical applications.
+keywords: eth_gasPrice, gas price, ethereum gas, transaction fees, wei price, gwei, eth fees, gas cost calculation, transaction cost
+---
+
+# eth_gasPrice
+
+The `eth_gasPrice` method returns the current gas price in wei. This value represents the median gas price from recent blocks, providing developers with a reliable baseline for transaction fee calculations and helping users avoid transaction failures due to low gas prices.
+
+## Use Cases
+
+- Transaction fee estimation for wallets and DApps
+- Setting appropriate gas prices for urgent transactions
+- Price monitoring and alerts for optimal transaction timing
+- Gas price tracking for analytics dashboards
+- Transaction optimization to reduce costs
+- MEV protection strategies to avoid front-running
+- Historical gas price analysis
+- Fee calculators and user-friendly gas interfaces
+
+## Method Details
+
+This method provides a simple way to query the current network gas price. It requires no parameters and returns a single hexadecimal value representing the gas price in wei.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_gasPrice',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'Current gas price in wei (hexadecimal)',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x1DCD65000" // 8 Gwei
+}
+```
+
+### Understanding Gas Units
+
+Gas prices are typically discussed in these units:
+- **Wei**: The smallest unit (returned by this method)
+- **Gwei**: 1 billion wei (10^9), the common unit for gas prices
+- **Ether**: 10^18 wei, the main currency unit
+
+For user interfaces, converting the returned value to Gwei usually provides a more readable format. For example, `0x1DCD65000` (8 Gwei) is easier to understand than 8,000,000,000 wei.
+
+### Common Use Case Example
+
+```javascript
+// Example of calculating gas cost for a standard transfer
+const gasPrice = await provider.send('eth_gasPrice', []);
+const gasPriceInGwei = parseInt(gasPrice, 16) / 1e9;
+const standardTransferGas = 21000;
+const costInEth = (parseInt(gasPrice, 16) * standardTransferGas) / 1e18;
+```
+
+### Important Notes
+
+- On EIP-1559 enabled networks, this method returns a value suitable for legacy transactions
+- For EIP-1559 transactions, consider using `eth_feeHistory` to determine appropriate `maxFeePerGas` and `maxPriorityFeePerGas` values
+- Gas prices can fluctuate rapidly during periods of high network activity
+- Some providers may add their own estimates or adjustments to this value
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="Calculate required gas for transactions">eth_estimateGas</Link> - Estimates the gas needed for transaction execution
+- <Link to="/docs/ethereum/core-methods/eth_feeHistory" title="Analyze historical fee data">eth_feeHistory</Link> - Returns historical fee data for advanced fee strategies
+- <Link to="/docs/ethereum/core-methods/eth_maxPriorityFeePerGas" title="Get suggested priority fee">eth_maxPriorityFeePerGas</Link> - Returns a suggested priority fee (tip) for EIP-1559 transactions

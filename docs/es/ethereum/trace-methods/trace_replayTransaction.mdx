@@ -1,0 +1,304 @@
+---
+title: trace_replayTransaction - Reproducir Transacción con Rastreo VM | Métodos de la API de Ethereum
+description: Aprenda a usar el método trace_replayTransaction para reproducir una transacción con rastros detallados y cambios de estado para una depuración y análisis completos.
+keywords: trace_replayTransaction, reproducción ethereum, reproducción de transacción, rastro vm, diferencia de estado, rastreo ethereum, depuración de contratos inteligentes, cambios de estado
+---
+
+# trace_replayTransaction
+
+El método `trace_replayTransaction` le permite reproducir una transacción y recuperar una variedad de información de rastro incluyendo rastro de ejecución, rastro VM y cambios de estado. Este método proporciona información más detallada que `trace_transaction` mostrando cómo la transacción cambió el estado.
+
+## Casos de Uso
+
+- Depuración de transacciones complejas con cambios de estado
+- Análisis del consumo de gas para optimización
+- Rastreo de llamadas internas entre contratos
+- Comprensión de cómo el almacenamiento fue modificado por una transacción
+- Verificación de la ejecución de flujos lógicos complejos
+- Auditoría de seguridad con detalle completo de transición de estado
+- Análisis de razones de reversión con contexto detallado
+- Investigación de patrones de acceso a memoria y almacenamiento
+- Validación del comportamiento del contrato como parte de revisiones de auditoría
+- Optimización del código del contrato basado en patrones de ejecución
+
+## Detalles del Método
+
+Este método reproduce una transacción y devuelve información detallada de rastro incluyendo rastro VM y diferencias de estado.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'trace_replayTransaction',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'transactionHash',
+			required: true,
+			type: 'string',
+			desc: 'El hash de la transacción a reproducir',
+			value: '0x02d4a872e096445e80d05276ee756cefef7f3b376bcec14246469c0cd97dad8f',
+		},
+		{
+			id: 'traceTypes',
+			required: true,
+			type: 'array',
+			desc: 'Array de tipos de rastreo a incluir en la respuesta',
+			value: ['trace', 'vmTrace', 'stateDiff'],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'Objeto resultado con información de rastreo',
+			fields: [
+				{
+					id: 'output',
+					type: 'string',
+					desc: 'Datos de salida de la transacción',
+				},
+				{
+					id: 'stateDiff',
+					type: 'object',
+					desc: 'Diferencias de estado causadas por la transacción (si se solicita)',
+					fields: [
+						{
+							id: 'address',
+							type: 'object',
+							desc: 'Cambios de estado para una dirección',
+						},
+					],
+				},
+				{
+					id: 'trace',
+					type: 'array',
+					desc: 'Array de objetos de rastreo para todas las operaciones en la transacción',
+					fields: [
+						{
+							id: 'action',
+							type: 'object',
+							desc: 'Detalles sobre la acción de llamada',
+							fields: [
+								{
+									id: 'callType',
+									type: 'string',
+									desc: 'Tipo de llamada (call, delegatecall, etc.)',
+								},
+								{
+									id: 'from',
+									type: 'string',
+									desc: 'Dirección del remitente',
+								},
+								{
+									id: 'gas',
+									type: 'string',
+									desc: 'Gas proporcionado para la llamada (hex)',
+								},
+								{
+									id: 'input',
+									type: 'string',
+									desc: 'Datos de entrada para la llamada (hex)',
+								},
+								{
+									id: 'to',
+									type: 'string',
+									desc: 'Dirección del destinatario',
+								},
+								{
+									id: 'value',
+									type: 'string',
+									desc: 'Valor transferido en wei (hex)',
+								},
+							],
+						},
+						{
+							id: 'result',
+							type: 'object',
+							desc: 'Resultado de la llamada',
+							fields: [
+								{
+									id: 'gasUsed',
+									type: 'string',
+									desc: 'Cantidad de gas utilizado (hex)',
+								},
+								{
+									id: 'output',
+									type: 'string',
+									desc: 'Datos de salida de la llamada (hex)',
+								},
+							],
+						},
+						{
+							id: 'subtraces',
+							type: 'integer',
+							desc: 'Número de sub-rastros',
+						},
+						{
+							id: 'traceAddress',
+							type: 'array',
+							desc: 'Ruta de dirección de la ubicación del rastro en el árbol de llamadas',
+						},
+						{
+							id: 'type',
+							type: 'string',
+							desc: 'Tipo de operación (call, create, suicide)',
+						},
+					],
+				},
+				{
+					id: 'vmTrace',
+					type: 'object',
+					desc: 'Rastro de ejecución de la máquina virtual (si se solicita)',
+					fields: [
+						{
+							id: 'code',
+							type: 'string',
+							desc: 'Bytecode EVM que se está ejecutando',
+						},
+						{
+							id: 'ops',
+							type: 'array',
+							desc: 'Array de operaciones ejecutadas',
+							fields: [
+								{
+									id: 'cost',
+									type: 'integer',
+									desc: 'Costo de gas de la operación',
+								},
+								{
+									id: 'ex',
+									type: 'object',
+									desc: 'Resultado de ejecución de la operación',
+								},
+								{
+									id: 'pc',
+									type: 'integer',
+									desc: 'Contador de programa',
+								},
+								{
+									id: 'sub',
+									type: 'object',
+									desc: 'Información sobre la sub-ejecución de llamada',
+								},
+							],
+						},
+					],
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.transactionHash || null, fields?.traceTypes || ['trace', 'vmTrace', 'stateDiff']]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+		"stateDiff": {
+			"0x1234567890123456789012345678901234567890": {
+				"balance": {
+					"*": {
+						"from": "0x100",
+						"to": "0x110"
+					}
+				},
+				"code": "=",
+				"nonce": {
+					"*": {
+						"from": "0x10",
+						"to": "0x11"
+					}
+				},
+				"storage": {
+					"0x0000000000000000000000000000000000000000000000000000000000000001": {
+						"*": {
+							"from": "0x0000000000000000000000000000000000000000000000000000000000000000",
+							"to": "0x0000000000000000000000000000000000000000000000000000000000000001"
+						}
+					}
+				}
+			}
+		},
+		"trace": [
+			{
+				"action": {
+					"callType": "call",
+					"from": "0x83806d539d4ea1c140489a06660319c9a303f874",
+					"gas": "0x1a1f8",
+					"input": "0x",
+					"to": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+					"value": "0x7a16c911b4d00000"
+				},
+				"result": {
+					"gasUsed": "0x2982",
+					"output": "0x"
+				},
+				"subtraces": 2,
+				"traceAddress": [],
+				"type": "call"
+			}
+		],
+		"vmTrace": {
+			"code": "0x606060...",
+			"ops": [
+				{
+					"cost": 3,
+					"ex": {
+						"mem": null,
+						"push": ["0x60"],
+						"store": null,
+						"used": 16723979
+					},
+					"pc": 0,
+					"sub": null
+				}
+			]
+		}
+	}
+}
+```
+
+### Tipos de Rastro
+
+El parámetro `traceTypes` acepta un array de los siguientes valores:
+
+- **trace**: El rastro básico de ejecución de la transacción
+- **vmTrace**: Un rastro detallado de la ejecución EVM
+- **stateDiff**: Cambios de estado resultantes de la transacción
+
+Puede solicitar cualquier combinación de estos tipos de rastro.
+
+### Formato de Diferencia de Estado
+
+El formato de diferencia de estado utiliza los siguientes símbolos:
+
+- **"="**: Sin cambio en el valor
+- **"+"**: El valor fue creado
+- **"-"**: El valor fue eliminado
+- **"\*"**: El valor fue modificado, con valores "from" y "to"
+
+### Notas Importantes
+
+- Este método requiere que las APIs de rastro estén habilitadas en el nodo Ethereum
+- No todos los clientes de Ethereum soportan este método (principalmente OpenEthereum/Nethermind)
+- La respuesta puede ser muy grande, especialmente con vmTrace habilitado
+- Para información de rastro simple sin cambios de estado, use `trace_transaction` en su lugar
+- El método es computacionalmente intensivo y puede tardar tiempo en completarse
+- Las transacciones históricas solo pueden rastrearse si el nodo mantiene datos de archivo
+- Diferentes traceTypes afectan significativamente al tamaño de respuesta y tiempo de cálculo
+- Para depurar transacciones más simples, `trace_transaction` puede ser suficiente
+- Las diferencias de estado son particularmente valiosas para entender cambios de almacenamiento
+- Las transacciones que revierten mostrarán cambios de estado hasta el punto de reversión
+
+### Véase también
+
+- <Link to="/docs/ethereum/trace-methods/trace_transaction" title="Obtener rastros de ejecución básicos para una transacción específica">trace_transaction</Link> - Recuperar rastros básicos para una transacción
+- <Link to="/docs/ethereum/trace-methods/trace_replayBlockTransactions" title="Reproducir todas las transacciones en un bloque con rastreo VM">trace_replayBlockTransactions</Link> - Reproducir y rastrear todas las transacciones en un bloque
+- <Link to="/docs/ethereum/trace-methods/trace_call" title="Rastrear una llamada sin crear una transacción">trace_call</Link> - Ejecutar y rastrear una llamada sin crear una transacción
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Obtener detalles de ejecución de bajo nivel de EVM para una transacción">debug_traceTransaction</Link> - Rastreo de transacciones detallado alternativo

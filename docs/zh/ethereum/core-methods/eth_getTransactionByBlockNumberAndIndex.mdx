@@ -1,0 +1,197 @@
+---
+title: eth_getTransactionByBlockNumberAndIndex - 通过区块号和索引检索交易 | 以太坊 API 方法
+description: 学习如何使用 eth_getTransactionByBlockNumberAndIndex 方法通过区块号和索引位置在以太坊区块链中获取交易详情。
+keywords: eth_getTransactionByBlockNumberAndIndex, 交易详情, 以太坊交易, 区块号, 交易索引, 区块链查询
+---
+
+# eth_getTransactionByBlockNumberAndIndex
+
+`eth_getTransactionByBlockNumberAndIndex` 方法通过指定交易在由区块号或标签标识的区块内的位置（索引）返回交易的详细信息。此方法对于从已知区块高度或特殊区块（如"latest"）中检索交易特别有用。
+
+## 使用场景
+
+- 实时交易监控
+- 区块浏览器功能
+- 特定交易分析
+- 历史数据提取
+- 交易验证
+- 顺序交易处理
+- 智能合约交互分析
+- 内存池调查（使用"pending"标签）
+
+## 方法详情
+
+此方法使用区块号（或标签）和交易在该区块内的索引定位交易。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getTransactionByBlockNumberAndIndex',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '十六进制格式的区块号或标签：latest, earliest, pending, safe, finalized',
+			value: '0x1194BB0', // 示例区块号 (18,350,000)
+		},
+		{
+			id: 'index',
+			required: true,
+			type: 'string',
+			desc: '交易在区块中的索引位置（十六进制）',
+			value: '0x0', // 区块中的第一笔交易
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: '交易对象，如果未找到则为 null',
+			fields: [
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: '包含此交易的区块哈希',
+				},
+				{
+					id: 'blockNumber',
+					type: 'string',
+					desc: '包含此交易的区块号（十六进制）',
+				},
+				{
+					id: 'from',
+					type: 'string',
+					desc: '发送者地址',
+				},
+				{
+					id: 'gas',
+					type: 'string',
+					desc: '发送者提供的燃料（十六进制）',
+				},
+				{
+					id: 'gasPrice',
+					type: 'string',
+					desc: '以 wei 为单位的燃料价格（十六进制）',
+				},
+				{
+					id: 'maxFeePerGas',
+					type: 'string',
+					desc: '每单位燃料的最大费用（EIP-1559 交易）',
+				},
+				{
+					id: 'maxPriorityFeePerGas',
+					type: 'string',
+					desc: '每单位燃料的最大优先费用（EIP-1559 交易）',
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: '交易哈希',
+				},
+				{
+					id: 'input',
+					type: 'string',
+					desc: '交易数据负载',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: '发送者在此之前的交易数量（十六进制）',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					desc: '接收者地址，合约创建交易则为 null',
+				},
+				{
+					id: 'transactionIndex',
+					type: 'string',
+					desc: '交易在区块中的位置整数（十六进制）',
+				},
+				{
+					id: 'value',
+					type: 'string',
+					desc: '以 wei 为单位的转账值（十六进制）',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: '交易类型（0=传统, 1=EIP2930, 2=EIP1559）',
+				},
+				{
+					id: 'accessList',
+					type: 'array',
+					desc: '地址和存储键列表（EIP-2930 和 EIP-1559）',
+				},
+				{
+					id: 'chainId',
+					type: 'string',
+					desc: '交易中指定的链 ID',
+				},
+				{
+					id: 'v',
+					type: 'string',
+					desc: '签名的 V 参数',
+				},
+				{
+					id: 'r',
+					type: 'string',
+					desc: '签名的 R 参数',
+				},
+				{
+					id: 's',
+					type: 'string',
+					desc: '签名的 S 参数',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null, fields?.index || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"blockHash": "0x0f2c90d18695045ede8b52476bba47db4c99ad8e9c748dd64147dcb698e88d5f",
+		"blockNumber": "0x1194bb0",
+		"from": "0xef3a770aec2e5e97994c8f0e283e7992e2c39a2a",
+		"gas": "0x2b13c",
+		"gasPrice": "0x342770c00",
+		"maxFeePerGas": "0x342770c00",
+		"maxPriorityFeePerGas": "0x3b9aca00",
+		"hash": "0xa1c2c6b23cec00cdfa10a2bc30357c4250a2efb3cdf3c4d5c71e8b90ccb9071d",
+		"input": "0x095ea7b30000000000000000000000007a250d5630b4cf539739df2c5dacb4c659f2488dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+		"nonce": "0x1a8",
+		"to": "0x6982508145454ce325ddbe47a25d4ec3d2311933",
+		"transactionIndex": "0x0",
+		"value": "0x0",
+		"type": "0x2",
+		"accessList": [],
+		"chainId": "0x1",
+		"v": "0x1",
+		"r": "0xea5232855738e1c0d1a6695f0a0c76de2db3c6c84eec9d7b7f4523d8dc0db1d5",
+		"s": "0x2fd0b585c8e8df25e2e95ca8afe94b2d84a4c298d1e526f9afa0c2f1d492cd0d"
+	}
+}
+```
+
+### 区块标签含义
+
+- `latest`：最近挖出的区块
+- `earliest`：创世区块（区块 0）
+- `pending`：当前待处理区块（内存池中的交易）
+- `safe`：网络认为安全的最新区块
+- `finalized`：已达到最终确定性的最新区块
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockHashAndIndex">eth_getTransactionByBlockHashAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash">eth_getTransactionByHash</Link>

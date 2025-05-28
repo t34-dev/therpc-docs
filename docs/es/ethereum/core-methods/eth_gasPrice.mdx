@@ -1,0 +1,84 @@
+---
+title: eth_gasPrice - Obtener Precio Actual de Gas en la Red | Métodos de API de Ethereum
+description: Aprenda a usar el método eth_gasPrice para recuperar el precio actual del gas de la red Ethereum. Incluye ejemplos y aplicaciones prácticas.
+keywords: eth_gasPrice, precio de gas, gas ethereum, tarifas de transacción, precio wei, gwei, tarifas eth, cálculo de costo de gas, costo de transacción
+---
+
+# eth_gasPrice
+
+El método `eth_gasPrice` devuelve el precio actual del gas en wei. Este valor representa el precio medio de gas de bloques recientes, proporcionando a los desarrolladores una línea base confiable para cálculos de tarifas de transacción y ayudando a los usuarios a evitar fallos de transacción debido a precios de gas bajos.
+
+## Casos de Uso
+
+- Estimación de tarifas de transacción para carteras y DApps
+- Establecimiento de precios de gas apropiados para transacciones urgentes
+- Monitoreo de precios y alertas para tiempos óptimos de transacción
+- Seguimiento de precios de gas para paneles analíticos
+- Optimización de transacciones para reducir costos
+- Estrategias de protección MEV para evitar adelantamiento
+- Análisis histórico de precios de gas
+- Calculadoras de tarifas e interfaces de gas amigables para el usuario
+
+## Detalles del Método
+
+Este método proporciona una forma simple de consultar el precio actual del gas de la red. No requiere parámetros y devuelve un único valor hexadecimal que representa el precio del gas en wei.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_gasPrice',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'Precio actual del gas en wei (hexadecimal)',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x1DCD65000" // 8 Gwei
+}
+```
+
+### Entendiendo las Unidades de Gas
+
+Los precios de gas se discuten típicamente en estas unidades:
+- **Wei**: La unidad más pequeña (devuelta por este método)
+- **Gwei**: 1 billón de wei (10^9), la unidad común para precios de gas
+- **Ether**: 10^18 wei, la unidad principal de moneda
+
+Para interfaces de usuario, convertir el valor devuelto a Gwei generalmente proporciona un formato más legible. Por ejemplo, `0x1DCD65000` (8 Gwei) es más fácil de entender que 8,000,000,000 wei.
+
+### Ejemplo de Caso de Uso Común
+
+```javascript
+// Ejemplo de cálculo de costo de gas para una transferencia estándar
+const gasPrice = await provider.send('eth_gasPrice', []);
+const gasPriceInGwei = parseInt(gasPrice, 16) / 1e9;
+const standardTransferGas = 21000;
+const costInEth = (parseInt(gasPrice, 16) * standardTransferGas) / 1e18;
+```
+
+### Notas Importantes
+
+- En redes habilitadas con EIP-1559, este método devuelve un valor adecuado para transacciones legacy
+- Para transacciones EIP-1559, considere usar `eth_feeHistory` para determinar valores apropiados de `maxFeePerGas` y `maxPriorityFeePerGas`
+- Los precios de gas pueden fluctuar rápidamente durante períodos de alta actividad de red
+- Algunos proveedores pueden añadir sus propias estimaciones o ajustes a este valor
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="Calcular gas requerido para transacciones">eth_estimateGas</Link> - Estima el gas necesario para la ejecución de transacciones
+- <Link to="/docs/ethereum/core-methods/eth_feeHistory" title="Analizar datos históricos de tarifas">eth_feeHistory</Link> - Devuelve datos históricos de tarifas para estrategias avanzadas de tarifas
+- <Link to="/docs/ethereum/core-methods/eth_maxPriorityFeePerGas" title="Obtener tarifa de prioridad sugerida">eth_maxPriorityFeePerGas</Link> - Devuelve una tarifa de prioridad sugerida (propina) para transacciones EIP-1559

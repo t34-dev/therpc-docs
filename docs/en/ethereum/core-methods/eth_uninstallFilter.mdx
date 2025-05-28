@@ -1,0 +1,119 @@
+---
+title: eth_uninstallFilter - Remove Ethereum Filters | Blockchain API Methods
+description: Learn how to use eth_uninstallFilter to clean up unused filters in Ethereum - avoid resource leaks and optimize node performance by properly removing filters that are no longer needed.
+keywords: eth_uninstallFilter, ethereum filter cleanup, blockchain filter removal, RPC filter management, ethereum resource optimization, remove event filter, clean up blockchain listeners, filter deletion, event filter management, node resource management, ethereum memory optimization, blockchain polling, filter timeout, ethereum api filter, ethereum event handling
+---
+
+# eth_uninstallFilter
+
+The `eth_uninstallFilter` method removes a filter with the given ID. It should be used when a filter is no longer needed. While filters automatically timeout after a period of inactivity (typically 5 minutes), it's best practice to manually uninstall filters to properly manage resources.
+
+## Use Cases
+
+- Properly terminating event listeners when monitoring is complete
+- Cleaning up resources in dApps to prevent memory leaks
+- Managing the complete filter lifecycle from creation to removal
+- Optimizing node resources by removing unused filters
+- Reducing API quota usage with service providers
+- Preventing unexpected filter timeout errors
+- Cleaning up after data collection tasks finish
+- Implementing proper application shutdown procedures
+
+## Method Details
+
+This method takes a filter ID and removes the corresponding filter.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_uninstallFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterId',
+      required: true,
+      type: 'string',
+      desc: "The filter ID to uninstall",
+      value: "0x1a4b0d22dbb7284cf485c969d2857ab3"
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'boolean',
+      desc: "true if the filter was successfully uninstalled, false otherwise"
+    }
+  ]}
+  getParams={(fields) => [fields?.filterId || null]}
+/>
+
+### Response Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": true
+}
+```
+
+### Return Values
+
+- **true**: The filter was successfully uninstalled
+- **false**: The filter could not be found or was already uninstalled
+
+### Why Uninstall Filters
+
+While most Ethereum nodes automatically expire filters after a period of inactivity (typically 5 minutes), there are several reasons to explicitly uninstall filters:
+
+1. **Resource Management**: Active filters consume memory and processing resources on the node
+2. **Filter Limits**: Some nodes implement limits on the number of active filters per connection
+3. **API Usage Optimization**: Using fewer resources may reduce API costs with commercial providers
+4. **Application Control**: Explicit lifecycle management allows your application to know exactly when a filter is active
+5. **Prevent Timeouts**: Avoids unexpected "filter not found" errors when a filter times out automatically
+6. **Clean Shutdown**: Allows your application to properly clean up when terminating
+
+### Error Handling
+
+When uninstalling filters, you might encounter the following scenarios:
+
+1. **Filter Already Removed**:
+   - Attempting to uninstall a filter that was already uninstalled returns `false`
+   - No error is thrown
+
+2. **Invalid Filter ID**:
+   - Attempting to uninstall a filter with an invalid ID format may result in an error
+   - Response will contain an error object instead of a result
+
+3. **Filter Expired**:
+   - If a filter automatically expired due to inactivity, uninstalling it returns `false`
+   - No error is thrown
+
+### Best Practices
+
+1. **Always clean up filters** when they are no longer needed
+2. **Handle connection interruptions** by tracking active filters and reinstalling them
+3. **Implement timeout handling** for when filters expire automatically
+4. **Add uninstall calls** to application shutdown procedures
+5. **Check the return value** to verify successful uninstallation
+6. **Keep track of active filters** in your application state
+7. **Don't assume uninstall will succeed** - verify the result
+8. **Implement retry logic** for critical filter removal
+
+### Filter Types
+
+This method works with all filter types created by:
+
+1. `eth_newFilter` - Event log filters
+2. `eth_newBlockFilter` - New block notification filters
+3. `eth_newPendingTransactionFilter` - Pending transaction filters
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Create filters to monitor smart contract events">eth_newFilter</Link> - Create a filter for event logs
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Poll for new events matching your filter criteria">eth_getFilterChanges</Link> - Retrieve new logs since last poll
+- <Link to="/docs/ethereum/core-methods/eth_getFilterLogs" title="Get all historical logs for your filter">eth_getFilterLogs</Link> - Get all logs matching filter criteria
+- <Link to="/docs/ethereum/core-methods/eth_newBlockFilter" title="Monitor for new blocks in the blockchain">eth_newBlockFilter</Link> - Create filter for new blocks
+- <Link to="/docs/ethereum/core-methods/eth_newPendingTransactionFilter" title="Track new pending transactions in the mempool">eth_newPendingTransactionFilter</Link> - Create filter for pending transactions

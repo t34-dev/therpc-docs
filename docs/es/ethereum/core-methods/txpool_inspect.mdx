@@ -1,0 +1,125 @@
+---
+title: txpool_inspect - Obtener Resumen del Pool de Transacciones | Métodos API de Ethereum
+description: Aprende a usar el método txpool_inspect para obtener una visión general legible de las transacciones pendientes y en cola en el mempool de tu nodo Ethereum para monitoreo y diagnóstico.
+keywords: txpool_inspect, pool de transacciones, transacciones pendientes, transacciones en cola, mempool, txpool ethereum, geth, resumen de transacciones, mempool ethereum, inspección de tx, transacciones blockchain, visión general del pool de memoria, análisis de tx pendientes, cola de transacciones, monitoreo de precio de gas, seguimiento de nonce, inspección de transacciones ethereum
+---
+
+# txpool_inspect
+
+El método `txpool_inspect` devuelve un resumen textual de todas las transacciones pendientes y en cola en el pool de transacciones. Este método es principalmente soportado por clientes Geth y proporciona una visión general legible para humanos de las transacciones esperando ser incluidas en bloques, sin los detalles completos de la transacción.
+
+## Casos de Uso
+
+- Monitoreo del estado del pool de transacciones para verificaciones de salud del nodo
+- Depuración de transacciones atascadas en carteras y aplicaciones
+- Análisis de precio de gas para envío óptimo de transacciones
+- Monitoreo y visualización de congestión de red
+- Verificación de reemplazo de transacciones (comprobar si una aceleración funcionó)
+- Investigación y análisis de MEV (Valor Extraíble del Minero)
+- Diagnóstico de operación de nodos en configuraciones de infraestructura
+- Identificación de patrones de transacciones durante alta actividad de red
+- Monitoreo del pool de transacciones para direcciones específicas
+- Observación de brechas de nonce que podrían impedir la confirmación de transacciones
+
+## Detalles del Método
+
+Este método no requiere parámetros y devuelve un resumen estructurado del pool de transacciones.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'txpool_inspect',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	disabled={true}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'Objeto que contiene resúmenes de transacciones pendientes y en cola',
+			fields: [
+				{
+					id: 'pending',
+					type: 'object',
+					desc: 'Mapa de transacciones pendientes agrupadas por dirección del remitente y nonce',
+				},
+				{
+					id: 'queued',
+					type: 'object',
+					desc: 'Mapa de transacciones en cola agrupadas por dirección del remitente y nonce',
+				},
+			],
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"pending": {
+			"0x0216d5032f356960cd3749c31ab34eeff21b3395": {
+				"806": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984: 0 wei + 21000 gas × 8000000000 wei"
+			},
+			"0x0239769a1adf4def9f1b1e5e2ab4d89c3cc5ba59": {
+				"4": "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2: 0 wei + 400000 gas × 10000000000 wei"
+			}
+		},
+		"queued": {
+			"0x00e4d0b50e4294f9b9eb2381b0ef33745f5a0a69": {
+				"7": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2: 0 wei + 21000 gas × 24200000000 wei"
+			},
+			"0x0216d5032f356960cd3749c31ab34eeff21b3395": {
+				"807": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D: 0 wei + 189000 gas × 3000000000 wei"
+			}
+		}
+	}
+}
+```
+
+### Entendiendo la Respuesta
+
+La respuesta está estructurada de la siguiente manera:
+
+1. **Transacciones Pendientes**: Transacciones que están listas para ser incluidas en los próximos bloques.
+
+- Organizadas por dirección del remitente y nonce
+- Cada entrada muestra: `direcciónDestinatario: valor + límiteGas × precioGas`
+
+2. **Transacciones en Cola**: Transacciones que aún no pueden ser ejecutadas (por ejemplo, debido a una brecha de nonce).
+
+- Misma estructura que las transacciones pendientes
+- Normalmente tienen nonces futuros u otras restricciones de ejecución
+
+### Categorías de Estado de Transacciones
+
+- **Pendientes**: Transacciones elegibles para inclusión en el próximo bloque
+- Tienen nonces válidos (iguales al nonce actual del remitente)
+- Cumplen con todos los demás criterios de validez
+
+- **En Cola**: Transacciones aún no elegibles para ejecución
+- Pueden tener nonces futuros (más altos que el nonce actual del remitente + conteo pendiente)
+- Pueden estar esperando otras transacciones del mismo remitente
+- Pueden tener otras restricciones que impiden la ejecución inmediata
+
+### Notas Importantes
+
+- Este método es principalmente soportado por clientes Geth
+- No todas las implementaciones de clientes Ethereum soportan el espacio de nombres txpool
+- Durante alta congestión de red, la respuesta puede ser muy grande
+- El formato textual está diseñado para legibilidad humana más que para procesamiento programático
+- Para datos de transacción más detallados, considera usar `txpool_content` en su lugar
+- Las transacciones pendientes pueden no ser incluidas inmediatamente en bloques a pesar de ser válidas
+- El pool de transacciones es dinámico y cambia con cada nuevo bloque y transacción entrante
+- Algunos clientes pueden limitar el número de transacciones mostradas en la respuesta
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/txpool_status" title="Obtener un conteo de transacciones en el mempool">txpool_status</Link> - Devuelve el número de transacciones en el pool
+- <Link to="/docs/ethereum/core-methods/txpool_content" title="Obtener información detallada sobre todas las transacciones en el mempool">txpool_content</Link> - Devuelve datos completos de transacciones del pool

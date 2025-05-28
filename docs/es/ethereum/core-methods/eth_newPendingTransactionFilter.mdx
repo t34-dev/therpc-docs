@@ -1,0 +1,125 @@
+---
+title: eth_newPendingTransactionFilter - Monitorear Transacciones Pendientes | Métodos API de Ethereum
+description: Aprenda a usar eth_newPendingTransactionFilter para monitorear el mempool de Ethereum en tiempo real - esencial para el seguimiento de transacciones, la optimización del precio del gas y el análisis de mercado.
+keywords: eth_newPendingTransactionFilter, mempool ethereum, transacciones pendientes, monitoreo de transacciones, análisis de mempool, seguimiento de transacciones, optimización de precio de gas, pool de transacciones ethereum, transacciones no confirmadas, cola de blockchain, monitoreo tx, mempool tx, análisis de tarifas de gas, tx pendiente, tx pendiente ethereum, monitoreo blockchain, pool de espera de transacciones
+---
+
+# eth_newPendingTransactionFilter
+
+El método `eth_newPendingTransactionFilter` crea un filtro en el nodo para notificar cuando nuevas transacciones pendientes se reciben en el mempool. Esto permite a las aplicaciones monitorear el mempool de transacciones sin sondear continuamente, ayudándole a rastrear transacciones antes de que se incluyan en los bloques.
+
+## Casos de Uso
+
+- Monitoreo y análisis del mempool para investigación
+- Detección de front-running en aplicaciones de trading
+- Optimización del precio del gas para envío de transacciones
+- Seguimiento de confirmación de transacciones en billeteras
+- Análisis de sentimiento del mercado para estrategias de trading
+- Monitoreo de trading DEX para oportunidades de arbitraje
+- Monitoreo de congestión de red para estimación de tarifas de gas
+- Investigación y explotación de MEV (Valor Extraíble del Minero)
+- Detección de grandes transferencias de tokens antes de la confirmación
+- Monitoreo de interacciones con contratos inteligentes en tiempo real
+
+## Detalles del Método
+
+Este método no toma parámetros y devuelve un ID de filtro que puede usarse con `eth_getFilterChanges` para consultar nuevas transacciones pendientes.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_newPendingTransactionFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[]}
+  returns={[
+    {
+      id: 'result',
+      type: 'string',
+      desc: "ID del filtro (cadena hexadecimal) usado para consultar con eth_getFilterChanges"
+    }
+  ]}
+  getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x4b8a92d14d798e3be84ffa20c5d5b2e2"
+}
+```
+
+### Cómo Funcionan los Filtros de Transacciones Pendientes
+
+1. Cuando crea un filtro de transacciones pendientes, el nodo Ethereum le asigna un ID único
+2. El nodo rastrea qué transacciones ya ha reportado a su filtro
+3. Cuando consulta usando `eth_getFilterChanges`, devuelve hashes de transacciones para cualquier nueva transacción pendiente desde su última consulta
+4. Si no se han recibido nuevas transacciones, devuelve un array vacío
+
+### Formato del Valor de Retorno
+
+Al consultar con `eth_getFilterChanges`, este filtro devuelve un array de hashes de transacciones:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    "0xc2f1070ef9d620c0cb1a90656a1a4a6c7d74fb99cb2a000f935e8f99d1ca3351",
+    "0x924a1f97deed4a9e1d76429139d7c2a41c8fabe3c96f2818ad3591a5c5ecf2cd",
+    "0x6611d7717c853b7548215f5cb3a04956ea6578b756e4b3d62c2f1a397e3429cc"
+  ]
+}
+```
+
+### Recuperación de Datos de Transacciones
+
+El filtro solo devuelve hashes de transacciones. Para obtener los datos completos de la transacción, debe realizar llamadas adicionales usando:
+
+- `eth_getTransactionByHash` - Obtener los detalles de una transacción usando su hash
+
+### Consideraciones Importantes
+
+1. **Alto Volumen**: El mempool de Ethereum puede ser extremadamente activo, produciendo cientos de transacciones por minuto
+2. **Expiración de Filtros**: Los filtros expiran después de un período de inactividad (normalmente alrededor de 5 minutos)
+3. **Límites de Tasa**: Debido al alto volumen, sondear con demasiada frecuencia podría llevar a limitaciones de tasa
+4. **Transacciones Perdidas**: Las transacciones pendientes de muy corta duración podrían perderse entre consultas
+5. **Intensivo en Recursos**: Este filtro puede consumir muchos recursos tanto para el cliente como para el nodo
+6. **No Para Producción**: Muchas aplicaciones de producción deberían usar suscripciones WebSocket en su lugar
+7. **Estado de Transacción**: Las transacciones pendientes podrían nunca ser minadas o podrían ser reemplazadas
+8. **Implementación del Nodo**: Algunos nodos podrían limitar el número de transacciones pendientes que rastrean
+9. **Volumen de Datos**: Durante períodos de alta actividad, este filtro puede devolver cientos de transacciones por consulta
+10. **Privacidad de Transacción**: Algunos nodos pueden no revelar todas las transacciones pendientes en su mempool
+
+### Aplicaciones de Análisis de Mempool
+
+Monitorear transacciones pendientes puede revelar información valiosa:
+
+1. **Tendencias de Precio de Gas**: Analizar las tarifas actuales del mercado para tarifas de transacción
+2. **Congestión de Red**: Evaluar la carga actual de la red
+3. **Movimientos de Tokens**: Detectar grandes transferencias de tokens antes de que sean confirmadas
+4. **Interacciones con Contratos Inteligentes**: Monitorear interacciones con contratos específicos
+5. **Oportunidades de Arbitraje**: Detectar discrepancias de precios entre exchanges
+6. **Sentimiento del Mercado**: Evaluar la actividad del mercado durante períodos volátiles
+7. **Protección contra Front-running**: Monitorear transacciones que podrían hacer front-running a las suyas
+
+### Comparación con Otros Métodos de Notificación
+
+| Método                           | Propósito                                 | Resultados                     | Mejor Para                              |
+|----------------------------------|-----------------------------------------|--------------------------------|------------------------------------------|
+| `eth_newPendingTransactionFilter`| Notifica sobre transacciones pendientes   | Array de hashes de transacciones | Monitoreo de mempool                    |
+| `eth_newBlockFilter`             | Notifica sobre nuevos bloques             | Array de hashes de bloques     | Monitoreo a nivel de bloque             |
+| `eth_newFilter`                  | Notifica sobre eventos de log específicos | Array de objetos de log        | Aplicaciones basadas en eventos         |
+| WebSocket `eth_subscribe`        | Notificaciones push (sin sondeo)          | Varía según tipo de suscripción | Aplicaciones en tiempo real             |
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Consultar nuevas transacciones pendientes desde la última verificación">eth_getFilterChanges</Link> - Recuperar nuevos hashes de transacciones desde la última consulta
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Limpiar filtros cuando ya no sean necesarios">eth_uninstallFilter</Link> - Eliminar un filtro cuando ya no sea necesario
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Obtener información detallada de transacción usando hash">eth_getTransactionByHash</Link> - Obtener detalles de transacción por hash
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Crear filtros para eventos de contratos inteligentes">eth_newFilter</Link> - Crear un filtro para registros de eventos
+- <Link to="/docs/ethereum/core-methods/eth_newBlockFilter" title="Monitorear nuevos bloques en la blockchain">eth_newBlockFilter</Link> - Crear filtro para nuevos bloques

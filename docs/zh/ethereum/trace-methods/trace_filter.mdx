@@ -1,0 +1,337 @@
+---
+title: trace_filter - 查询以太坊交易追踪 | 以太坊 API 方法
+description: 学习如何使用 trace_filter 方法基于多种条件（包括地址、区块范围等）有效地搜索和过滤交易追踪。
+keywords: trace_filter, ethereum trace search, transaction filter, trace query, blockchain data, smart contract interactions, internal transactions, trace filtering, ethereum forensics, call filter, trace analysis, block range search, address filter, transaction monitoring, trace indexing, smart contract tracing, contract calls, function calls, value transfers, trace querying
+---
+
+# trace_filter
+
+`trace_filter` 方法允许您在一系列区块中搜索特定的追踪，可以通过各种条件过滤，如发送/接收地址、区块范围和追踪类型。这提供了一种强大的方式来分析特定合约或账户的区块链活动。
+
+## 使用场景
+
+- 查找特定地址的所有内部交易
+- 跟踪在交易日志中不可见的代币转移
+- 对合约交互和漏洞进行取证分析
+- 监控一系列区块中的特定合约调用
+- 审计合约到合约的交互以进行安全审查
+- 分析智能合约执行模式
+- 检测 MEV 和抢先交易活动
+- 跟踪 DeFi 协议之间的套利路径
+- 构建全面的区块浏览器
+- 验证 DeFi 应用程序中的复杂资金流动
+
+## 方法详情
+
+此方法根据指定的过滤条件检索交易追踪。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'trace_filter',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'filterParams',
+			required: true,
+			type: 'object',
+			desc: '过滤参数',
+			fields: [
+				{
+					id: 'fromBlock',
+					type: 'string',
+					desc: '起始区块（十六进制区块号或 "latest"、"earliest"、"pending"）',
+					value: '0x3d0000',
+				},
+				{
+					id: 'toBlock',
+					type: 'string',
+					desc: '结束区块（十六进制区块号或 "latest"、"earliest"、"pending"）',
+					value: '0x3d0100',
+				},
+				{
+					id: 'fromAddress',
+					type: 'array',
+					desc: '按发送者地址过滤追踪（地址字符串数组）',
+					value: ['0x8bbb73bcb5d553b5a556358d27625323fd781d37'],
+				},
+				{
+					id: 'toAddress',
+					type: 'array',
+					desc: '按接收者地址过滤追踪（地址字符串数组）',
+					value: ['0x6090a6e47849629b7245dfa1ca21d94cd15878ef'],
+				},
+				{
+					id: 'after',
+					type: 'integer',
+					desc: '在给定索引之后偏移追踪',
+					value: 1000,
+				},
+				{
+					id: 'count',
+					type: 'integer',
+					desc: '返回的最大追踪数量',
+					value: 100,
+				},
+			],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: '追踪对象数组',
+			fields: [
+				{
+					id: 'action',
+					type: 'object',
+					desc: '关于所采取行动的信息',
+					fields: [
+						{
+							id: 'callType',
+							type: 'string',
+							desc: '调用类型（例如，"call"、"delegatecall"、"staticcall"）',
+						},
+						{
+							id: 'from',
+							type: 'string',
+							desc: '发送者地址',
+						},
+						{
+							id: 'to',
+							type: 'string',
+							desc: '接收者地址',
+						},
+						{
+							id: 'gas',
+							type: 'string',
+							desc: '为执行的这部分提供的燃料',
+						},
+						{
+							id: 'input',
+							type: 'string',
+							desc: '调用数据输入',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: '以 wei 为单位转移的价值',
+						},
+						{
+							id: 'init',
+							type: 'string',
+							desc: '构造函数初始化代码（对于 "create" 追踪）',
+						},
+						{
+							id: 'address',
+							type: 'string',
+							desc: '合约地址（对于 "suicide" 追踪）',
+						},
+						{
+							id: 'refundAddress',
+							type: 'string',
+							desc: '接收退款的地址（对于 "suicide" 追踪）',
+						},
+						{
+							id: 'balance',
+							type: 'string',
+							desc: '销毁时合约的余额（对于 "suicide" 追踪）',
+						},
+					],
+				},
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: '包含此追踪的区块的哈希',
+				},
+				{
+					id: 'blockNumber',
+					type: 'integer',
+					desc: '包含此追踪的区块号',
+				},
+				{
+					id: 'result',
+					type: 'object',
+					desc: '调用结果',
+					fields: [
+						{
+							id: 'gasUsed',
+							type: 'string',
+							desc: '使用的燃料量',
+						},
+						{
+							id: 'output',
+							type: 'string',
+							desc: '调用的输出数据',
+						},
+						{
+							id: 'address',
+							type: 'string',
+							desc: '创建的合约地址（对于 "create" 追踪）',
+						},
+						{
+							id: 'code',
+							type: 'string',
+							desc: '部署的合约代码（对于 "create" 追踪）',
+						},
+					],
+				},
+				{
+					id: 'subtraces',
+					type: 'integer',
+					desc: '子追踪数量',
+				},
+				{
+					id: 'traceAddress',
+					type: 'array',
+					desc: '调用树中追踪位置的地址路径',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: '被追踪的交易的哈希',
+				},
+				{
+					id: 'transactionPosition',
+					type: 'integer',
+					desc: '交易在区块中的索引位置',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: '追踪类型（call、create、suicide）',
+				},
+				{
+					id: 'error',
+					type: 'string',
+					desc: '如果调用失败的错误消息（可选）',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.filterParams || {}]}
+/>
+
+### 过滤参数
+
+| 参数 | 类型 | 描述 |
+| --- | --- | --- |
+| `fromBlock` | string | 起始区块号（十六进制）或标签（"latest"、"earliest"、"pending"） |
+| `toBlock` | string | 结束区块号（十六进制）或标签（"latest"、"earliest"、"pending"） |
+| `fromAddress` | array | 可选的按发送者地址过滤的数组 |
+| `toAddress` | array | 可选的按接收者地址过滤的数组 |
+| `after` | integer | 可选的分页参数 - 在给定索引之后偏移追踪 |
+| `count` | integer | 可选的返回的最大追踪数量 |
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x8bbb73bcb5d553b5a556358d27625323fd781d37",
+				"to": "0x6090a6e47849629b7245dfa1ca21d94cd15878ef",
+				"gas": "0x12a94",
+				"input": "0x0000000000000000000000000000000000000000000000000000000000000000",
+				"value": "0x0"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3928366,
+			"result": {
+				"gasUsed": "0xd979",
+				"output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+			},
+			"subtraces": 1,
+			"traceAddress": [],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		}
+	]
+}
+```
+
+### 过滤策略
+
+不同的过滤组合可用于回答特定问题：
+
+**查找对特定合约的所有调用：**
+```json
+{
+  "toAddress": ["0x1234567890123456789012345678901234567890"]
+}
+```
+
+**查找合约的所有内部交易：**
+```json
+{
+  "fromAddress": ["0x1234567890123456789012345678901234567890"]
+}
+```
+
+**查找两个特定地址之间的交互：**
+```json
+{
+  "fromAddress": ["0x1234567890123456789012345678901234567890"],
+  "toAddress": ["0xabcdef0123456789abcdef0123456789abcdef01"]
+}
+```
+
+**分析特定区块范围内的活动：**
+```json
+{
+  "fromBlock": "0x429d3b",
+  "toBlock": "0x429d3d"
+}
+```
+
+### 分页
+
+对于大型结果集，使用 `after` 和 `count` 参数进行分页：
+
+1. 第一个请求：`{ "after": 0, "count": 100, ... }`
+2. 下一个请求：`{ "after": 100, "count": 100, ... }`
+3. 继续按 `count` 值递增 `after`
+
+### 性能考虑
+
+- 在大范围区块上进行过滤可能会消耗大量资源
+- 始终指定必要的最窄区块范围
+- 使用地址过滤来减少结果集大小
+- 考虑将大型查询拆分为较小的区块范围
+- 对于重度使用，考虑运行您自己的带有追踪索引的存档节点
+
+### 追踪类型
+
+该方法返回不同类型的追踪：
+
+- **call**：对地址的消息调用
+- **create**：合约创建
+- **suicide**：合约自毁操作（也称为 SELFDESTRUCT）
+
+### 重要注意事项
+
+- 此方法需要在以太坊节点上启用追踪 API
+- 并非所有以太坊客户端都支持追踪过滤（主要是带有 `--gcmode=archive` 的 Geth 和 OpenEthereum/Nethermind）
+- 由于资源密集性，公共 RPC 提供商通常会限制或禁用追踪方法
+- 过滤器仅适用于存储的追踪，而不适用于日志事件（使用 eth_getLogs 获取事件日志）
+- 对于宽区块范围或流行地址，响应大小可能非常大
+- RPC 提供商可能会施加区块范围限制（通常限制为几千个区块）
+- 在非存档节点上调用此方法将返回不完整的结果
+- 追踪过滤比常规交易查询消耗更多资源
+- 与事件不同，追踪不按主题索引，而仅按地址和区块号索引
+- 由于燃料不足或回退而失败的交易仍会产生直到失败点的追踪
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/trace-methods/trace_transaction" title="获取特定交易的详细执行追踪">trace_transaction</Link> - 检索单个交易的追踪
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="获取区块中所有交易的执行追踪">trace_block</Link> - 检索区块中所有交易的追踪
+- <Link to="/docs/ethereum/trace-methods/trace_call" title="追踪调用而不创建交易">trace_call</Link> - 执行并追踪调用而不创建交易
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="基于过滤条件查询事件日志">eth_getLogs</Link> - 过滤事件日志的替代方法
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="获取交易的低级 EVM 执行详情">debug_traceTransaction</Link> - 获取交易的更低级执行详情

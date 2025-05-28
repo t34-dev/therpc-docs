@@ -1,0 +1,133 @@
+---
+title: eth_getStorageAt - 获取合约存储数据 | 以太坊 API 方法
+description: 了解如何使用 eth_getStorageAt 方法从以太坊智能合约访问原始存储数据。包括存储布局解释和实用示例。
+keywords: eth_getStorageAt, 合约存储, 以太坊存储, 智能合约状态, 存储槽, solidity 存储, 区块链数据访问
+---
+
+# eth_getStorageAt
+
+`eth_getStorageAt` 方法返回给定智能合约地址的特定存储位置存储的值。这个低级方法允许直接访问合约的状态变量，对合约分析和调试至关重要。
+
+## 使用场景
+
+- 智能合约调试和分析
+- 代币余额验证
+- 协议治理检查
+- 代理实现验证
+- 合约状态审计
+- 存储布局验证
+- DAO 提案状态检查
+- 合约升级验证
+
+## 方法详情
+
+此方法提供对合约存储中任何存储槽的原始访问。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getStorageAt',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: '智能合约的地址',
+			value: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', // UNI token contract
+		},
+		{
+			id: 'position',
+			required: true,
+			type: 'string',
+			desc: '存储位置的整数（十六进制字符串）',
+			value: '0x0', // First storage slot
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '十六进制格式的区块号或区块标签',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '指定存储位置的值（32 字节，十六进制编码）',
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.position || null, fields?.blockNumber || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x000000000000000000000000000000000000000000000000000000000000000a"
+}
+```
+
+### 理解 Solidity 存储布局
+
+Solidity 的存储布局遵循特定规则：
+
+1. **状态变量**：从槽 0 开始按顺序存储
+
+```solidity
+// 存储槽 0
+uint256 firstVariable;
+// 存储槽 1
+address secondVariable;
+```
+
+2. **映射**：槽本身不包含数据，但作为计算位置的种子
+
+```solidity
+// 存储槽 2（空）
+mapping(address => uint256) balances;
+// 值存储在 keccak256(abi.encode(userAddress, 2))
+```
+
+3. **动态数组**：槽包含数组长度，数据从 `keccak256(slot)` 开始
+
+```solidity
+// 存储槽 3 存储长度
+uint256[] myArray;
+// 值存储在 keccak256(3) + index
+```
+
+4. **小于 32 字节的变量**：多个变量打包在一起
+
+```solidity
+// 都在存储槽 4
+uint128 a;
+uint64 b;
+uint64 c;
+```
+
+### 常见存储槽
+
+- **ERC20 总供应量**：通常在槽 0 或 2
+- **ERC20 余额映射**：通常在槽 1 或 3
+- **ERC20 授权映射**：通常在槽 2 或 4
+- **代理实现地址**：对于 EIP-1967 代理，在 `0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc`
+
+### 存储检查工具
+
+对于复杂合约，考虑使用专用工具：
+
+- **Slither**：可以生成存储布局的静态分析器
+- **Tenderly**：带有存储检查的可视化调试器
+- **Hardhat**：带有存储访问的控制台调试
+- **Etherscan**：有时提供已验证合约的存储布局
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getCode" title="检索智能合约字节码">eth_getCode</Link> - 获取特定地址部署的字节码
+- <Link to="/docs/ethereum/core-methods/eth_getProof" title="生成账户数据的默克尔证明">eth_getProof</Link> - 检索账户和存储值的加密证明

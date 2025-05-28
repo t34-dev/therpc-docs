@@ -1,0 +1,195 @@
+---
+title: eth_getTransactionReceipt - 检索交易结果 | 以太坊 API 方法
+description: 学习如何使用 eth_getTransactionReceipt 方法获取交易执行结果，包括状态、消耗的燃料、日志和合约部署信息。
+keywords: eth_getTransactionReceipt, 交易收据, 交易状态, 以太坊日志, 燃料使用, 智能合约事件, 交易结果
+---
+
+# eth_getTransactionReceipt
+
+`eth_getTransactionReceipt` 方法返回交易的收据，其中包含关于交易执行结果的关键信息，包括成功或失败、使用的燃料、生成的事件（日志）和部署的合约地址。收据只有在交易被包含在区块中后才可用。
+
+## 使用场景
+
+- 验证交易成功或失败
+- 监控燃料消耗
+- 合约部署验证
+- 事件/日志提取
+- 转账确认
+- 智能合约状态变更验证
+- 交易费用计算
+- 交易最终确认
+
+## 方法详情
+
+该方法使用交易的唯一哈希返回交易收据对象。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getTransactionReceipt',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'hash',
+			required: true,
+			type: 'string',
+			desc: '交易的哈希值',
+			value: '0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0', // Example significant transaction
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: '交易收据对象，如果交易处于待处理状态或未找到则为 null',
+			fields: [
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: '包含此交易的区块哈希',
+				},
+				{
+					id: 'blockNumber',
+					type: 'string',
+					desc: '包含此交易的区块号（十六进制）',
+				},
+				{
+					id: 'contractAddress',
+					type: 'string',
+					desc: '创建的合约地址（如果是合约创建），否则为 null',
+				},
+				{
+					id: 'cumulativeGasUsed',
+					type: 'string',
+					desc: '区块中截至并包括此交易的总燃料使用量（十六进制）',
+				},
+				{
+					id: 'effectiveGasPrice',
+					type: 'string',
+					desc: '每单位燃料实际支付的燃料价格（十六进制）',
+				},
+				{
+					id: 'from',
+					type: 'string',
+					desc: '发送者地址',
+				},
+				{
+					id: 'gasUsed',
+					type: 'string',
+					desc: '此特定交易使用的燃料（十六进制）',
+				},
+				{
+					id: 'logs',
+					type: 'array',
+					desc: '此交易生成的日志对象数组',
+				},
+				{
+					id: 'logsBloom',
+					type: 'string',
+					desc: '供轻客户端快速检索相关日志的布隆过滤器',
+				},
+				{
+					id: 'status',
+					type: 'string',
+					desc: '交易状态：1（成功）或 0（失败）',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					desc: '接收者地址，合约创建交易则为 null',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: '交易哈希',
+				},
+				{
+					id: 'transactionIndex',
+					type: 'string',
+					desc: '交易在区块中的索引位置',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: '交易类型（0=传统, 1=EIP2930, 2=EIP1559）',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.hash || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"blockHash": "0x5f35e7deaad2ff7a25c46b7df81a5d834f6c2725e49e868402f6958e979aaa5a",
+		"blockNumber": "0x1197fa5",
+		"contractAddress": null,
+		"cumulativeGasUsed": "0x2eac11",
+		"effectiveGasPrice": "0xb4c7a080",
+		"from": "0x95222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+		"gasUsed": "0x860a",
+		"logs": [
+			{
+				"address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+				"topics": [
+					"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+					"0x00000000000000000000000095222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+					"0x00000000000000000000000088e6a0c2ddd26feeb64f039a2c41296fcb3f5640"
+				],
+				"data": "0x00000000000000000000000000000000000000000000000000000000007a1200",
+				"blockNumber": "0x1197fa5",
+				"transactionHash": "0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0",
+				"transactionIndex": "0xdb",
+				"blockHash": "0x5f35e7deaad2ff7a25c46b7df81a5d834f6c2725e49e868402f6958e979aaa5a",
+				"logIndex": "0x133",
+				"removed": false
+			}
+		],
+		"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000020000000000000000000800000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000",
+		"status": "0x1",
+		"to": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+		"transactionHash": "0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0",
+		"transactionIndex": "0xdb",
+		"type": "0x2"
+	}
+}
+```
+
+### 理解状态代码
+
+- `0x1`：交易成功
+- `0x0`：交易失败（被回滚）
+
+### 交易收据中的关键字段
+
+- **status**：表示交易成功或失败
+- **contractAddress**：包含新部署合约的地址（常规交易则为 null）
+- **gasUsed**：交易实际消耗的燃料量
+- **logs**：交易执行期间发出的事件
+- **effectiveGasPrice**：每单位燃料实际支付的价格
+
+### 常见事件签名
+
+- ERC20 转账: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`
+- ERC20 授权: `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925`
+- ERC721 转账: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` (与 ERC20 相同)
+
+### 重要说明
+
+- 交易收据仅在交易被包含在区块中后才可用
+- 收据提供交易的最终状态（成功或失败）
+- 对于合约部署，新合约地址包含在收据中
+- 事件日志可用于跟踪由交易触发的状态变更
+- 收据中的燃料使用量提供实际燃料消耗（用于费用计算）
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="查看交易详情和参数">eth_getTransactionByHash</Link> - 使用交易的唯一哈希获取完整的交易数据
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="过滤和检索区块链事件">eth_getLogs</Link> - 基于地址和主题过滤器搜索事件日志

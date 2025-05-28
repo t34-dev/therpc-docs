@@ -1,0 +1,133 @@
+---
+title: API अवलोकन | Ethereum JSON-RPC तकनीकी दस्तावेज़ीकरण
+description: TheRPC API आर्किटेक्चर का व्यापक तकनीकी अवलोकन, जिसमें JSON-RPC 2.0 विनिर्देश, अनुरोध प्रारूप, प्रमाणीकरण, प्रतिक्रिया संरचनाएं और त्रुटि नियंत्रण शामिल हैं
+keywords: json rpc overview, api architecture, blockchain api technical, ethereum api specification, json-rpc 2.0, blockchain communication, ethereum rpc protocol, web3 api structure
+---
+
+# API अवलोकन
+
+## आर्किटेक्चर
+
+TheRPC API, JSON-RPC 2.0 विनिर्देश का पालन करता है और प्रदान करता है:
+
+- मानक HTTP और WebSocket एंडपॉइंट
+- API कुंजियों के माध्यम से प्रमाणीकरण
+- एकीकृत प्रतिक्रिया प्रारूप
+- क्रॉस-नेटवर्क संगतता
+
+## संचार प्रोटोकॉल
+
+### HTTP एंडपॉइंट
+
+एकल अनुरोधों और सरल एकीकरण के लिए सबसे अच्छा। हमारे <Link to="/docs/ethereum/tools/curl" title="HTTP/Curl examples for Ethereum API integration">HTTP/Curl गाइड</Link> में उदाहरण देखें।
+
+```
+https://YOUR_API_ENDPOINT
+```
+
+### WebSocket एंडपॉइंट
+
+सदस्यताओं और रीयल-टाइम डेटा के लिए आदर्श। सदस्यता उदाहरणों के लिए <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Ethereum subscription method for real-time blockchain events">eth_subscribe</Link> देखें।
+
+```
+wss://YOUR_API_ENDPOINT
+```
+
+## JSON-RPC प्रारूप
+
+### अनुरोध संरचना
+
+सभी API कॉल JSON-RPC 2.0 प्रारूप का पालन करते हैं। हमारे <Link to="/docs/ethereum/basic-operations" title="Guide to common Ethereum blockchain operations">मूल संचालन गाइड</Link> में पूर्ण उदाहरण देखें:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"method": "eth_blockNumber",
+	"params": [],
+	"id": 1
+}
+```
+
+आवश्यक फ़ील्ड:
+
+- `jsonrpc`: संस्करण पहचानकर्ता (हमेशा "2.0")
+- `method`: कॉल करने के लिए RPC विधि (देखें <Link to="/docs/ethereum/all-methods" title="Complete list of available Ethereum API methods">उपलब्ध विधियां</Link>)
+- `params`: पैरामीटर्स की सरणी (खाली हो सकती है)
+- `id`: अनुरोध पहचानकर्ता
+
+### प्रतिक्रिया प्रारूप
+
+सभी प्रतिक्रियाएँ एक सुसंगत संरचना का पालन करती हैं:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x..."
+}
+```
+
+या त्रुटि के मामले में:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"error": {
+		"code": -32600,
+		"message": "Invalid Request"
+	}
+}
+```
+
+## प्रमाणीकरण
+
+सभी अनुरोधों के लिए प्राधिकरण हेडर में एक API कुंजी की आवश्यकता होती है। विस्तृत सेटअप के लिए हमारा <Link to="/docs/ethereum/authentication" title="Guide to securing your API access with authentication">प्रमाणीकरण गाइड</Link> देखें:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+## विधि श्रेणियां
+
+### मानक विधियां
+
+- **eth\_**: Ethereum प्रोटोकॉल विधियां (<Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Method to get the latest Ethereum block number">eth_blockNumber</Link>, <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Method to retrieve an account's ETH balance">eth_getBalance</Link>, आदि)
+- **net\_**: नेटवर्क स्थिति विधियां (<Link to="/docs/ethereum/core-methods/net_version" title="Method to get the current network ID">net_version</Link>)
+- **web3\_**: Web3 उपयोगिता विधियां (<Link to="/docs/ethereum/core-methods/web3_clientVersion" title="Method to get the Ethereum client version">web3_clientVersion</Link>)
+
+### उन्नत विधियां
+
+- **debug\_**: डीबगिंग क्षमताएं (<Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Method to trace an Ethereum transaction execution">debug_traceTransaction</Link>)
+- **trace\_**: लेनदेन ट्रेसिंग (<Link to="/docs/ethereum/trace-methods/trace_transaction" title="Method to get external calls made by a transaction">trace_transaction</Link>)
+- **txpool\_**: लेनदेन पूल जानकारी (<Link to="/docs/ethereum/core-methods/txpool_status" title="Method to get pending transaction statistics">txpool_status</Link>)
+
+## त्रुटि नियंत्रण
+
+आम त्रुटि कोड (विस्तृत त्रुटि नियंत्रण रणनीतियों के लिए <Link to="/docs/ethereum/faq" title="Frequently asked questions about Ethereum API usage">FAQ</Link> देखें):
+
+- `-32700`: पार्स त्रुटि
+- `-32600`: अमान्य अनुरोध
+- `-32601`: विधि नहीं मिली
+- `-32602`: अमान्य पैरामीटर्स
+- `-32603`: आंतरिक त्रुटि
+
+## कार्यान्वयन उदाहरण
+
+व्यावहारिक कार्यान्वयन उदाहरणों के लिए, हमारे भाषा-विशिष्ट गाइड देखें:
+
+- <Link to="/docs/ethereum/tools/javascript-typescript" title="JavaScript and TypeScript tools for Ethereum development">JavaScript/TypeScript गाइड</Link>
+- <Link to="/docs/ethereum/tools/python" title="Python tools and libraries for Ethereum development">Python गाइड</Link>
+- <Link to="/docs/ethereum/tools/curl" title="Direct HTTP request examples for Ethereum API">HTTP/Curl उदाहरण</Link>
+- हमारे <Link to="/docs/ethereum/tools/overview" title="Overview of all available Ethereum development tools">टूल्स और SDK</Link> अनुभाग में सभी उपलब्ध SDK देखें
+
+## रेट सीमाएँ
+
+अनुरोध सीमाओं और कोटा के बारे में जानकारी के लिए, हमारा <Link to="/docs/ethereum/rate-limits" title="Information about API usage limits and quotas">रेट सीमाएँ दस्तावेज़ीकरण</Link> देखें।
+
+## यह भी देखें
+
+- <Link to="/docs/ethereum/authentication" title="Guide to securing your API access with authentication">प्रमाणीकरण गाइड</Link> - विस्तृत प्रमाणीकरण जानकारी
+- <Link to="/docs/ethereum/all-methods" title="Complete list of available Ethereum API methods">उपलब्ध विधियां</Link> - पूर्ण विधि सूची
+- <Link to="/docs/ethereum/basic-operations" title="Guide to common Ethereum blockchain operations">मूल संचालन</Link> - सामान्य उपयोग पैटर्न
+- <Link to="/docs/ethereum/faq" title="Frequently asked questions about Ethereum API usage">FAQ</Link> - सामान्य प्रश्न और उत्तर

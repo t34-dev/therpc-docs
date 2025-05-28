@@ -1,0 +1,128 @@
+---
+title: web3_clientVersion - Obtener Versión del Cliente Ethereum | Métodos API de Ethereum
+description: Aprende a usar el método web3_clientVersion para identificar qué software cliente de Ethereum y versión está ejecutando tu nodo, útil para depuración y comprobaciones de compatibilidad.
+keywords: web3_clientVersion, cliente ethereum, versión del nodo, versión del cliente, nodo ethereum, web3, versión de geth, versión de erigon, versión de nethermind, versión de besu, openethereum, implementación de cliente, software de nodo, software ethereum, identificación de cliente, versión de nodo blockchain
+---
+
+# web3_clientVersion
+
+El método `web3_clientVersion` devuelve la versión actual del cliente Ethereum utilizado por el nodo. Este método es útil para identificar la implementación específica del cliente (como Geth, Erigon o Nethermind) y la versión para verificación de compatibilidad y propósitos de depuración.
+
+## Casos de Uso
+
+- Identificación de la implementación del cliente (Geth, OpenEthereum, Erigon, etc.)
+- Verificación de versiones de cliente para soporte de características específicas
+- Depuración de problemas y errores específicos de versión
+- Análisis de versiones de cliente para investigación del ecosistema
+- Asegurar compatibilidad con características avanzadas
+- Monitoreo de actualizaciones de cliente en infraestructura
+- Gestión y planificación de infraestructura de nodos
+- Detección de clientes desactualizados con vulnerabilidades de seguridad
+- Solución de problemas de comportamientos específicos de cliente
+- Adaptación del comportamiento de aplicaciones a clientes específicos
+
+## Detalles del Método
+
+Este método no requiere parámetros y devuelve una cadena que representa la versión del cliente.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'web3_clientVersion',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'La versión actual del cliente como una cadena',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "Geth/v1.12.0-stable-e501b3b0/linux-amd64/go1.20.2"
+}
+```
+
+### Entendiendo la Versión del Cliente
+
+La cadena de versión del cliente típicamente sigue un formato que incluye:
+
+1. **Nombre del Cliente**: El nombre de la implementación del cliente Ethereum (por ejemplo, Geth, OpenEthereum, Erigon)
+2. **Número de Versión**: La versión semántica del cliente
+3. **Detalles de Plataforma**: Información sobre el sistema operativo y arquitectura
+4. **Etiquetas Adicionales**: Etiquetas de compilación, hashes de commit u otros identificadores
+
+### Formatos Comunes de Cliente
+
+#### Geth
+
+```
+Geth/v1.12.0-stable-e501b3b0/linux-amd64/go1.20.2
+```
+
+- Cliente: Geth
+- Versión: 1.12.0
+- Compilación: stable-e501b3b0 (hash de commit)
+- Plataforma: linux-amd64
+- Versión de Go: 1.20.2
+
+#### OpenEthereum
+
+```
+OpenEthereum/v3.3.4-stable-12f36a38a-20210612/x86_64-linux-gnu/rustc1.52.1
+```
+
+- Cliente: OpenEthereum
+- Versión: 3.3.4
+- Compilación: stable-12f36a38a (hash de commit)
+- Fecha de compilación: 20210612
+- Plataforma: x86_64-linux-gnu
+- Versión de Rust: 1.52.1
+
+#### Erigon
+
+```
+erigon/v2.39.0-stable-a38ae579/linux-amd64/go1.19.6
+```
+
+- Cliente: Erigon
+- Versión: 2.39.0
+- Compilación: stable-a38ae579 (hash de commit)
+- Plataforma: linux-amd64
+- Versión de Go: 1.19.6
+
+#### Nethermind
+
+```
+Nethermind/v1.15.2/Linux/dotnet7.0.5
+```
+
+- Cliente: Nethermind
+- Versión: 1.15.2
+- Plataforma: Linux
+- Versión de .NET: 7.0.5
+
+### Notas Importantes
+
+- Este método es soportado por todas las implementaciones de clientes Ethereum
+- El formato exacto de la cadena de versión varía entre implementaciones de cliente
+- La respuesta puede ayudar a identificar compatibilidad de características y diferencias potenciales en comportamiento
+- Este método puede usarse para verificar que estás conectado al tipo de nodo esperado
+- El método es ligero y tiene impacto mínimo en el rendimiento del nodo
+- La versión del cliente no corresponde necesariamente a la versión del protocolo Ethereum
+- Para algunos servicios gestionados, la versión del cliente podría estar personalizada o modificada
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/net_version" title="Identificar a qué red Ethereum está conectado tu nodo">net_version</Link> - Devuelve el ID de red actual
+- <Link to="/docs/ethereum/core-methods/eth_protocolVersion" title="Obtener la versión del protocolo Ethereum soportada por tu nodo">eth_protocolVersion</Link> - Devuelve la versión actual del protocolo Ethereum

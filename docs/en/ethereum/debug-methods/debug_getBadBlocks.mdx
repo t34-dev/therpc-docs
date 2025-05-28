@@ -1,0 +1,191 @@
+---
+title: debug_getBadBlocks - Detect and Analyze Invalid Blocks in Ethereum | Ethereum API Methods
+description: Learn how to use the debug_getBadBlocks method to retrieve, analyze, and understand invalid blocks detected by your Ethereum node, essential for network operators and investigators of consensus issues.
+keywords: debug_getBadBlocks, ethereum invalid blocks, consensus error detection, bad blocks, blockchain validation, consensus violation, block verification, chain integrity, network debugging, fork detection, block validation failures, ethereum network issues, consensus flaws, ethereum debugging, block verification errors, node synchronization problems, ethereum fork analysis, rejected blocks, blockchain forensics, invalid state transitions, miner errors, ethereum client issues, block header validation, malformed blocks, block propagation issues
+---
+
+# debug_getBadBlocks
+
+The `debug_getBadBlocks` method returns a list of invalid blocks that have been observed and rejected by the Ethereum node. This method is particularly valuable for developers, network operators, and security researchers who need to detect, analyze, and understand consensus flaws or network inconsistencies.
+
+## Use Cases
+
+- Detect consensus issues and protocol violations in the network
+- Analyze fork occurrences and their underlying causes
+- Debug node synchronization problems and reorg-related issues
+- Validate blockchain integrity across different clients
+- Monitor network health and identify potential attacks
+- Investigate chain reorganizations and their patterns
+- Diagnose client-specific validation issues
+- Audit block validation logic in client implementations
+- Identify malicious block producers and their patterns
+- Research network partition incidents
+
+## Method Details
+
+This method does not require any parameters and returns information about any invalid blocks detected by the node.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'debug_getBadBlocks',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: 'An array of invalid blocks with detailed information',
+			fields: [
+				{
+					id: 'hash',
+					type: 'string',
+					desc: 'The hash of the invalid block',
+				},
+				{
+					id: 'block',
+					type: 'object',
+					desc: 'The block object with full details',
+					fields: [
+						{
+							id: 'baseFeePerGas',
+							type: 'string',
+							desc: 'The base fee per gas in the block (post-EIP-1559)',
+						},
+						{
+							id: 'difficulty',
+							type: 'string',
+							desc: 'The difficulty level of the block',
+						},
+						{
+							id: 'extraData',
+							type: 'string',
+							desc: 'Additional data included in the block',
+						},
+						{
+							id: 'gasLimit',
+							type: 'string',
+							desc: 'The maximum gas allowed in the block',
+						},
+						{
+							id: 'gasUsed',
+							type: 'string',
+							desc: 'Total gas used by all transactions in the block',
+						},
+						{
+							id: 'miner',
+							type: 'string',
+							desc: 'The address of the miner who mined the block',
+						},
+						{
+							id: 'transactions',
+							type: 'array',
+							desc: 'Array of transaction objects in the block',
+						},
+					],
+				},
+				{
+					id: 'rlp',
+					type: 'string',
+					desc: 'The RLP-encoded block data for detailed analysis',
+				},
+			],
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"hash": "0x4a62f91774346144245d80e21065ab1cbc807f43611b675966dced62a6e7f7a6",
+			"block": {
+				"parentHash": "0x825e81563696f5eb82fe94ad52526fec1c8937b28d36bd88051e33739281d85a",
+				"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+				"miner": "0x3daeee3e90d51acd79fe4446fe6962c4e0e78e9977f39cf731ed0d5b5418269b",
+				"stateRoot": "0xf2790a1421d95c8d3f3d1c8a8e2342a704aef457d3996a5df9a77a818f2c8fa5",
+				"transactionsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+				"receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+				"logsBloom": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+				"difficulty": "0x1",
+				"number": "0xc9b44",
+				"gasLimit": "0x1c9c380",
+				"gasUsed": "0x0",
+				"timestamp": "0x65b131e7",
+				"extraData": "0xd983010a1d846765746888676f312e32312e30856c696e7578",
+				"mixHash": "0x9a7ab7c6c8fde86c8b9d6f49cd579bb2e9a868b8ff53bc3c3b767deaacc21c0a",
+				"nonce": "0x0000000000000000",
+				"baseFeePerGas": "0x12a05f200",
+				"transactions": []
+			},
+			"rlp": "0xf90226a0825e81563696f5eb82fe94ad52526fec1c8937b28d36bd88051e33739281d85aa01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347943daeee3e90d51acd79fe4446fe6962c4e0e78e9977f39cf731ed0d5b5418269ba0f2790a1421d95c8d3f3d1c8a8e2342a704aef457d3996a5df9a77a818f2c8fa5a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421b901000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000083000c9b44831c9c38080846583135f11d983010a1d846765746888676f312e32312e30856c696e7578a09a7ab7c6c8fde86c8b9d6f49cd579bb2e9a868b8ff53bc3c3b767deaacc21c0a880000000000000000850212a05f200c0"
+		}
+	]
+}
+```
+
+### Empty Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": []
+}
+```
+
+### Common Block Validation Errors
+
+Invalid blocks can fail validation for various reasons:
+
+1. **Invalid state transition**: The resulting state doesn't match the expected state root
+2. **Invalid block header**: Fields like nonce, difficulty, or gas limit violate consensus rules
+3. **Invalid transaction**: Contains an invalid transaction (e.g., signature issues)
+4. **Uncle block validation**: Uncle references don't follow protocol rules
+5. **Timestamp issues**: Block timestamp violates allowed deviation rules
+6. **Gas limit violations**: Gas limit adjustments exceed allowed range
+7. **PoW validation failures**: Proof of work doesn't meet difficulty requirements
+8. **EIP violation**: Violates rules introduced by an activated Ethereum Improvement Proposal
+
+### Analyzing the RLP Data
+
+The RLP (Recursive Length Prefix) encoded data provides the raw block representation:
+
+- Use RLP decoders to analyze the exact structure
+- Compare with valid blocks to identify differences
+- Extract specific fields that may be causing validation issues
+- Valuable for deep technical investigations of consensus issues
+
+### Performance Considerations
+
+- This method has minimal performance impact on nodes
+- Response size depends on how many bad blocks have been observed
+- Using this method doesn't affect node operation or sync status
+- Nodes may limit how many bad blocks they store to conserve memory
+
+### Important Notes
+
+- This method is primarily used by node operators and developers investigating consensus issues
+- An empty array is returned if no invalid blocks have been detected
+- The method requires debug APIs to be enabled on the Ethereum node (--http.api=eth,debug,net,web3)
+- Not all Ethereum clients support this method (primarily available in Geth)
+- Invalid blocks might be discarded by nodes after some time for memory efficiency
+- When running a node in pruning mode, historical bad blocks may not be available
+- Bad blocks are typically not propagated across the network after being rejected
+- Different clients may have slight differences in block validation logic
+- The RLP encoded data is essential for detailed forensic analysis
+- Blocks can be invalid due to honest errors or malicious attempts
+
+### See also
+
+- <Link to="/docs/ethereum/debug-methods/debug_traceBlock" title="Get detailed traces of all transactions in a block">debug_traceBlock</Link> - Trace all transactions in a block
+- <Link to="/docs/ethereum/debug-methods/debug_traceBlockByHash" title="Trace transactions in a block specified by block hash">debug_traceBlockByHash</Link> - Trace block transactions by hash
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Get basic block information without detailed tracing">eth_getBlockByHash</Link> - Get basic block information
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Get block information by block number">eth_getBlockByNumber</Link> - Get block by number

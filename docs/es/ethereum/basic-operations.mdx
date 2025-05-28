@@ -1,0 +1,217 @@
+---
+title: Operaciones Básicas de Ethereum | Guía de Métodos de API Blockchain
+description: Guía completa de operaciones comunes en la blockchain Ethereum usando la API de TheRPC, incluyendo consulta de saldos, operaciones con transacciones, información de bloques, interacciones con contratos y gestión de gas
+keywords: fundamentos ethereum, operaciones blockchain, fundamentos web3, tutorial api ethereum, operaciones básicas blockchain, verificación saldo ethereum, estado transacción, información bloque ethereum, interacción contrato inteligente, gas ethereum, consulta blockchain
+---
+
+# Operaciones Básicas
+
+Esta guía cubre las operaciones más comunes que realizarás con la blockchain Ethereum usando la API de TheRPC.
+
+## # Recuperación de Información Básica
+
+### Obtener el Número del Último Bloque
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_blockNumber",
+  "params": [],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Obtener el número de bloque actual en Ethereum">eth_blockNumber</Link> para más detalles.
+
+### Verificar Saldo de Cuenta
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBalance",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Obtener el saldo de Ether para una dirección Ethereum">eth_getBalance</Link> para más detalles.
+
+## # Operaciones con Transacciones
+
+### Obtener Estado de Transacción
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionByHash",
+  "params": [
+    "0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"
+  ],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Obtener detalles de transacción por su hash">eth_getTransactionByHash</Link> para más detalles.
+
+### Verificar Recibo de Transacción
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionReceipt",
+  "params": [
+    "0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"
+  ],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Obtener recibo de transacción y estado de confirmación">eth_getTransactionReceipt</Link> para más detalles.
+
+## # Información de Bloque
+
+### Obtener Bloque por Número
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBlockByNumber",
+  "params": [
+    "0xE81224",
+    false
+  ],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Obtener información de bloque por su número">eth_getBlockByNumber</Link> para más detalles.
+
+### Obtener Bloque por Hash
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBlockByHash",
+  "params": [
+    "0xdc0818cf78f21a8e70579cb46a43643f78291264dda342ae31049421c82d21ae",
+    false
+  ],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Obtener información de bloque por su hash">eth_getBlockByHash</Link> para más detalles.
+
+## # Interacciones con Contratos Inteligentes
+
+### Llamar a Método de Contrato
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_call",
+  "params": [
+    {
+      "to": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+      "data": "0x70a08231000000000000000000000000742d35Cc6634C0532925a3b844Bc454e4438f44e"
+    },
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_call" title="Ejecutar función de visualización de contrato inteligente sin transacción">eth_call</Link> para más detalles.
+
+### Obtener Código de Contrato
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getCode",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_getCode" title="Obtener el bytecode desplegado en una dirección">eth_getCode</Link> para más detalles.
+
+## # Estado de la Red
+
+### Obtener Versión de la Red
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "net_version",
+  "params": [],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/net_version" title="Obtener el ID de red actual">net_version</Link> para más detalles.
+
+### Verificar Estado de Sincronización del Nodo
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_syncing",
+  "params": [],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_syncing" title="Verificar si el nodo está sincronizando y el progreso de sincronización">eth_syncing</Link> para más detalles.
+
+## # Gas y Nonce
+
+### Obtener Precio de Gas
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_gasPrice",
+  "params": [],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="Obtener precio actual de gas en wei">eth_gasPrice</Link> para más detalles.
+
+### Obtener Contador de Transacciones (Nonce)
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionCount",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+Ver <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="Obtener contador de transacciones (nonce) para una dirección">eth_getTransactionCount</Link> para más detalles.
+
+## Ejemplos de Implementación
+
+Para implementaciones específicas de cada lenguaje, consulta nuestros SDKs:
+
+- <Link to="/docs/ethereum/tools/javascript-typescript" title="Herramientas JavaScript y TypeScript para desarrollo en Ethereum">JavaScript/TypeScript</Link>
+- <Link to="/docs/ethereum/tools/python" title="Bibliotecas Python para desarrollo blockchain Ethereum">Python</Link>
+- <Link to="/docs/ethereum/tools/java-kotlin" title="Herramientas Java y Kotlin para desarrollo en Ethereum">Java/Kotlin</Link>
+- Ver todos en <Link to="/docs/ethereum/tools/overview" title="Resumen completo de todas las herramientas de desarrollo disponibles para Ethereum">Herramientas y SDKs</Link>
+
+### Ver también
+
+- <Link to="/docs/ethereum/all-methods" title="Lista completa de todos los métodos disponibles de la API de Ethereum">Todos los Métodos Disponibles</Link> - Referencia completa de la API
+- <Link to="/docs/ethereum/authentication" title="Guía para asegurar el acceso a tu API">Guía de Autenticación</Link> - Asegura tu acceso a la API
+- <Link to="/docs/ethereum/faq" title="Preguntas frecuentes sobre el uso de la API de Ethereum">FAQ</Link> - Preguntas y respuestas comunes

@@ -1,0 +1,48 @@
+---
+title: 区块确认指南 | 以太坊交易最终性
+description: 全面了解以太坊区块确认，实施安全交易验证，并确保在不同网络条件下的交易最终性的综合指南。
+keywords: 区块确认, 交易最终性, 以太坊安全, 区块链确认, 以太坊最终性, 确认交易, 区块验证, 交易安全, 以太坊交易, 最终性保证
+---
+
+# 区块确认指南
+
+区块确认对确保以太坊中的交易最终性至关重要。本指南解释了确认的工作原理以及如何在应用程序中实施它们。
+
+## 理解确认
+
+- 什么是区块确认
+- 为什么确认很重要
+- 推荐的确认数量
+- 不同网络中的最终性（主网与测试网）
+
+## 实现示例
+
+```javascript
+// 检查确认数量
+const getConfirmations = async (txHash) => {
+	const tx = await web3.eth.getTransaction(txHash);
+	const currentBlock = await web3.eth.getBlockNumber();
+	return tx.blockNumber ? currentBlock - tx.blockNumber : 0;
+};
+
+// 等待特定数量的确认
+const waitForConfirmations = async (txHash, confirmations = 6) => {
+	while ((await getConfirmations(txHash)) < confirmations) {
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+	}
+	return true;
+};
+```
+
+## 安全考虑因素
+
+1. 不同交易价值的不同确认要求
+2. 处理链重组
+3. 特定网络的考虑因素
+4. 监控确认进度
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="检索交易确认状态的API方法">eth_getTransactionReceipt</Link> - 获取交易确认状态
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="学习使用以太坊区块的基本技术">使用区块</Link> - 一般区块处理
+- <Link to="/docs/ethereum/guides/chain-reorganization" title="学习如何处理以太坊中的区块链重组">链重组指南</Link> - 处理区块链重组

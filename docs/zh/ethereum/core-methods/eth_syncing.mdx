@@ -1,0 +1,199 @@
+---
+title: eth_syncing - 检查节点同步状态 | 以太坊API方法
+description: 学习如何使用eth_syncing检查您的以太坊节点是否正在与区块链网络同步，跟踪同步进度，并了解不同的同步状态。
+keywords: eth_syncing, 以太坊同步状态, 节点同步, 区块链同步, 以太坊节点状态, 同步进度, 区块同步, eth同步, 区块链同步检查, 同步跟踪, 节点追赶, 区块链数据同步, 以太坊节点同步, 网络同步, 主网同步, geth同步, erigon同步, nethermind同步
+---
+
+# eth_syncing
+
+`eth_syncing`方法允许您检查您的以太坊节点是否正在与网络同步，如果是，则跟踪同步过程的进度。这个简单但功能强大的方法可帮助您监控节点的追赶状态。
+
+## 使用场景
+
+- 在基础设施设置中监控节点同步状态
+- 在区块浏览器和仪表板中跟踪同步进度
+- 确定节点何时准备好处理交易
+- 构建以太坊基础设施的健康监控系统
+- 计算完成全同步的估计时间
+- 在钱包应用程序中显示同步状态
+- 在关键操作前验证节点是否完全同步
+- 诊断网络或区块链同步问题
+- 检查节点是否能可靠处理请求
+- 监控资源密集型归档节点的初始同步
+
+## 方法详情
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_syncing',
+		id: 1,
+		jsonrpc: '2.0',
+		params: [],
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'syncing',
+			type: 'boolean | object',
+			desc: '当节点未同步时，返回`false`。同步时，返回包含同步状态数据的对象。',
+		},
+	]}
+	getParams={(s) => s.params}
+/>
+
+## 响应示例
+
+### 未同步时
+
+如果节点与网络完全同步，该方法返回`false`：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": false
+}
+```
+
+### 同步时
+
+如果节点当前正在同步，该方法返回一个包含同步状态信息的对象：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "currentBlock": "0x3b0bc5",
+    "highestBlock": "0x3b7698",
+    "knownStates": "0x21a679",
+    "pulledStates": "0x21a679",
+    "startingBlock": "0x3ad7a2"
+  }
+}
+```
+
+### 理解同步状态字段
+
+#### 标准字段
+* **startingBlock**: 同步开始的十六进制区块号
+* **currentBlock**: 节点当前处理的十六进制区块号
+* **highestBlock**: 网络中已知最高区块的十六进制区块号
+* **knownStates**: 已知存在的状态条目数（来自对等节点信息）
+* **pulledStates**: 已下载的状态条目数
+
+#### 额外的客户端特定字段
+
+不同的以太坊客户端可能包含额外的同步信息：
+
+##### Geth
+* **healedBytecodeBytes**: 快照同步期间恢复的代码字节
+* **healedBytecodes**: 快照同步期间恢复的字节码数量
+* **healedTrienodeBytes**: 修复期间恢复的字典树节点字节
+* **healedTrienodes**: 修复期间恢复的字典树节点数量
+* **syncedAccountBytes**: 下载的账户数据大小
+* **syncedAccounts**: 下载的账户数量
+* **syncedBytecodeBytes**: 下载的字节码大小
+* **syncedBytecodes**: 下载的字节码数量
+* **syncedStorage**: 同步的存储槽数量
+* **syncedStorageBytes**: 下载的存储数据大小
+
+##### Erigon
+* **syncStage**: 当前同步阶段名称（Headers、Bodies、Execution等）
+* **syncProgress**: 当前阶段完成百分比（0-100）
+
+### 示例数据解释
+
+给定此同步状态：
+```json
+{
+  "currentBlock": "0x3b0bc5",
+  "highestBlock": "0x3b7698",
+  "startingBlock": "0x3ad7a2"
+}
+```
+
+我们可以解释如下：
+- 起始区块：3,840,930（0x3ad7a2的十进制）
+- 当前区块：3,872,709（0x3b0bc5的十进制）
+- 最高区块：3,897,000（0x3b7698的十进制）
+- 进度：在总共约56,070个区块中已同步约31,779个区块（56.7%完成）
+
+### 同步类型和阶段
+
+以太坊节点可以使用不同的策略进行同步，每种策略都会影响`eth_syncing`响应的显示内容：
+
+#### 完全同步
+从创世区块下载所有区块并执行所有交易。
+- 慢但最安全
+- 根据硬件可能需要数天或数周
+- 提供完整的历史数据
+
+#### 快速同步
+下载区块但只拉取最近的状态，而不重新执行历史交易。
+- 比完全同步快得多
+- 可能需要数小时到数天
+- 减少存储要求
+- `eth_syncing`将显示状态同步进度
+
+#### 快照同步（Geth）
+直接下载状态快照，而不是从交易重建状态。
+- Geth最快的同步方法
+- 在良好硬件上可以在几小时内完成
+- 同步状态中的其他字段显示快照进度
+
+#### 光束同步（Nethermind）
+允许在完全同步完成前查询链数据。
+- 在完全同步前开始处理请求
+- 即使在回填数据期间可能显示为未同步
+
+### 常见同步阶段
+
+1. **头部同步**：下载区块头（最快阶段）
+2. **区块同步**：下载区块主体
+3. **收据同步**：下载交易收据
+4. **状态同步**：下载或构建账户和合约状态（最慢阶段）
+5. **修复**：验证数据完整性并修复任何问题
+
+### 同步问题
+
+当使用`eth_syncing`监控时，这些模式可能表明存在问题：
+
+1. **卡住同步**：`currentBlock`长时间没有变化
+2. **进度缓慢**：区块每分钟速率非常低
+3. **重复区块**：当前区块号减少或波动
+4. **断开/重新连接**：同步以新的`startingBlock`重新启动
+
+### 同步状态仪表板
+
+对于需要显示同步状态的应用程序，考虑显示：
+
+1. 基于`currentBlock`与`highestBlock`比较的可视化进度条
+2. 完成百分比数值
+3. 当前区块与最高区块对比
+4. 预计剩余时间
+5. 当前同步阶段（如果可用）
+6. 历史同步速度图表
+7. 网络健康指标
+
+
+### 重要说明
+
+1. **假阴性**：某些客户端在某些同步类型或阶段可能返回`false`，即使尚未完全同步
+2. **共识层**：此方法仅报告执行层同步状态，而非共识层（合并后）
+3. **需要对等节点**：节点需要对等节点来准确确定最高区块
+4. **客户端差异**：不同客户端（Geth、Erigon、Nethermind等）提供不同的同步信息
+5. **归档节点**：完整归档节点比带有修剪的完整节点需要更长时间同步
+6. **磁盘IO**：同步速度通常受磁盘I/O性能限制而非网络
+7. **内存要求**：同步需要大量RAM，特别是在状态同步阶段
+8. **多种同步方法**：客户端在同步过程中经常在不同同步方法之间切换
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="获取当前区块号以与同步状态比较">eth_blockNumber</Link> - 返回当前区块号
+- <Link to="/docs/ethereum/core-methods/eth_chainId" title="获取您的节点正在同步的网络链ID">eth_chainId</Link> - 返回当前网络的链ID
+- <Link to="/docs/ethereum/core-methods/net_peerCount" title="检查连接到您节点的对等节点数量">net_peerCount</Link> - 返回当前连接到节点的对等节点数量
+- <Link to="/docs/ethereum/core-methods/net_version" title="识别您的节点连接到的网络">net_version</Link> - 返回当前网络ID
+- <Link to="/docs/ethereum/core-methods/web3_clientVersion" title="检查您正在运行的以太坊客户端和版本">web3_clientVersion</Link> - 返回当前客户端版本
+- <Link to="/docs/ethereum/guides/nodes-and-clients" title="了解不同的以太坊节点客户端及其同步策略">节点和客户端指南</Link> - 以太坊节点类型和客户端概述

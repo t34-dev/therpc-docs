@@ -1,0 +1,168 @@
+---
+title: Herramientas Dart y Flutter para Desarrollo Ethereum | Guía del SDK Web3Dart
+description: Guía completa para utilizar Dart y Flutter en el desarrollo blockchain Ethereum con la biblioteca Web3Dart, ejemplos de código y patrones de integración móvil para dApps
+keywords: dart ethereum, flutter ethereum, web3dart, ethereum mobile, flutter blockchain, dart web3, flutter dapp development, ethereum flutter app, web3dart tutorial, cross-platform ethereum, mobile blockchain development, smart contract dart
+---
+
+# Herramientas Dart y Flutter para Ethereum
+
+Los desarrolladores de Dart y Flutter pueden utilizar Web3Dart para el desarrollo en Ethereum, permitiendo aplicaciones móviles y web multiplataforma.
+
+<PayAttention category="Dart/Flutter" />
+
+## # Biblioteca Web3Dart
+
+La principal biblioteca Ethereum para los ecosistemas Dart y Flutter, que proporciona capacidades completas de interacción con blockchain.
+
+```dart
+import 'package:web3dart/web3dart.dart';
+import 'package:http/http.dart';
+
+class EthereumService {
+  final Web3Client client;
+
+  EthereumService(String rpcUrl) : client = Web3Client(rpcUrl, Client());
+
+  Future<EtherAmount> getBalance(String address) async {
+    final addr = EthereumAddress.fromHex(address);
+    return await client.getBalance(addr);
+  }
+
+  Future<String> sendTransaction({
+    required Credentials credentials,
+    required String to,
+    required BigInt amount,
+  }) async {
+    final transaction = await client.sendTransaction(
+      credentials,
+      Transaction(
+        to: EthereumAddress.fromHex(to),
+        value: EtherAmount.fromBigInt(EtherUnit.wei, amount),
+      ),
+    );
+    return transaction;
+  }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/simolus3/web3dart" target="_blank" absolute>web3dart</Link>
+- **Pub.dev**: <Link to="https://pub.dev/packages/web3dart" target="_blank" absolute>web3dart package</Link>
+- **Características**:
+  - Soporte para Flutter en dApps móviles multiplataforma
+  - Integración perfecta con widgets de Flutter
+  - Capacidades completas de interacción con contratos
+  - Firma y verificación segura de transacciones
+  - Integración de HD wallet con soporte BIP-39/44
+  - Resolución e integración ENS
+  - Soporte para estándares de tokens ERC-20 y ERC-721
+  - Estimación y optimización de gas
+
+> **Nota Importante**: Especifique siempre un límite de gas al crear transacciones para evitar fallos inesperados. La biblioteca Web3Dart intentará estimar el gas, pero se recomiendan valores explícitos para aplicaciones en producción.
+
+## # Ejemplos de Integración con Flutter
+
+Ejemplo de un widget Flutter usando Web3Dart para mostrar el saldo de una wallet:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:web3dart/web3dart.dart';
+
+class WalletWidget extends StatefulWidget {
+  @override
+  _WalletWidgetState createState() => _WalletWidgetState();
+}
+
+class _WalletWidgetState extends State<WalletWidget> {
+  final ethereum = EthereumService('YOUR_ETHEREUM_NODE_URL');
+  EtherAmount? balance;
+
+  Future<void> updateBalance() async {
+    final newBalance = await ethereum.getBalance('YOUR_ADDRESS');
+    setState(() {
+      balance = newBalance;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text('Balance: ${balance?.getValueInUnit(EtherUnit.ether)} ETH'),
+            ElevatedButton(
+              onPressed: updateBalance,
+              child: Text('Refresh Balance'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+> **Consejo de Rendimiento**: Para aplicaciones Flutter en producción, considera implementar mecanismos de caché y patrones de actualización en segundo plano para evitar llamadas RPC excesivas que podrían afectar la capacidad de respuesta de la aplicación.
+
+## # Integración de Contratos Inteligentes
+
+Trabajando con contratos inteligentes en Dart con seguridad de tipos completa:
+
+```dart
+class SmartContractService {
+  final Web3Client client;
+  final DeployedContract contract;
+
+  SmartContractService(String rpcUrl, String contractAddress, String abi)
+      : client = Web3Client(rpcUrl, Client()),
+        contract = DeployedContract(
+          ContractAbi.fromJson(abi, 'YourContract'),
+          EthereumAddress.fromHex(contractAddress),
+        );
+
+  Future<List<dynamic>> callFunction(
+    String functionName,
+    List<dynamic> params,
+  ) async {
+    final function = contract.function(functionName);
+    final result = await client.call(
+      contract: contract,
+      function: function,
+      params: params,
+    );
+    return result;
+  }
+}
+```
+
+> **Nota de Seguridad**: Al manejar claves privadas en aplicaciones Flutter, utiliza soluciones de almacenamiento seguro como `flutter_secure_storage` para proteger credenciales sensibles. Nunca codifiques claves privadas directamente en el código de tu aplicación.
+
+## # Manejo de Errores y Utilidades
+
+Manejo adecuado de errores en Dart para aplicaciones Ethereum robustas:
+
+```dart
+class EthereumException implements Exception {
+  final String message;
+  final dynamic originalError;
+
+  EthereumException(this.message, [this.originalError]);
+
+  @override
+  String toString() => 'EthereumException: $message';
+}
+
+extension EtherAmountExtension on EtherAmount {
+  String formatEther([int decimals = 4]) {
+    return getValueInUnit(EtherUnit.ether).toStringAsFixed(decimals);
+  }
+}
+```
+
+### Ver también
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">Visión General de Herramientas</Link> - Todos los SDKs y Herramientas Disponibles
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">Guía de Autenticación</Link> - Información Detallada de Autenticación
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">Guía de Operaciones Básicas</Link> - Operaciones Fundamentales
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">Métodos Disponibles</Link> - Explorar Capacidades de la API

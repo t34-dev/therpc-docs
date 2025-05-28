@@ -1,0 +1,199 @@
+---
+title: eth_syncing - Check Node Synchronization Status | Ethereum API Methods
+description: Learn how to use eth_syncing to check if your Ethereum node is currently synchronizing with the blockchain network, track sync progress, and understand different synchronization states.
+keywords: eth_syncing, ethereum sync status, node sync, blockchain synchronization, ethereum node status, sync progress, block sync, eth sync, blockchain sync check, synchronization tracking, node catch-up, blockchain data sync, ethereum node sync, network sync, mainnet sync, geth syncing, erigon sync, nethermind sync
+---
+
+# eth_syncing
+
+The `eth_syncing` method allows you to check whether your Ethereum node is currently synchronizing with the network and, if it is, track the progress of the synchronization process. This simple yet powerful method helps you monitor your node's catch-up status.
+
+## Use Cases
+
+- Monitoring node synchronization status in infrastructure setups
+- Tracking sync progress in block explorers and dashboards
+- Determining when a node is ready to process transactions
+- Building health monitoring systems for Ethereum infrastructure
+- Calculating estimated time until full sync is complete
+- Displaying sync status in wallet applications
+- Verifying that a node is fully synchronized before critical operations
+- Diagnosing networking or blockchain synchronization issues
+- Checking if a node can reliably process requests
+- Monitoring initial sync for resource-intensive archive nodes
+
+## Method Details
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_syncing',
+		id: 1,
+		jsonrpc: '2.0',
+		params: [],
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'syncing',
+			type: 'boolean | object',
+			desc: 'When the node is not syncing, returns `false`. When syncing, returns an object with sync status data.',
+		},
+	]}
+	getParams={(s) => s.params}
+/>
+
+## Response Examples
+
+### When Not Syncing
+
+If the node is fully synchronized with the network, the method returns `false`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": false
+}
+```
+
+### When Syncing
+
+If the node is currently synchronizing, the method returns an object with sync status information:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "currentBlock": "0x3b0bc5",
+    "highestBlock": "0x3b7698",
+    "knownStates": "0x21a679",
+    "pulledStates": "0x21a679",
+    "startingBlock": "0x3ad7a2"
+  }
+}
+```
+
+### Understanding the Sync Status Fields
+
+#### Standard Fields
+* **startingBlock**: Hexadecimal block number where the sync started
+* **currentBlock**: Hexadecimal block number the node is currently processing
+* **highestBlock**: Hexadecimal block number of the highest known block in the network
+* **knownStates**: Number of state entries known to exist (from peer information)
+* **pulledStates**: Number of state entries already downloaded
+
+#### Additional Client-Specific Fields
+
+Different Ethereum clients may include additional sync information:
+
+##### Geth
+* **healedBytecodeBytes**: Bytes of code restored during snap sync
+* **healedBytecodes**: Number of bytecodes recovered during snap sync
+* **healedTrienodeBytes**: Bytes of trie nodes recovered during healing
+* **healedTrienodes**: Number of trie nodes recovered during healing
+* **syncedAccountBytes**: Size of account data downloaded
+* **syncedAccounts**: Number of accounts downloaded
+* **syncedBytecodeBytes**: Size of bytecode downloaded
+* **syncedBytecodes**: Number of bytecodes downloaded
+* **syncedStorage**: Number of storage slots synced
+* **syncedStorageBytes**: Size of storage data downloaded
+
+##### Erigon
+* **syncStage**: Current sync stage name (Headers, Bodies, Execution, etc.)
+* **syncProgress**: Percentage of current stage completion (0-100)
+
+### Example Data Interpretation
+
+Given this sync status:
+```json
+{
+  "currentBlock": "0x3b0bc5",
+  "highestBlock": "0x3b7698",
+  "startingBlock": "0x3ad7a2"
+}
+```
+
+We can interpret it as follows:
+- Starting block: 3,840,930 (decimal of 0x3ad7a2)
+- Current block: 3,872,709 (decimal of 0x3b0bc5)
+- Highest block: 3,897,000 (decimal of 0x3b7698)
+- Progress: ~31,779 blocks synced out of ~56,070 total (56.7% complete)
+
+### Sync Types and Phases
+
+Ethereum nodes can sync using different strategies, each affecting what the `eth_syncing` response will show:
+
+#### Full Sync
+Downloads all blocks and executes all transactions from the genesis block.
+- Slow but most secure
+- Can take days or weeks depending on hardware
+- Provides full historical data
+
+#### Fast Sync
+Downloads blocks but pulls only recent state without re-executing historical transactions.
+- Much faster than full sync
+- May take hours to days
+- Reduces storage requirements
+- `eth_syncing` will show state sync progress
+
+#### Snap Sync (Geth)
+Directly downloads state snapshots rather than reconstructing state from transactions.
+- Fastest sync method for Geth
+- Can complete in hours on good hardware
+- Additional fields in sync status show snapshot progress
+
+#### Beam Sync (Nethermind)
+Allows querying chain data before full sync completes.
+- Begins processing requests before fully synchronized
+- May show as not syncing even while backfilling data
+
+### Common Sync Phases
+
+1. **Header Sync**: Download block headers (fastest phase)
+2. **Block Sync**: Download block bodies
+3. **Receipt Sync**: Download transaction receipts
+4. **State Sync**: Download or build account and contract state (slowest phase)
+5. **Healing**: Verify data integrity and fix any issues
+
+### Synchronization Issues
+
+When monitoring with `eth_syncing`, these patterns may indicate problems:
+
+1. **Stuck Sync**: No change in `currentBlock` for extended periods
+2. **Slow Progress**: Very low blocks-per-minute rate
+3. **Repeated Blocks**: Current block number decreases or fluctuates
+4. **Disconnect/Reconnect**: Sync restarts with a new `startingBlock`
+
+### Sync Status Dashboard
+
+For applications that need to display sync status, consider showing:
+
+1. Visual progress bar based on `currentBlock` vs `highestBlock`
+2. Numeric percentage of completion
+3. Current block vs highest block
+4. Estimated time remaining
+5. Current sync stage (if available)
+6. Historical sync speed chart
+7. Network health indicators
+
+
+### Important Notes
+
+1. **False Negatives**: Some clients return `false` during certain sync types or stages even when not fully synced
+2. **Consensus Layer**: This method only reports execution layer sync status, not consensus layer (post-merge)
+3. **Peers Required**: Nodes need peers to accurately determine the highest block
+4. **Client Variations**: Different clients (Geth, Erigon, Nethermind, etc.) provide different sync information
+5. **Archive Nodes**: Full archive nodes take significantly longer to sync than full nodes with pruning
+6. **Disk IO**: Sync speed is often limited by disk I/O performance rather than network
+7. **Memory Requirements**: Syncing requires significant RAM, especially during state sync phases
+8. **Multiple Sync Methods**: Clients often switch between sync methods during the process
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Get the current block number to compare with sync status">eth_blockNumber</Link> - Returns the current block number
+- <Link to="/docs/ethereum/core-methods/eth_chainId" title="Get the chain ID of the network your node is syncing with">eth_chainId</Link> - Returns the chain ID of the current network
+- <Link to="/docs/ethereum/core-methods/net_peerCount" title="Check the number of peers connected to your node">net_peerCount</Link> - Returns the number of peers currently connected to the node
+- <Link to="/docs/ethereum/core-methods/net_version" title="Identify the network your node is connected to">net_version</Link> - Returns the current network ID
+- <Link to="/docs/ethereum/core-methods/web3_clientVersion" title="Check which Ethereum client and version you're running">web3_clientVersion</Link> - Returns the current client version
+- <Link to="/docs/ethereum/guides/nodes-and-clients" title="Learn about different Ethereum node clients and their sync strategies">Nodes and Clients Guide</Link> - Overview of Ethereum node types and clients

@@ -1,0 +1,195 @@
+---
+title: eth_getTransactionReceipt - Recuperar Resultados de Transacciones | Métodos de API de Ethereum
+description: Aprenda a utilizar el método eth_getTransactionReceipt para obtener resultados de ejecución de transacciones, incluyendo estado, gas utilizado, logs e información de despliegue de contratos.
+keywords: eth_getTransactionReceipt, recibo de transacción, estado de transacción, logs de ethereum, gas utilizado, eventos de contratos inteligentes, resultado de transacción
+---
+
+# eth_getTransactionReceipt
+
+El método `eth_getTransactionReceipt` devuelve el recibo de una transacción, que contiene información crítica sobre los resultados de ejecución de la transacción, incluyendo éxito o fracaso, gas utilizado, eventos generados (logs), y direcciones de contratos desplegados. El recibo solo está disponible para transacciones que han sido incluidas en un bloque.
+
+## Casos de Uso
+
+- Verificación de éxito o fracaso de transacciones
+- Monitorización del consumo de gas
+- Verificación de despliegue de contratos
+- Extracción de eventos/logs
+- Confirmación de transferencias
+- Verificación de cambios de estado en contratos inteligentes
+- Cálculo de comisiones de transacción
+- Confirmación de finalidad de transacciones
+
+## Detalles del Método
+
+Este método devuelve el objeto de recibo de transacción utilizando el hash único de la transacción.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getTransactionReceipt',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'hash',
+			required: true,
+			type: 'string',
+			desc: 'El hash de la transacción',
+			value: '0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0', // Example significant transaction
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'El objeto de recibo de la transacción, o null si la transacción está pendiente/no se encuentra',
+			fields: [
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: 'Hash del bloque que contiene esta transacción',
+				},
+				{
+					id: 'blockNumber',
+					type: 'string',
+					desc: 'Número del bloque que contiene esta transacción (hex)',
+				},
+				{
+					id: 'contractAddress',
+					type: 'string',
+					desc: 'Dirección del contrato creado (si es creación de contrato), de lo contrario null',
+				},
+				{
+					id: 'cumulativeGasUsed',
+					type: 'string',
+					desc: 'Gas total utilizado en el bloque hasta e incluyendo esta transacción (hex)',
+				},
+				{
+					id: 'effectiveGasPrice',
+					type: 'string',
+					desc: 'El precio de gas real pagado por unidad de gas (hex)',
+				},
+				{
+					id: 'from',
+					type: 'string',
+					desc: 'Dirección del remitente',
+				},
+				{
+					id: 'gasUsed',
+					type: 'string',
+					desc: 'Gas utilizado por esta transacción específica (hex)',
+				},
+				{
+					id: 'logs',
+					type: 'array',
+					desc: 'Array de objetos de log generados por esta transacción',
+				},
+				{
+					id: 'logsBloom',
+					type: 'string',
+					desc: 'Filtro Bloom para que los clientes ligeros recuperen logs relacionados rápidamente',
+				},
+				{
+					id: 'status',
+					type: 'string',
+					desc: 'Estado de la transacción: 1 (éxito) o 0 (fracaso)',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					desc: 'Dirección del receptor, null para transacciones de creación de contratos',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: 'Hash de la transacción',
+				},
+				{
+					id: 'transactionIndex',
+					type: 'string',
+					desc: "Posición de índice de la transacción en el bloque",
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: 'Tipo de transacción (0=legacy, 1=EIP2930, 2=EIP1559)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.hash || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"blockHash": "0x5f35e7deaad2ff7a25c46b7df81a5d834f6c2725e49e868402f6958e979aaa5a",
+		"blockNumber": "0x1197fa5",
+		"contractAddress": null,
+		"cumulativeGasUsed": "0x2eac11",
+		"effectiveGasPrice": "0xb4c7a080",
+		"from": "0x95222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+		"gasUsed": "0x860a",
+		"logs": [
+			{
+				"address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+				"topics": [
+					"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+					"0x00000000000000000000000095222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+					"0x00000000000000000000000088e6a0c2ddd26feeb64f039a2c41296fcb3f5640"
+				],
+				"data": "0x00000000000000000000000000000000000000000000000000000000007a1200",
+				"blockNumber": "0x1197fa5",
+				"transactionHash": "0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0",
+				"transactionIndex": "0xdb",
+				"blockHash": "0x5f35e7deaad2ff7a25c46b7df81a5d834f6c2725e49e868402f6958e979aaa5a",
+				"logIndex": "0x133",
+				"removed": false
+			}
+		],
+		"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000020000000000000000000800000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000",
+		"status": "0x1",
+		"to": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+		"transactionHash": "0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0",
+		"transactionIndex": "0xdb",
+		"type": "0x2"
+	}
+}
+```
+
+### Entendiendo los Códigos de Estado
+
+- `0x1`: Transacción exitosa
+- `0x0`: Transacción fallida (revertida)
+
+### Campos Clave en Recibos de Transacciones
+
+- **status**: Indica éxito o fracaso de la transacción
+- **contractAddress**: Contiene la dirección de un contrato recién desplegado (null para transacciones regulares)
+- **gasUsed**: Cantidad de gas realmente consumido por la transacción
+- **logs**: Eventos emitidos durante la ejecución de la transacción
+- **effectiveGasPrice**: El precio real pagado por unidad de gas
+
+### Firmas Comunes de Eventos
+
+- Transferencia ERC20: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`
+- Aprobación ERC20: `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925`
+- Transferencia ERC721: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` (igual que ERC20)
+
+### Notas Importantes
+
+- Los recibos de transacciones solo están disponibles para transacciones que han sido incluidas en un bloque
+- El recibo proporciona el estado definitivo de una transacción (éxito o fracaso)
+- Para despliegues de contratos, la dirección del nuevo contrato se incluye en el recibo
+- Los logs de eventos pueden usarse para rastrear cambios de estado desencadenados por la transacción
+- El gas utilizado en el recibo proporciona el consumo real de gas (útil para el cálculo de comisiones)
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Ver detalles y parámetros de transacción">eth_getTransactionByHash</Link> - Obtener los datos completos de la transacción usando su hash único
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Filtrar y recuperar eventos de blockchain">eth_getLogs</Link> - Buscar logs de eventos basados en filtros de dirección y tema

@@ -1,0 +1,32 @@
+---
+title: Ethereum Debug Methods | Advanced Blockchain Analysis Tools
+description: Comprehensive documentation for Ethereum debug API methods enabling detailed blockchain analysis, transaction debugging, and low-level EVM state inspection
+keywords: ethereum debug api, debug_traceTransaction, debug_traceBlock, debug_traceCall, ethereum debugging, blockchain debugging, evm tracing, ethereum state inspection, debug_storageRangeAt
+---
+
+# Ethereum Debug Methods
+
+This section documents Ethereum's powerful debug API methods that provide advanced capabilities for blockchain analysis, transaction debugging, and detailed state inspection. These methods are essential for developers building sophisticated Ethereum applications, tools, and analytics.
+
+## Debug Methods Overview
+
+Debug methods allow you to perform detailed analysis of blockchain data, trace transaction execution at the EVM level, inspect state changes, and diagnose issues with transactions or smart contracts. These advanced inspection capabilities are crucial for developers working on complex smart contracts or building analytical tools.
+
+<DocsEndpointsTable createLink={(elem) => `/docs/ethereum/debug-methods/${elem.key}`} prefixes={['debug_']} />
+
+The debug namespace provides methods for:
+
+- Tracing transaction execution with granular control over tracing parameters
+- Analyzing block execution with different trace types (e.g., call tracer, 4byte tracer)
+- Inspecting contract storage and state
+- Retrieving information about bad blocks
+- Analyzing call and execution contexts
+
+These methods typically provide more detailed output than standard API methods, making them valuable for deep debugging and analysis tasks.
+
+### See also
+
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">All Available Methods</Link> - Complete Method Reference
+- <Link to="/docs/ethereum/core-methods/overview" title="Core Ethereum API methods documentation">Core Methods</Link> - Essential API Functionality
+- <Link to="/docs/ethereum/trace-methods/overview" title="Ethereum transaction and block tracing methods">Trace Methods</Link> - Alternative Tracing Capabilities
+- <Link to="/docs/ethereum/guides/overview" title="Practical guides for Ethereum development">Development Guides</Link> - Practical Implementation Help

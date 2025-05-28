@@ -1,0 +1,189 @@
+---
+title: 以太坊开发的C#工具 | Nethereum框架指南
+description: C#库用于以太坊区块链开发的完整指南，包括Nethereum框架、.NET集成、智能合约交互和Unity3D示例
+keywords: c# 以太坊, nethereum, .net 以太坊, 以太坊 c#, dotnet 区块链, c# 智能合约, unity3d 以太坊, nethereum api, 以太坊 unity, c# web3, 区块链 .net, asp.net 以太坊
+---
+
+# C#工具
+
+C#开发者可以使用Nethereum，这是一个用于以太坊开发的综合.NET集成库。
+
+<PayAttention category="C#" />
+
+## # Nethereum
+
+用于以太坊开发的完整.NET解决方案。
+
+```csharp
+using Nethereum.Web3;
+using Nethereum.Web3.Accounts;
+using Nethereum.Util;
+using Nethereum.Hex.HexTypes;
+
+public class EthereumService
+{
+    private readonly Web3 _web3;
+
+    public EthereumService(string url)
+    {
+        _web3 = new Web3(url);
+    }
+
+    public async Task<decimal> GetBalanceAsync(string address)
+    {
+        var balance = await _web3.Eth.GetBalance.SendRequestAsync(address);
+        return Web3.Convert.FromWei(balance.Value);
+    }
+
+    public async Task<string> SendTransactionAsync(
+        string privateKey,
+        string toAddress,
+        decimal etherAmount)
+    {
+        var account = new Account(privateKey);
+        var web3 = new Web3(account, _web3.Client.Url);
+
+        var transaction = await web3.Eth.GetEtherTransferService()
+            .TransferEtherAsync(toAddress, etherAmount);
+
+        return transaction;
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/Nethereum/Nethereum" target="_blank" absolute>Nethereum</Link>
+- **文档**: <Link to="https://docs.nethereum.com" target="_blank" absolute>docs.nethereum.com</Link>
+- **特性**:
+  - 完整的以太坊集成
+  - 智能合约部署和交互
+  - HD钱包支持
+  - Unity3D支持
+  - Xamarin兼容性
+  - IPC、RPC、WebSocket支持
+
+## # 智能合约集成
+
+在C#中使用智能合约：
+
+```csharp
+public class SmartContractService
+{
+    private readonly Web3 _web3;
+    private readonly Contract _contract;
+
+    public SmartContractService(string url, string contractAddress, string abi)
+    {
+        _web3 = new Web3(url);
+        _contract = _web3.Eth.GetContract(abi, contractAddress);
+    }
+
+    public async Task<T> CallFunctionAsync<T>(string functionName, params object[] parameters)
+    {
+        var function = _contract.GetFunction(functionName);
+        return await function.CallAsync<T>(parameters);
+    }
+
+    public async Task<string> ExecuteFunctionAsync(
+        string functionName,
+        string fromAddress,
+        params object[] parameters)
+    {
+        var function = _contract.GetFunction(functionName);
+        return await function.SendTransactionAsync(fromAddress, parameters);
+    }
+}
+```
+
+## # ASP.NET集成
+
+ASP.NET Web API集成示例：
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class EthereumController : ControllerBase
+{
+    private readonly EthereumService _ethereumService;
+
+    public EthereumController(EthereumService ethereumService)
+    {
+        _ethereumService = ethereumService;
+    }
+
+    [HttpGet("balance/{address}")]
+    public async Task<ActionResult<decimal>> GetBalance(string address)
+    {
+        try
+        {
+            var balance = await _ethereumService.GetBalanceAsync(address);
+            return Ok(balance);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+}
+```
+
+## # 事件处理
+
+订阅以太坊事件：
+
+```csharp
+public class EventMonitorService
+{
+    private readonly Web3 _web3;
+
+    public async Task MonitorEventsAsync(string contractAddress, string eventName)
+    {
+        var filterAll = _web3.Eth.GetEvent<YourEventDTO>(contractAddress)
+            .CreateFilterInput();
+
+        var subscription = _web3.Eth.GetEvent<YourEventDTO>(contractAddress)
+            .GetFilterChanges(filterAll);
+
+        subscription.Subscribe(evt =>
+        {
+            Console.WriteLine($"New event: {evt.Event}");
+        });
+    }
+}
+```
+
+## # Unity3D集成
+
+Unity3D集成示例：
+
+```csharp
+public class EthereumUnityManager : MonoBehaviour
+{
+    private Web3 _web3;
+
+    private async void Start()
+    {
+        _web3 = new Web3("YOUR_ETHEREUM_NODE_URL");
+        await InitializeWalletAsync();
+    }
+
+    private async Task InitializeWalletAsync()
+    {
+        try
+        {
+            var balance = await _web3.Eth.GetBalance.SendRequestAsync("YOUR_ADDRESS");
+            Debug.Log($"Wallet Balance: {Web3.Convert.FromWei(balance.Value)} ETH");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to initialize wallet: {ex.Message}");
+        }
+    }
+}
+```
+### 另请参阅
+
+- <Link to="/docs/ethereum/tools/overview" title="可用以太坊开发工具和SDK的完整概述">工具概述</Link> - 所有可用的SDK和工具
+- <Link to="/docs/ethereum/authentication" title="与以太坊节点和API服务认证的指南">认证指南</Link> - 详细认证信息
+- <Link to="/docs/ethereum/basic-operations" title="学习开发者的基本以太坊区块链操作">基本操作指南</Link> - 基础操作
+- <Link to="/docs/ethereum/all-methods" title="所有可用以太坊API方法的完整参考">可用方法</Link> - 探索API功能
+

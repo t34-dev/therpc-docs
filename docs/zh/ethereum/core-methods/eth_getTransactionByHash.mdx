@@ -1,0 +1,211 @@
+---
+title: eth_getTransactionByHash - 通过哈希检索交易 | 以太坊 API 方法
+description: 学习如何使用 eth_getTransactionByHash 方法通过交易哈希获取详细的交易信息。包含各种交易类型的示例。
+keywords: eth_getTransactionByHash, 交易哈希, 以太坊交易, 交易详情, 交易哈希查询, 区块链查询
+---
+
+# eth_getTransactionByHash
+
+`eth_getTransactionByHash` 方法返回通过其唯一哈希标识的交易的全面信息。这是直接检索交易详情最常用的方法之一。
+
+## 使用场景
+
+- 交易状态确认
+- 交易验证
+- 支付验证
+- 智能合约交互分析
+- 交易监控
+- 燃料使用分析
+- 历史交易数据检索
+- 交易调试
+
+## 方法详情
+
+此方法使用交易的唯一哈希检索详细的交易数据。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getTransactionByHash',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'hash',
+			required: true,
+			type: 'string',
+			desc: '交易的哈希',
+			value: '0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: '交易对象，如果未找到则为 null',
+			fields: [
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: '包含此交易的区块哈希，待处理交易则为 null',
+				},
+				{
+					id: 'blockNumber',
+					type: 'string',
+					desc: '包含此交易的区块号（十六进制），待处理交易则为 null',
+				},
+				{
+					id: 'from',
+					type: 'string',
+					desc: '发送者地址',
+				},
+				{
+					id: 'gas',
+					type: 'string',
+					desc: '发送者提供的燃料（十六进制）',
+				},
+				{
+					id: 'gasPrice',
+					type: 'string',
+					desc: '以 wei 为单位的燃料价格（十六进制）',
+				},
+				{
+					id: 'maxFeePerGas',
+					type: 'string',
+					desc: '每单位燃料的最大费用（EIP-1559 交易）',
+				},
+				{
+					id: 'maxPriorityFeePerGas',
+					type: 'string',
+					desc: '每单位燃料的最大优先费用（EIP-1559 交易）',
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: '交易哈希',
+				},
+				{
+					id: 'input',
+					type: 'string',
+					desc: '交易数据负载',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: '发送者在此之前的交易数量（十六进制）',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					desc: '接收者地址，合约创建交易则为 null',
+				},
+				{
+					id: 'transactionIndex',
+					type: 'string',
+					desc: '交易在区块中的位置整数（十六进制），待处理交易则为 null',
+				},
+				{
+					id: 'value',
+					type: 'string',
+					desc: '以 wei 为单位的转账值（十六进制）',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: '交易类型（0=传统, 1=EIP2930, 2=EIP1559）',
+				},
+				{
+					id: 'accessList',
+					type: 'array',
+					desc: '地址和存储键列表（EIP-2930 和 EIP-1559）',
+				},
+				{
+					id: 'chainId',
+					type: 'string',
+					desc: '交易中指定的链 ID',
+				},
+				{
+					id: 'v',
+					type: 'string',
+					desc: '签名的 V 参数',
+				},
+				{
+					id: 'r',
+					type: 'string',
+					desc: '签名的 R 参数',
+				},
+				{
+					id: 's',
+					type: 'string',
+					desc: '签名的 S 参数',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.hash || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"blockHash": "0xb3b20624f8f0f86eb50dd04688409e5cea4bd02d700bf6e79e9384d47d6a5a35",
+		"blockNumber": "0x11a48cb",
+		"from": "0x28c6c06298d514db089934071355e5743bf21d60",
+		"gas": "0x21924",
+		"gasPrice": "0x1057b28df",
+		"maxFeePerGas": "0x11986c07a",
+		"maxPriorityFeePerGas": "0x77359400",
+		"hash": "0x5d15326cb350e13d19d1618b7534dcad9feac5cce8a877b8e6fdfd963a4889f7",
+		"input": "0xa9059cbb000000000000000000000000ae2fc483527b8ef99eb5d9b44875f005ba1fae9600000000000000000000000000000000000000000000001158e460913d00000",
+		"nonce": "0x3b50",
+		"to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+		"transactionIndex": "0x4d",
+		"value": "0x0",
+		"type": "0x2",
+		"accessList": [],
+		"chainId": "0x1",
+		"v": "0x0",
+		"r": "0x35707b530856150cec9ef609a724e2eb651f71ed9f0b0f94d9969919dae58387",
+		"s": "0x7b305ef8f21e889f63d5178e7d2cbb85880ceaae045b0f46aef808c70b3a7a42"
+	}
+}
+```
+
+### 识别交易类型
+
+通过检查交易数据，您可以识别常见的交易模式：
+
+1. **简单 ETH 转账**：
+
+- `to` 是常规地址（非合约）
+- `input` 是 "0x"（空数据）
+- `value` 大于 0
+
+2. **ERC-20 代币转账**：
+
+- `to` 是代币合约地址
+- `input` 以 "0xa9059cbb"（transfer 方法签名）开头
+- `value` 通常为 0
+
+3. **合约部署**：
+
+- `to` 为 null
+- `input` 包含合约字节码
+
+4. **合约方法调用**：
+
+- `to` 是合约地址
+- `input` 以函数签名开头（函数名称和参数的 keccak256 哈希的前 4 个字节）
+- 如果函数是可支付的，可能包含 `value`
+
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="检查交易执行状态">eth_getTransactionReceipt</Link> - 获取带有执行结果和事件的交易收据
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockHashAndIndex" title="通过区块中的位置查找交易">eth_getTransactionByBlockHashAndIndex</Link> - 使用区块哈希和索引位置查找交易

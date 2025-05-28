@@ -1,0 +1,137 @@
+---
+title: Ethereum के लिए JavaScript और TypeScript टूल्स | Web3.js और Ethers.js गाइड
+description: व्यावहारिक कोड उदाहरणों और एकीकरण पैटर्न के साथ Ethereum ब्लॉकचेन विकास के लिए JavaScript और TypeScript लाइब्रेरीज़ का व्यापक गाइड, जिसमें Web3.js और Ethers.js शामिल हैं
+keywords: javascript ethereum, web3.js, ethers.js, ethereum javascript, web3 typescript, ethereum typescript, javascript dapp, typescript smart contracts, node.js ethereum, javascript blockchain, typescript web3, browser ethereum, frontend blockchain
+---
+
+# JavaScript/TypeScript टूल्स
+
+JavaScript Ethereum विकास के लिए कई शक्तिशाली लाइब्रेरीज़ प्रदान करता है, जिनमें web3.js और ethers.js सबसे लोकप्रिय विकल्प हैं।
+
+<PayAttention category="Javascript/Typescript" />
+
+## # Web3.js
+
+मूल और सबसे व्यापक रूप से उपयोग किया जाने वाला Ethereum JavaScript API।
+
+```javascript
+import Web3 from 'web3';
+const web3 = new Web3('YOUR_ETHEREUM_NODE_URL');
+
+// बैलेंस प्राप्त करें
+const getBalance = async (address) => {
+	const balance = await web3.eth.getBalance(address);
+	const balanceInEth = web3.utils.fromWei(balance, 'ether');
+	return balanceInEth;
+};
+
+// लेनदेन भेजें
+const sendTransaction = async (from, to, value) => {
+	const tx = {
+		from,
+		to,
+		value: web3.utils.toWei(value, 'ether'),
+	};
+	return await web3.eth.sendTransaction(tx);
+};
+```
+
+- **GitHub**: <Link to="https://github.com/web3/web3.js" target="_blank" absolute>web3.js</Link>
+- **दस्तावेज़ीकरण**: <Link to="https://web3js.readthedocs.io/" target="_blank" absolute>web3js.readthedocs.io</Link>
+- **विशेषताएँ**:
+  - पूर्ण Ethereum API कवरेज
+  - व्यापक समुदाय समर्थन
+  - WebSocket समर्थन
+  - कॉन्ट्रैक्ट इंटरैक्शंस
+  - ENS समर्थन
+
+## # Ethers.js
+
+आधुनिक, पूर्ण और संक्षिप्त लाइब्रेरी।
+
+```javascript
+import { ethers } from 'ethers';
+const provider = new ethers.JsonRpcProvider('YOUR_ETHEREUM_NODE_URL');
+
+// बैलेंस प्राप्त करें
+const getBalance = async (address) => {
+	const balance = await provider.getBalance(address);
+	return ethers.formatEther(balance);
+};
+
+// लेनदेन भेजें
+const sendTransaction = async (wallet, to, value) => {
+	const tx = await wallet.sendTransaction({
+		to,
+		value: ethers.parseEther(value),
+	});
+	return await tx.wait();
+};
+```
+
+- **GitHub**: <Link to="https://github.com/ethers-io/ethers.js/" target="_blank" absolute>ethers.js</Link>
+- **दस्तावेज़ीकरण**: <Link to="https://docs.ethers.org/" target="_blank" absolute>docs.ethers.org</Link>
+- **विशेषताएँ**:
+  - TypeScript समर्थन
+  - छोटा बंडल साइज़
+  - बेहतर सुरक्षा सुविधाएँ
+  - ENS समर्थन
+  - व्यापक परीक्षण
+
+## # TypeScript समर्थन
+
+दोनों लाइब्रेरीज़ उत्कृष्ट TypeScript समर्थन प्रदान करती हैं। TypeScript का उपयोग करते समय, आपको मिलता है:
+
+- बॉक्स से बाहर टाइप परिभाषाएँ
+- बेहतर IDE समर्थन
+- कंपाइल-टाइम त्रुटि जाँच
+- उन्नत कोड दस्तावेज़ीकरण
+
+```typescript
+import { BigNumber } from 'ethers';
+
+interface TransactionData {
+	to: string;
+	value: BigNumber;
+	gasLimit?: BigNumber;
+}
+
+const createTransaction = async (data: TransactionData) => {
+	// आपका कार्यान्वयन
+};
+```
+
+## # Node.js उपयोग
+
+दोनों लाइब्रेरीज़ Node.js वातावरण में निर्बाध रूप से काम करती हैं:
+
+```javascript
+// Node.js में Web3.js
+const Web3 = require('web3');
+const web3 = new Web3('YOUR_ETHEREUM_NODE_URL');
+
+// Node.js में Ethers.js
+const { ethers } = require('ethers');
+const provider = new ethers.JsonRpcProvider('YOUR_ETHEREUM_NODE_URL');
+```
+
+## # ब्राउज़र उपयोग
+
+ब्राउज़र वातावरण के लिए, आप webpack या vite जैसे बंडलर्स के साथ किसी भी लाइब्रेरी का उपयोग कर सकते हैं:
+
+```javascript
+// ES मॉड्यूल का उपयोग करना
+import { Web3 } from 'web3';
+// या
+import { ethers } from 'ethers';
+
+// window.ethereum (MetaMask) का उपयोग करना
+const provider = new ethers.BrowserProvider(window.ethereum);
+```
+
+### इसे भी देखें
+
+- <Link to="/docs/ethereum/tools/overview" title="उपलब्ध Ethereum विकास टूल्स और SDK का पूर्ण अवलोकन">टूल्स अवलोकन</Link> - सभी उपलब्ध SDK और टूल्स
+- <Link to="/docs/ethereum/authentication" title="Ethereum नोड्स और API सेवाओं के साथ प्रमाणीकरण के लिए गाइड">प्रमाणीकरण गाइड</Link> - विस्तृत प्रमाणीकरण जानकारी
+- <Link to="/docs/ethereum/basic-operations" title="मूलभूत Ethereum ब्लॉकचेन ऑपरेशंस सीखें">मूलभूत ऑपरेशंस</Link> - आधारभूत ब्लॉकचेन ऑपरेशंस
+- <Link to="/docs/ethereum/all-methods" title="सभी उपलब्ध Ethereum API विधियों का पूर्ण संदर्भ">उपलब्ध विधियां</Link> - API क्षमताओं का अन्वेषण करें

@@ -1,0 +1,373 @@
+---
+title: trace_call - 执行和追踪交易调用 | 以太坊 API 方法
+description: 学习如何使用 trace_call 方法模拟交易执行并追踪调用，而不修改区块链状态。非常适合智能合约测试和调试。
+keywords: trace_call, ethereum trace call, trace api, ethereum debug transaction, smart contract trace, dry run transaction, call trace, contract execution trace, ethereum dry run, transaction simulation, debug smart contract, call tracing, transaction analysis, ethereum contract debugging, off-chain execution, contract state analysis, ethereum vm trace, contract call simulation, ethereum debug api, transaction tracing
+---
+
+# trace_call
+
+`trace_call` 方法允许您执行新的消息调用并获取其执行的详细追踪，而不将交易添加到区块链。这类似于 `eth_call`，但提供了详细的逐步执行追踪。
+
+## 使用场景
+
+- 在发送交易前调试复杂的合约交互
+- 分析燃料消耗模式而不消耗实际燃料
+- 使用不同参数测试智能合约功能
+- 在不同的区块链状态下模拟交易
+- 检测合约代码中的潜在安全漏洞
+- 理解合约执行流程和状态变化
+- 验证特定边缘情况条件下的合约行为
+- 创建合约执行可视化工具
+- 执行合约代码的静态分析
+- 安全测试交易撤销和错误条件
+
+## 方法详情
+
+此方法模拟交易并返回其执行的详细追踪。
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    "method": "trace_call",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'transaction',
+      required: true,
+      type: 'object',
+      desc: "交易调用对象",
+      fields: [
+        {
+          id: 'from',
+          type: 'string',
+          desc: "交易发送地址",
+          value: "0x6f1FB6EFDf50F34bFA3F2bC0E5576EdD71631638"
+        },
+        {
+          id: 'to',
+          type: 'string',
+          desc: "交易接收地址",
+          value: "0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e"
+        },
+        {
+          id: 'gas',
+          type: 'string',
+          desc: "为交易提供的燃料（十六进制）",
+          value: "0x100000"
+        },
+        {
+          id: 'gasPrice',
+          type: 'string',
+          desc: "燃料价格（以 wei 为单位，十六进制）",
+          value: "0x4A817C800"
+        },
+        {
+          id: 'value',
+          type: 'string',
+          desc: "转移的价值（以 wei 为单位，十六进制）",
+          value: "0x0"
+        },
+        {
+          id: 'data',
+          type: 'string',
+          desc: "合约方法调用数据",
+          value: "0xa67a6a45000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      id: 'traceTypes',
+      required: true,
+      type: 'array',
+      desc: "响应中包含的追踪类型数组",
+      value: ["trace"]
+    },
+    {
+      id: 'blockParameter',
+      type: 'string',
+      desc: "整数区块号，或 'latest'、'earliest'、'pending'（可选）",
+      value: "latest"
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'object',
+      desc: "带有执行详情的追踪结果对象",
+      fields: [
+        {
+          id: 'output',
+          type: 'string',
+          desc: "调用返回的数据"
+        },
+        {
+          id: 'stateDiff',
+          type: 'object',
+          desc: "调用导致的状态变化（如果请求）"
+        },
+        {
+          id: 'trace',
+          type: 'array',
+          desc: "追踪对象数组",
+          fields: [
+            {
+              id: 'action',
+              type: 'object',
+              desc: "关于调用操作的详情",
+              fields: [
+                {
+                  id: 'callType',
+                  type: 'string',
+                  desc: "调用类型（call, delegatecall 等）"
+                },
+                {
+                  id: 'from',
+                  type: 'string',
+                  desc: "发送者地址"
+                },
+                {
+                  id: 'gas',
+                  type: 'string',
+                  desc: "为调用提供的燃料"
+                },
+                {
+                  id: 'input',
+                  type: 'string',
+                  desc: "调用的输入数据"
+                },
+                {
+                  id: 'to',
+                  type: 'string',
+                  desc: "接收者地址"
+                },
+                {
+                  id: 'value',
+                  type: 'string',
+                  desc: "转移的价值（以 wei 为单位）"
+                }
+              ]
+            },
+            {
+              id: 'result',
+              type: 'object',
+              desc: "调用结果",
+              fields: [
+                {
+                  id: 'gasUsed',
+                  type: 'string',
+                  desc: "使用的燃料量"
+                },
+                {
+                  id: 'output',
+                  type: 'string',
+                  desc: "调用的输出数据"
+                }
+              ]
+            },
+            {
+              id: 'subtraces',
+              type: 'integer',
+              desc: "子追踪数量"
+            },
+            {
+              id: 'traceAddress',
+              type: 'array',
+              desc: "调用树中追踪位置的地址路径"
+            },
+            {
+              id: 'type',
+              type: 'string',
+              desc: "追踪类型"
+            },
+            {
+              id: 'error',
+              type: 'string',
+              desc: "如果调用失败的错误消息"
+            }
+          ]
+        },
+        {
+          id: 'vmTrace',
+          type: 'object',
+          desc: "虚拟机执行追踪（如果请求）"
+        }
+      ]
+    }
+  ]}
+  getParams={(fields) => {
+    const params = [];
+
+    // Build transaction object
+    const tx = {};
+    if (fields?.transaction?.from) tx.from = fields.transaction.from;
+    if (fields?.transaction?.to) tx.to = fields.transaction.to;
+    if (fields?.transaction?.gas) tx.gas = fields.transaction.gas;
+    if (fields?.transaction?.gasPrice) tx.gasPrice = fields.transaction.gasPrice;
+    if (fields?.transaction?.value) tx.value = fields.transaction.value;
+    if (fields?.transaction?.data) tx.data = fields.transaction.data;
+
+    params.push(tx);
+
+    // Add trace types
+    params.push(fields?.traceTypes || ["trace"]);
+
+    // Add block parameter if provided
+    if (fields?.blockParameter) {
+      params.push(fields.blockParameter);
+    }
+
+    return params;
+
+}}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"output": "0x",
+		"stateDiff": null,
+		"trace": [
+			{
+				"action": {
+					"callType": "call",
+					"from": "0x6f1fb6efdf50f34bfa3f2bc0e5576edd71631638",
+					"gas": "0x1dcd11f8",
+					"input": "0xa67a6a45000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000",
+					"to": "0x1e0447b19bb6ecfdae1e4ae1694b0c3659614e4e",
+					"value": "0x0"
+				},
+				"error": "Reverted",
+				"subtraces": 0,
+				"traceAddress": [],
+				"type": "call"
+			}
+		],
+		"vmTrace": null
+	}
+}
+```
+
+### 调用类型
+
+追踪操作中的 `callType` 字段表示调用类型：
+
+- **call**: 地址之间的标准调用
+- **staticcall**: 只读调用（不能修改状态）
+- **delegatecall**: 保持调用者上下文的调用
+- **callcode**: 遗留调用类型（已弃用）
+
+### 追踪类型
+
+追踪中的 `type` 字段表示操作类型：
+
+- **call**: 消息调用
+- **create**: 合约创建
+- **suicide**: 合约自毁（SELFDESTRUCT 操作码）
+
+### 理解 traceAddress
+
+`traceAddress` 字段表示在调用树中的位置：
+
+- 空数组（`[]`）表示顶级调用
+- 索引数组显示通过嵌套调用的路径
+- 帮助您跟踪复杂交互中的精确执行路径
+
+### 成功调用的响应示例
+
+以下是 `trace_call` 的示例响应：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "stateDiff": { /* 状态变化 */ },
+    "trace": [
+      {
+        "action": {
+          "callType": "call",
+          "from": "0x407d73d8a49eeb85d32cf465507dd71d507100c1",
+          "gas": "0x1dcd12f8",
+          "input": "0xa9059cbb0000000000000000000000002710000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a",
+          "to": "0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b",
+          "value": "0x0"
+        },
+        "result": {
+          "gasUsed": "0x765",
+          "output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "subtraces": 1,
+        "traceAddress": [],
+        "type": "call"
+      },
+      {
+        "action": {
+          "callType": "call",
+          "from": "0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b",
+          "gas": "0x1dcd0393",
+          "input": "0x",
+          "to": "0x2710000000000000000000000000000000000000",
+          "value": "0xa"
+        },
+        "result": {
+          "gasUsed": "0x0",
+          "output": "0x"
+        },
+        "subtraces": 0,
+        "traceAddress": [0],
+        "type": "call"
+      }
+    ],
+    "vmTrace": { /* 详细的虚拟机执行信息 */ }
+  }
+}
+```
+
+### 与 eth_call 的区别
+
+虽然 `trace_call` 和 `eth_call` 都执行模拟调用：
+
+- `trace_call` 提供 `eth_call` 中不可用的详细执行追踪
+- `trace_call` 可以返回几种类型的追踪（操作、VM 步骤、状态变化）
+- `trace_call` 提供更多用于调试和分析的信息
+- `eth_call` 在所有以太坊客户端中更轻量和标准
+- `trace_call` 支持历史区块状态模拟
+
+### 性能考虑
+
+- 追踪计算密集，尤其是启用所有追踪类型时
+- vmTrace 和 stateDiff 特别增加响应大小和计算时间
+- 考虑只请求您需要的追踪类型
+- 对于复杂合约，响应可能非常大
+- 可能在公共节点或速率限制的端点上超时
+- 响应时间随交易复杂度增加
+- 如果追踪多个调用，考虑使用批处理请求
+- 对于生产应用程序，建议使用专用基础设施
+
+### 重要注意事项
+
+- 此方法需要在节点上启用追踪 API
+- 并非所有客户端都支持此方法（主要是带有 `--gcmode=archive` 的 Geth 和 OpenEthereum/Nethermind）
+- 该方法不会修改区块链或使用实际燃料
+- 由于模拟细节，燃料估算可能与实际交易略有不同
+- 不同客户端可能返回略有不同的追踪格式
+- 回退的交易将包含直到回退点的追踪信息
+- 对于历史区块，节点必须有该状态的存档数据
+- 对于修改许多存储槽的交易，`stateDiff` 响应可能非常大
+- 在大多数公共 RPC 提供商上，可能无法对主网进行追踪
+- 追踪显示实际执行路径，而非所有可能路径
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/trace-methods/trace_transaction" title="获取已在区块链上的特定交易的详细执行追踪">trace_transaction</Link> - 检索现有交易的追踪
+- <Link to="/docs/ethereum/trace-methods/trace_filter" title="在多个区块中搜索匹配特定条件的交易追踪">trace_filter</Link> - 跨多个区块过滤和搜索追踪
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="获取指定区块内所有交易执行追踪">trace_block</Link> - 获取区块中所有交易的追踪
+- <Link to="/docs/ethereum/core-methods/eth_call" title="执行新的消息调用而不在区块链上创建交易">eth_call</Link> - 类似方法但没有详细追踪信息
+- <Link to="/docs/ethereum/debug-methods/debug_traceCall" title="使用自定义追踪选项对调用进行低级追踪">debug_traceCall</Link> - 具有不同追踪选项的替代追踪方法

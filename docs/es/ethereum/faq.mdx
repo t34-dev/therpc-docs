@@ -1,0 +1,141 @@
+---
+title: FAQ - Preguntas Frecuentes | Solución de Problemas de la API Ethereum
+description: Guía completa que responde a preguntas comunes sobre el uso de la API Ethereum de TheRPC, incluyendo autenticación, límites de velocidad, manejo de errores, optimización del rendimiento y mejores prácticas de implementación
+keywords: faq therpc, preguntas api, faq api blockchain, ayuda api ethereum, solución problemas json rpc, preguntas desarrollo ethereum, errores api blockchain, rendimiento api ethereum, mejores prácticas web3, interacción contrato inteligente
+---
+
+# Preguntas Frecuentes
+
+## # Autenticación y Acceso
+
+- #### ¿Cómo obtengo una clave API?
+
+  Regístrate en TheRPC.io y navega al panel de control para generar tu clave API. Cada clave tiene sus propios límites de velocidad y permisos.
+
+- #### ¿Puedo usar múltiples claves API?
+
+  Sí, puedes crear múltiples claves API para diferentes aplicaciones o entornos. Esto ayuda a monitorizar el uso y mantener la seguridad.
+
+- #### ¿Qué sucede si mi clave API se ve comprometida?
+  Revoca inmediatamente la clave comprometida desde tu panel de control y genera una nueva. Tu clave antigua dejará de funcionar instantáneamente.
+
+## # Uso de la API
+
+### ¿Cuál es la diferencia entre los endpoints HTTP y WebSocket?
+
+- **HTTP**: Mejor para solicitudes individuales e integraciones simples. Usa métodos como <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Método para obtener el número de bloque actual">eth_blockNumber</Link> o <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Método para recuperar el saldo ETH de una cuenta">eth_getBalance</Link>
+- **WebSocket**: Ideal para datos en tiempo real y suscripciones a eventos como <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Método para suscribirse a eventos blockchain en tiempo real">eth_subscribe</Link>
+
+### ¿Cómo manejar los límites de velocidad?
+
+Implementa retroceso exponencial cuando recibas errores de límite de velocidad. Considera actualizar tu plan si alcanzas los límites constantemente.
+
+### ¿Cuáles son las configuraciones de tiempo de espera recomendadas?
+
+Recomendamos:
+
+- Solicitudes HTTP: 30 segundos de tiempo de espera
+- Conexiones WebSocket: intervalo de ping/pong de 60 segundos
+- Operaciones de suscripción: 30 segundos de tiempo de espera
+
+## # Manejo de Errores
+
+### Códigos de Error Comunes
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32601,
+		"message": "Method not found"
+	},
+	"id": 1
+}
+```
+
+- `-32700`: Error de análisis
+- `-32600`: Solicitud inválida
+- `-32601`: Método no encontrado
+- `-32602`: Parámetros inválidos
+- `-32603`: Error interno
+- `-32000 a -32099`: Error del servidor
+
+### Mejores Prácticas para el Manejo de Errores
+
+1. Siempre verifica la respuesta en busca de un campo `error`
+2. Implementa una lógica de reintento adecuada con retroceso
+3. Registra información detallada de errores para depuración
+4. Maneja los tiempos de espera de red adecuadamente
+
+## # Preguntas Técnicas
+
+### ¿Cómo rastrear transacciones pendientes?
+
+Usa <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Método para obtener el recibo de transacción y el estado de confirmación">eth_getTransactionReceipt</Link> para sondear el estado de la transacción. Para actualizaciones en tiempo real, suscríbete a transacciones pendientes a través de <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Método para suscribirse a eventos blockchain en tiempo real">eth_subscribe</Link> usando WebSocket.
+
+```javascript
+// Ejemplo de seguimiento de transacción
+const receipt = await web3.eth.getTransactionReceipt(txHash);
+if (receipt) {
+	console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
+}
+```
+
+### ¿Cómo puedo asegurar que mis solicitudes se procesen en orden?
+
+Usa el parámetro `nonce` para transacciones y mantén una cola en tu aplicación para el procesamiento secuencial. Puedes obtener el nonce actual usando <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="Método para obtener el contador de transacciones (nonce) para una cuenta">eth_getTransactionCount</Link>.
+
+### ¿Cuál es la forma recomendada de manejar reorganizaciones de la cadena?
+
+1. Espera suficientes confirmaciones de bloques usando <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Método para obtener el número de bloque actual">eth_blockNumber</Link>
+2. Escucha eventos `newHeads` a través de <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Método para suscribirse a eventos blockchain en tiempo real">eth_subscribe</Link>
+3. Verifica la finalidad de la transacción usando <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Método para obtener información de bloque por número de bloque">eth_getBlockByNumber</Link>
+
+## # Rendimiento
+
+### ¿Cómo puedo optimizar mi uso de la API?
+
+1. Agrupa solicitudes relacionadas cuando sea posible
+2. Usa WebSocket para datos en tiempo real a través de <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Método para suscribirse a eventos blockchain en tiempo real">eth_subscribe</Link>
+3. Implementa un almacenamiento en caché adecuado
+4. Elige intervalos de sondeo apropiados
+
+### ¿Cuáles son las mejores prácticas para aplicaciones de alto rendimiento?
+
+1. Usa agrupación de conexiones
+2. Implementa encolado de solicitudes
+3. Monitoriza los límites de velocidad
+4. Considera infraestructura dedicada
+
+## # Específico de la Red
+
+### ¿Cómo cambio entre redes?
+
+Simplemente usa el endpoint apropiado para cada red mientras mantienes la misma clave API y formato de solicitud. Puedes verificar la red usando <Link to="/docs/ethereum/core-methods/net_version" title="Método para obtener el ID de red actual">net_version</Link>.
+
+### ¿Puedo usar el mismo código para diferentes redes?
+
+Sí, nuestra API proporciona interfaces consistentes en todas las redes. Solo actualiza la URL del endpoint para diferentes redes. Puedes verificar el ID de la cadena usando <Link to="/docs/ethereum/core-methods/eth_chainId" title="Método para obtener el ID de cadena actual">eth_chainId</Link>.
+
+## # Desarrollo e Integración
+
+### ¿Qué biblioteca Web3 debería usar?
+
+- **JavaScript**: web3.js o ethers.js
+- **Python**: web3.py
+- **Java**: web3j
+- **Otros lenguajes**: Consulta nuestra sección <Link to="/docs/tools/overview" title="Resumen de herramientas para diferentes lenguajes de programación">Herramientas y SDKs</Link>
+
+### ¿Cómo pruebo mi integración?
+
+1. Comienza con endpoints de testnet
+2. Usa nuestras claves API de prueba
+3. Implementa un manejo de errores adecuado
+4. Valida las respuestas usando métodos como <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Método para obtener el número de bloque actual">eth_blockNumber</Link>
+5. Monitoriza el rendimiento
+
+### Ver también
+
+- <Link to="/docs/ethereum/quick-start" title="Comienza rápidamente con la API de Ethereum">Guía de Inicio Rápido</Link> - Comienza Rápidamente
+- <Link to="/docs/ethereum/authentication" title="Guía para asegurar el acceso a tu API">Guía de Autenticación</Link> - Información Detallada de Autenticación
+- <Link to="/docs/ethereum/rate-limits" title="Información sobre límites de uso de API y cuotas">Límites de Velocidad</Link> - Entender los Límites de Uso

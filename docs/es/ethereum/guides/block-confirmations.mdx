@@ -1,0 +1,48 @@
+---
+title: Guía de Confirmaciones de Bloques | Finalidad de Transacciones en Ethereum
+description: Guía completa para entender las confirmaciones de bloques en Ethereum, implementar verificación segura de transacciones y asegurar la finalidad de transacciones en diferentes condiciones de red.
+keywords: confirmaciones de bloques, finalidad de transacciones, seguridad ethereum, confirmaciones blockchain, finalidad ethereum, confirmar transacciones, verificación de bloques, seguridad de transacciones, transacciones ethereum, garantías de finalidad
+---
+
+# Guía de Confirmaciones de Bloques
+
+Las confirmaciones de bloques son cruciales para asegurar la finalidad de las transacciones en Ethereum. Esta guía explica cómo funcionan las confirmaciones y cómo implementarlas en tus aplicaciones.
+
+## Entendiendo las Confirmaciones
+
+- Qué son las confirmaciones de bloques
+- Por qué importan las confirmaciones
+- Número recomendado de confirmaciones
+- Finalidad en diferentes redes (mainnet vs testnets)
+
+## Ejemplos de Implementación
+
+```javascript
+// Verificar número de confirmaciones
+const getConfirmations = async (txHash) => {
+	const tx = await web3.eth.getTransaction(txHash);
+	const currentBlock = await web3.eth.getBlockNumber();
+	return tx.blockNumber ? currentBlock - tx.blockNumber : 0;
+};
+
+// Esperar un número específico de confirmaciones
+const waitForConfirmations = async (txHash, confirmations = 6) => {
+	while ((await getConfirmations(txHash)) < confirmations) {
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+	}
+	return true;
+};
+```
+
+## Consideraciones de Seguridad
+
+1. Diferentes requisitos de confirmación para diferentes valores de transacción
+2. Manejo de reorganizaciones de cadena
+3. Consideraciones específicas de la red
+4. Monitoreo del progreso de confirmación
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Método API para recuperar el estado de confirmación de una transacción">eth_getTransactionReceipt</Link> - Obtener estado de confirmación de transacción
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="Aprende técnicas fundamentales para trabajar con bloques de Ethereum">Trabajando con Bloques</Link> - Manejo general de bloques
+- <Link to="/docs/ethereum/guides/chain-reorganization" title="Aprende cómo manejar reorganizaciones de blockchain en Ethereum">Guía de Reorganización de Cadena</Link> - Manejo de reorganizaciones de blockchain

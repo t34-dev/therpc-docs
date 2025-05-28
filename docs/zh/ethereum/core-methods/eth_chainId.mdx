@@ -1,0 +1,71 @@
+---
+title: eth_chainId - 获取网络链 ID | 以太坊 API 方法
+description: 学习如何使用 eth_chainId 方法检索用于防重放交易的当前网络/链 ID。包括示例和响应格式。
+keywords: eth_chainId, 以太坊链 id, 网络 id, EIP-155, 重放保护, 区块链网络, 多链, 网络检测, 区块链标识符
+---
+
+# eth_chainId
+
+`eth_chainId` 方法返回当前网络/链 ID，这对于签署 EIP-155 中引入的防重放交易至关重要。这个简单而基本的方法有助于确保交易在预期网络上执行，并防止交易重放攻击。
+
+## 使用场景
+
+- 在钱包和 DApp 中验证当前网络连接
+- 实施交易重放保护
+- 在多链应用程序中构建特定网络逻辑
+- 跨链应用程序开发和切换
+- 交易签名验证
+- 用户界面的网络检测
+- Web3 应用程序中的自动网络切换
+
+## 方法详情
+
+这是一个简单的查询方法，以十六进制格式返回所连接网络的链 ID。它不需要参数，非常轻量级。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_chainId',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '十六进制格式的链 ID',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x1" // 代表以太坊主网（链 ID：1）
+}
+```
+
+### 常见链 ID
+
+- 0x1 (1): 以太坊主网
+- 0x5 (5): Goerli 测试网
+- 0xAA36A7 (11155111): Sepolia 测试网
+- 0x89 (137): Polygon 主网
+- 0xA (10): Optimism
+- 0xA4B1 (42161): Arbitrum One
+- 0x38 (56): BNB 智能链
+- 0xA86A (43114): Avalanche C-链
+
+### 理解 EIP-155
+
+EIP-155 通过在交易签名中包含链 ID 引入了重放保护。在这一改进之前，为一个网络签署的交易可能会在另一个网络或分叉上被重放。`eth_chainId` 方法对于实现这种保护至关重要，因为它允许应用程序获取正确的链 ID 值，以包含在交易签名中。
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="获取详细区块信息">eth_getBlockByNumber</Link> - 通过区块号检索区块信息
+- <Link to="/docs/ethereum/core-methods/eth_syncing" title="检查节点同步状态">eth_syncing</Link> - 检查节点当前是否正在同步

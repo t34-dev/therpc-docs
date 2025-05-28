@@ -1,0 +1,103 @@
+---
+title: net_version - Obtener ID de Red | Métodos API de Ethereum
+description: Aprende a usar el método net_version para identificar a qué red de Ethereum está conectado tu cliente, incluyendo la red principal, redes de prueba y otras redes compatibles con EVM.
+keywords: net_version, id de red, red ethereum, id de cadena, identificación de red, red blockchain, ethereum mainnet, detección de testnet, cambio de red, multi-chain, redes evm, verificación de red, id de blockchain, selección de cadena, diagnósticos de red, detección de cadena
+---
+
+# net_version
+
+El método `net_version` devuelve el ID de red actual como una cadena. Esto permite a las aplicaciones determinar a qué red de Ethereum está conectado el cliente, como la red principal, redes de prueba u otras redes compatibles con EVM.
+
+## Casos de Uso
+
+- Verificación de red antes de enviar transacciones
+- Comprobaciones de compatibilidad entre cadenas en aplicaciones multi-chain
+- Funcionalidad específica del entorno para dApps
+- Validaciones de seguridad para evitar envíos a redes incorrectas
+- Desarrollo y pruebas de dApps en múltiples redes
+- Prevención de operaciones accidentales entre testnet y mainnet
+- Verificación de despliegue de contratos inteligentes
+- Confirmación de cambio de red en wallets
+- Comprobaciones de seguridad para validación de transacciones
+- Habilitación de características específicas según la red
+
+## Detalles del Método
+
+Este método no requiere parámetros y devuelve un valor de cadena que representa el ID de red.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'net_version',
+		id: 67,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'El ID de red actual como una cadena',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 67,
+	"result": "1" // Ethereum Mainnet
+}
+```
+
+### IDs de Red Comunes
+
+| ID de Red   | Nombre de Red                |
+| ---------- | ---------------------------- |
+| "1"        | Ethereum Mainnet             |
+| "5"        | Goerli Testnet               |
+| "11155111" | Sepolia Testnet              |
+| "10"       | Optimism Mainnet             |
+| "42161"    | Arbitrum One                 |
+| "42170"    | Arbitrum Nova                |
+| "137"      | Polygon Mainnet              |
+| "80001"    | Polygon Mumbai Testnet       |
+| "56"       | BNB Smart Chain Mainnet      |
+| "97"       | BNB Smart Chain Testnet      |
+| "43114"    | Avalanche C-Chain            |
+| "250"      | Fantom Opera                 |
+| "100"      | Gnosis Chain (anteriormente xDai) |
+| "1284"     | Moonbeam                     |
+| "1285"     | Moonriver                    |
+| "324"      | zkSync Era Mainnet           |
+| "59144"    | Linea Mainnet                |
+| "8453"     | Base Mainnet                 |
+| "84531"    | Base Goerli Testnet          |
+| "534352"   | Scroll Mainnet               |
+| "7777777"  | Zora Mainnet                 |
+
+### Notas Importantes
+
+- El ID de red se devuelve como una cadena, no como un número
+- El ID de red a veces es el mismo que el ID de cadena, pero no siempre
+- Algunas redes pueden cambiar su ID de red con el tiempo
+- Siempre verifica el ID de red cuando desarrolles aplicaciones entre cadenas
+- Para aplicaciones críticas de seguridad, considera usar múltiples métodos de verificación
+- EIP-155 introdujo el ID de cadena para protección contra repetición, que es diferente del ID de red en algunos casos
+- Para la firma de transacciones, el ID de cadena (de `eth_chainId`) es generalmente más relevante que el ID de red
+
+### Diferencia Entre ID de Red e ID de Cadena
+
+- **ID de Red**: Identifica la red en el protocolo P2P
+- **ID de Cadena**: Se utiliza para la firma de transacciones para prevenir ataques de repetición
+- Para la mayoría de las redes, son el mismo valor, pero hay excepciones
+- Siempre usa el ID apropiado para el caso de uso específico
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_chainId" title="Obtener el ID de cadena usado para la firma de transacciones">eth_chainId</Link> - Devuelve el ID de cadena utilizado para firmar transacciones
+- <Link to="/docs/ethereum/core-methods/net_listening" title="Comprobar si tu nodo está escuchando activamente conexiones">net_listening</Link> - Devuelve si el cliente está activamente en red
+- <Link to="/docs/ethereum/core-methods/net_peerCount" title="Comprobar cuántos pares están conectados a tu nodo">net_peerCount</Link> - Devuelve el número de pares conectados

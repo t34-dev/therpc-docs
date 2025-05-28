@@ -1,0 +1,304 @@
+---
+title: trace_replayTransaction - VM ट्रेसिंग के साथ लेनदेन रिप्ले करें | Ethereum API विधियां
+description: व्यापक डीबगिंग और विश्लेषण के लिए विस्तृत ट्रेस और स्टेट परिवर्तनों के साथ लेनदेन रिप्ले करने के लिए trace_replayTransaction विधि का उपयोग कैसे करें।
+keywords: trace_replayTransaction, ethereum replay, transaction replay, vm trace, state diff, ethereum tracing, smart contract debugging, state changes
+---
+
+# trace_replayTransaction
+
+`trace_replayTransaction` विधि आपको एक लेनदेन को रिप्ले करने और निष्पादन ट्रेस, VM ट्रेस और स्टेट परिवर्तनों सहित विभिन्न प्रकार की ट्रेस जानकारी प्राप्त करने की अनुमति देती है। यह विधि स्टेट में परिवर्तन दिखाकर `trace_transaction` से अधिक विस्तृत जानकारी प्रदान करती है।
+
+## उपयोग के मामले
+
+- स्टेट परिवर्तनों के साथ जटिल लेनदेन को डीबग करना
+- अनुकूलन के लिए गैस खपत का विश्लेषण करना
+- कॉन्ट्रैक्ट्स के बीच आंतरिक कॉल को ट्रेस करना
+- एक लेनदेन द्वारा स्टोरेज कैसे संशोधित किया गया, यह समझना
+- जटिल लॉजिक फ्लो के निष्पादन को सत्यापित करना
+- पूर्ण स्टेट ट्रांज़िशन विवरण के साथ सुरक्षा ऑडिटिंग
+- विस्तृत संदर्भ के साथ रिवर्ट कारणों का विश्लेषण करना
+- मेमोरी और स्टोरेज एक्सेस पैटर्न की जांच करना
+- ऑडिट समीक्षा के हिस्से के रूप में कॉन्ट्रैक्ट व्यवहार का सत्यापन
+- निष्पादन पैटर्न के आधार पर कॉन्ट्रैक्ट कोड का अनुकूलन
+
+## विधि विवरण
+
+यह विधि एक लेनदेन को रिप्ले करती है और VM ट्रेस और स्टेट डिफरेंस सहित विस्तृत ट्रेस जानकारी लौटाती है।
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'trace_replayTransaction',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'transactionHash',
+			required: true,
+			type: 'string',
+			desc: 'रिप्ले करने के लिए लेनदेन का हैश',
+			value: '0x02d4a872e096445e80d05276ee756cefef7f3b376bcec14246469c0cd97dad8f',
+		},
+		{
+			id: 'traceTypes',
+			required: true,
+			type: 'array',
+			desc: 'प्रतिक्रिया में शामिल करने के लिए ट्रेस प्रकारों की सरणी',
+			value: ['trace', 'vmTrace', 'stateDiff'],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'ट्रेस जानकारी के साथ परिणाम ऑब्जेक्ट',
+			fields: [
+				{
+					id: 'output',
+					type: 'string',
+					desc: 'लेनदेन से आउटपुट डेटा',
+				},
+				{
+					id: 'stateDiff',
+					type: 'object',
+					desc: 'लेनदेन के कारण स्टेट डिफरेंस (यदि अनुरोधित हो)',
+					fields: [
+						{
+							id: 'address',
+							type: 'object',
+							desc: 'किसी पते के लिए स्टेट परिवर्तन',
+						},
+					],
+				},
+				{
+					id: 'trace',
+					type: 'array',
+					desc: 'लेनदेन में सभी ऑपरेशन्स के लिए ट्रेस ऑब्जेक्ट की सरणी',
+					fields: [
+						{
+							id: 'action',
+							type: 'object',
+							desc: 'कॉल एक्शन के बारे में विवरण',
+							fields: [
+								{
+									id: 'callType',
+									type: 'string',
+									desc: 'कॉल का प्रकार (call, delegatecall, आदि)',
+								},
+								{
+									id: 'from',
+									type: 'string',
+									desc: 'प्रेषक पता',
+								},
+								{
+									id: 'gas',
+									type: 'string',
+									desc: 'कॉल के लिए प्रदान की गई गैस (हेक्स)',
+								},
+								{
+									id: 'input',
+									type: 'string',
+									desc: 'कॉल के लिए इनपुट डेटा (हेक्स)',
+								},
+								{
+									id: 'to',
+									type: 'string',
+									desc: 'प्राप्तकर्ता पता',
+								},
+								{
+									id: 'value',
+									type: 'string',
+									desc: 'wei में स्थानांतरित मूल्य (हेक्स)',
+								},
+							],
+						},
+						{
+							id: 'result',
+							type: 'object',
+							desc: 'कॉल का परिणाम',
+							fields: [
+								{
+									id: 'gasUsed',
+									type: 'string',
+									desc: 'उपयोग की गई गैस की मात्रा (हेक्स)',
+								},
+								{
+									id: 'output',
+									type: 'string',
+									desc: 'कॉल से आउटपुट डेटा (हेक्स)',
+								},
+							],
+						},
+						{
+							id: 'subtraces',
+							type: 'integer',
+							desc: 'सबट्रेस की संख्या',
+						},
+						{
+							id: 'traceAddress',
+							type: 'array',
+							desc: 'कॉल ट्री में ट्रेस स्थान का पता पथ',
+						},
+						{
+							id: 'type',
+							type: 'string',
+							desc: 'ऑपरेशन का प्रकार (call, create, suicide)',
+						},
+					],
+				},
+				{
+					id: 'vmTrace',
+					type: 'object',
+					desc: 'वर्चुअल मशीन निष्पादन ट्रेस (यदि अनुरोधित हो)',
+					fields: [
+						{
+							id: 'code',
+							type: 'string',
+							desc: 'निष्पादित होने वाला EVM बाइटकोड',
+						},
+						{
+							id: 'ops',
+							type: 'array',
+							desc: 'निष्पादित ऑपरेशन्स की सरणी',
+							fields: [
+								{
+									id: 'cost',
+									type: 'integer',
+									desc: 'ऑपरेशन की गैस लागत',
+								},
+								{
+									id: 'ex',
+									type: 'object',
+									desc: 'ऑपरेशन का निष्पादन परिणाम',
+								},
+								{
+									id: 'pc',
+									type: 'integer',
+									desc: 'प्रोग्राम काउंटर',
+								},
+								{
+									id: 'sub',
+									type: 'object',
+									desc: 'कॉल सब-एक्जीक्यूशन के बारे में जानकारी',
+								},
+							],
+						},
+					],
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.transactionHash || null, fields?.traceTypes || ['trace', 'vmTrace', 'stateDiff']]}
+/>
+
+### प्रतिक्रिया उदाहरण
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+		"stateDiff": {
+			"0x1234567890123456789012345678901234567890": {
+				"balance": {
+					"*": {
+						"from": "0x100",
+						"to": "0x110"
+					}
+				},
+				"code": "=",
+				"nonce": {
+					"*": {
+						"from": "0x10",
+						"to": "0x11"
+					}
+				},
+				"storage": {
+					"0x0000000000000000000000000000000000000000000000000000000000000001": {
+						"*": {
+							"from": "0x0000000000000000000000000000000000000000000000000000000000000000",
+							"to": "0x0000000000000000000000000000000000000000000000000000000000000001"
+						}
+					}
+				}
+			}
+		},
+		"trace": [
+			{
+				"action": {
+					"callType": "call",
+					"from": "0x83806d539d4ea1c140489a06660319c9a303f874",
+					"gas": "0x1a1f8",
+					"input": "0x",
+					"to": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+					"value": "0x7a16c911b4d00000"
+				},
+				"result": {
+					"gasUsed": "0x2982",
+					"output": "0x"
+				},
+				"subtraces": 2,
+				"traceAddress": [],
+				"type": "call"
+			}
+		],
+		"vmTrace": {
+			"code": "0x606060...",
+			"ops": [
+				{
+					"cost": 3,
+					"ex": {
+						"mem": null,
+						"push": ["0x60"],
+						"store": null,
+						"used": 16723979
+					},
+					"pc": 0,
+					"sub": null
+				}
+			]
+		}
+	}
+}
+```
+
+### ट्रेस प्रकार
+
+`traceTypes` पैरामीटर निम्न मानों की एक सरणी स्वीकार करता है:
+
+- **trace**: लेनदेन निष्पादन का बुनियादी ट्रेस
+- **vmTrace**: EVM निष्पादन का विस्तृत ट्रेस
+- **stateDiff**: लेनदेन के परिणामस्वरूप स्टेट परिवर्तन
+
+आप इन ट्रेस प्रकारों के किसी भी संयोजन का अनुरोध कर सकते हैं।
+
+### स्टेट डिफ प्रारूप
+
+स्टेट डिफ प्रारूप निम्नलिखित प्रतीकों का उपयोग करता है:
+
+- **"="**: मान में कोई परिवर्तन नहीं
+- **"+"**: मान बनाया गया था
+- **"-"**: मान हटाया गया था
+- **"\*"**: मान संशोधित किया गया था, "from" और "to" मानों के साथ
+
+### महत्वपूर्ण नोट्स
+
+- इस विधि के लिए Ethereum नोड पर ट्रेस API सक्षम होने की आवश्यकता है
+- सभी Ethereum क्लाइंट इस विधि का समर्थन नहीं करते (मुख्य रूप से OpenEthereum/Nethermind)
+- प्रतिक्रिया बहुत बड़ी हो सकती है, विशेष रूप से vmTrace सक्षम होने पर
+- स्टेट परिवर्तनों के बिना सरल ट्रेस जानकारी के लिए, इसके बजाय `trace_transaction` का उपयोग करें
+- यह विधि कम्प्यूटेशनल रूप से गहन है और पूरा होने में समय लग सकता है
+- ऐतिहासिक लेनदेन का ट्रेस केवल तभी किया जा सकता है जब नोड आर्काइव डेटा बनाए रखता है
+- विभिन्न traceTypes प्रतिक्रिया आकार और गणना समय को महत्वपूर्ण रूप से प्रभावित करते हैं
+- सरल लेनदेन के डीबगिंग के लिए, `trace_transaction` पर्याप्त हो सकता है
+- स्टोरेज परिवर्तनों को समझने के लिए स्टेट डिफ्स विशेष रूप से मूल्यवान हैं
+- रिवर्ट होने वाले लेनदेन रिवर्ट पॉइंट तक स्टेट परिवर्तन दिखाएंगे
+
+### यह भी देखें
+
+- <Link to="/docs/ethereum/trace-methods/trace_transaction" title="Get basic execution traces for a specific transaction">trace_transaction</Link> - किसी लेनदेन के लिए बुनियादी ट्रेस प्राप्त करें
+- <Link to="/docs/ethereum/trace-methods/trace_replayBlockTransactions" title="Replay all transactions in a block with VM tracing">trace_replayBlockTransactions</Link> - किसी ब्लॉक में सभी लेनदेन रिप्ले और ट्रेस करें
+- <Link to="/docs/ethereum/trace-methods/trace_call" title="Trace a call without creating a transaction">trace_call</Link> - लेनदेन बनाए बिना कॉल को निष्पादित और ट्रेस करें
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Get low-level EVM execution details for a transaction">debug_traceTransaction</Link> - वैकल्पिक विस्तृत लेनदेन ट्रेसिंग

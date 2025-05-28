@@ -1,0 +1,67 @@
+---
+title: eth_getUncleCountByBlockHash - Get Uncle Count by Block Hash | Ethereum API Methods
+description: Learn how to use the eth_getUncleCountByBlockHash method to retrieve the number of uncle blocks in a specified block on the Ethereum blockchain.
+keywords: eth_getUncleCountByBlockHash, uncle blocks, ommer blocks, ethereum block, uncle count, mining statistics
+---
+
+# eth_getUncleCountByBlockHash
+
+The `eth_getUncleCountByBlockHash` method returns the number of uncles (ommer blocks) in a block specified by the block hash. Uncle blocks are valid blocks that weren't included in the main chain but are still referenced and partially rewarded in Ethereum.
+
+## Use Cases
+
+- Block explorer statistics
+- Mining pool analytics
+- Network health monitoring
+- Block validation verification
+- Consensus algorithm research
+- Uncle rate analysis
+- Historical block data collection
+- Mining reward calculations
+
+## Method Details
+
+This method returns a count of uncle blocks for a specific block identified by its hash.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getUncleCountByBlockHash',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockHash',
+			required: true,
+			type: 'string',
+			desc: 'The hash of the block',
+			value: '0xb3b20624f8f0f86eb50dd04688409e5cea4bd02d700bf6e79e9384d47d6a5a35',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'Integer of the number of uncles in this block (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.blockHash || null]}
+/>
+
+### Response Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x1" // 1 uncle in this block
+}
+```
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockHashAndIndex">eth_getUncleByBlockHashAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockNumberAndIndex">eth_getUncleByBlockNumberAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getUncleCountByBlockNumber">eth_getUncleCountByBlockNumber</Link>
+- <Link to="/docs/ethereum/guides/uncle-blocks">Uncle Blocks Guide</Link>

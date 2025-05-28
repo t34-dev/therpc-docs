@@ -1,0 +1,343 @@
+---
+title: trace_replayBlockTransactions - 重放区块交易 | 以太坊 API 方法
+description: 学习如何使用 trace_replayBlockTransactions 方法重放区块中的所有交易并提供追踪信息，用于详细分析和调试。
+keywords: trace_replayBlockTransactions, ethereum trace, transaction replay, block transactions, smart contract debugging, execution tracing
+---
+
+# trace_replayBlockTransactions
+
+`trace_replayBlockTransactions` 方法重放指定区块中的所有交易并返回每个交易的详细追踪信息。这提供了对交易执行流程的见解，允许进行详细分析和调试。
+
+## 使用场景
+
+- 分析特定区块中的交易执行流程
+- 调试复杂的智能合约交互
+- 理解交易执行导致的状态变化
+- 审计和验证交易结果
+- 燃料优化研究
+- 调查失败的交易
+- 研究和分析历史区块
+- 测试特定区块条件下的合约行为
+- 识别区块中多个交易的模式
+- 在交易级别验证共识规则
+
+## 方法详情
+
+此方法重放区块中的所有交易并提供详细的追踪信息。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'trace_replayBlockTransactions',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '十六进制格式的区块号或区块标签（latest, earliest, pending）',
+			value: 'latest',
+		},
+		{
+			id: 'traceTypes',
+			required: true,
+			type: 'array',
+			desc: '响应中包含的追踪类型数组',
+			value: ['trace', 'vmTrace', 'stateDiff'],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: '区块中每个交易的追踪结果数组',
+			fields: [
+				{
+					id: 'output',
+					type: 'string',
+					desc: '交易的输出数据',
+				},
+				{
+					id: 'stateDiff',
+					type: 'object',
+					desc: '交易导致的状态差异（如果请求）',
+					fields: [
+						{
+							id: 'address',
+							type: 'object',
+							desc: '地址的状态变化',
+						},
+					],
+				},
+				{
+					id: 'trace',
+					type: 'array',
+					desc: '追踪对象数组',
+					fields: [
+						{
+							id: 'action',
+							type: 'object',
+							desc: '关于调用操作的详情',
+							fields: [
+								{
+									id: 'callType',
+									type: 'string',
+									desc: '调用类型（call, delegatecall 等）',
+								},
+								{
+									id: 'from',
+									type: 'string',
+									desc: '发送者地址',
+								},
+								{
+									id: 'gas',
+									type: 'string',
+									desc: '为调用提供的燃料',
+								},
+								{
+									id: 'input',
+									type: 'string',
+									desc: '调用的输入数据',
+								},
+								{
+									id: 'to',
+									type: 'string',
+									desc: '接收者地址',
+								},
+								{
+									id: 'value',
+									type: 'string',
+									desc: '以 wei 为单位转移的价值',
+								},
+							],
+						},
+						{
+							id: 'result',
+							type: 'object',
+							desc: '调用结果',
+							fields: [
+								{
+									id: 'gasUsed',
+									type: 'string',
+									desc: '使用的燃料量',
+								},
+								{
+									id: 'output',
+									type: 'string',
+									desc: '调用的输出数据',
+								},
+							],
+						},
+						{
+							id: 'subtraces',
+							type: 'integer',
+							desc: '子追踪数量',
+						},
+						{
+							id: 'traceAddress',
+							type: 'array',
+							desc: '调用树中追踪位置的地址路径',
+						},
+						{
+							id: 'type',
+							type: 'string',
+							desc: '追踪类型',
+						},
+					],
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: '交易的哈希',
+				},
+				{
+					id: 'vmTrace',
+					type: 'object',
+					desc: '虚拟机执行追踪（如果请求）',
+					fields: [
+						{
+							id: 'code',
+							type: 'string',
+							desc: '正在执行的 EVM 字节码',
+						},
+						{
+							id: 'ops',
+							type: 'array',
+							desc: '已执行操作的数组',
+							fields: [
+								{
+									id: 'cost',
+									type: 'integer',
+									desc: '操作的燃料成本',
+								},
+								{
+									id: 'ex',
+									type: 'object',
+									desc: '操作的执行结果',
+								},
+								{
+									id: 'pc',
+									type: 'integer',
+									desc: '程序计数器',
+								},
+								{
+									id: 'sub',
+									type: 'object',
+									desc: '关于调用子执行的信息',
+								},
+							],
+						},
+					],
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null, fields?.traceTypes || ['trace', 'vmTrace', 'stateDiff']]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+			"stateDiff": {
+				"0x1234567890123456789012345678901234567890": {
+					"balance": {
+						"*": {
+							"from": "0x100",
+							"to": "0x110"
+						}
+					},
+					"code": "=",
+					"nonce": {
+						"*": {
+							"from": "0x10",
+							"to": "0x11"
+						}
+					},
+					"storage": {
+						"0x0000000000000000000000000000000000000000000000000000000000000001": {
+							"*": {
+								"from": "0x0000000000000000000000000000000000000000000000000000000000000000",
+								"to": "0x0000000000000000000000000000000000000000000000000000000000000001"
+							}
+						}
+					}
+				}
+			},
+			"trace": [
+				{
+					"action": {
+						"callType": "call",
+						"from": "0x71c7656ec7ab88b098defb751b7401b5f6d8976f",
+						"gas": "0x4c40d",
+						"input": "0xa9059cbb000000000000000000000000ea674fdde714fd979de3edf0f56aa9716b898ec80000000000000000000000000000000000000000000000002b5e3af16b1880000",
+						"to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+						"value": "0x0"
+					},
+					"result": {
+						"gasUsed": "0x9868",
+						"output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+					},
+					"subtraces": 0,
+					"traceAddress": [],
+					"type": "call"
+				}
+			],
+			"transactionHash": "0x69f8de1af3129dc3b1adb5b3c1577476f737f9335f156e177b48c2ed88f3f7c4",
+			"vmTrace": {
+				"code": "0x60606040...",
+				"ops": [
+					{
+						"cost": 3,
+						"ex": {
+							"mem": null,
+							"push": ["0x60"],
+							"store": null,
+							"used": 16723979
+						},
+						"pc": 0,
+						"sub": null
+					}
+					// 额外的操作...
+				]
+			}
+		}
+		// 额外的交易追踪...
+	]
+}
+```
+
+### 追踪类型
+
+`traceTypes` 参数接受以下值的数组：
+
+- **trace**: 交易执行的基本追踪
+- **vmTrace**: EVM 执行的详细追踪
+- **stateDiff**: 交易导致的状态变化
+
+您可以请求这些追踪类型的任意组合。
+
+### 状态差异格式
+
+状态差异格式使用以下符号：
+
+- **"="**: 值没有变化
+- **"+"**: 值被创建
+- **"-"**: 值被删除
+- **"\*"**: 值被修改，有 "from" 和 "to" 值
+
+### 虚拟机追踪格式
+
+虚拟机追踪包含：
+
+- **code**: 正在执行的 EVM 字节码
+- **ops**: 操作数组，包含：
+- **cost**: 操作的燃料成本
+- **ex**: 执行结果（内存、堆栈、存储）
+- **pc**: 程序计数器
+- **sub**: 子调用的信息
+
+### 追踪格式
+
+追踪格式显示执行路径：
+
+- **action**: 关于调用的详情
+- **result**: 调用结果
+- **subtraces**: 子调用数量
+- **traceAddress**: 调用树中的位置
+- **type**: 操作类型（call、create、suicide）
+
+### 重要注意事项
+
+- 此方法计算密集，可能需要时间完成
+- 需要在以太坊节点上启用追踪 API
+- 并非所有以太坊客户端都支持此方法
+- 对于有许多交易的区块，响应大小可能非常大
+- 考虑限制追踪类型以获得更好的性能
+- 空区块将返回空数组
+- 如果节点维护存档数据，才能追踪历史区块
+- 对于具有复杂交易的区块，响应可能极其庞大
+- 每种追踪类型显著增加响应大小
+- 不同客户端可能实现追踪格式的细微变化
+
+### 区块标签
+
+`blockNumber` 参数接受：
+
+- 十六进制编码的区块号（`0x1b4`）
+- `latest`: 最近挖出的区块
+- `earliest`: 创世区块
+- `pending`: 当前待定区块（等待挖矿的交易）
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="获取区块中交易的基本追踪">trace_block</Link> - 获取区块中所有交易的基本追踪
+- <Link to="/docs/ethereum/trace-methods/trace_call" title="追踪调用而不创建交易">trace_call</Link> - 执行并追踪调用而不创建交易
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="获取交易的低级 EVM 执行详情">debug_traceTransaction</Link> - 获取单个交易的详细执行追踪

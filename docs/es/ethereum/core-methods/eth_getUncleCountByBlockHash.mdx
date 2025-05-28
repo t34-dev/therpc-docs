@@ -1,0 +1,67 @@
+---
+title: eth_getUncleCountByBlockHash - Obtener Cantidad de Tíos por Hash de Bloque | Métodos API de Ethereum
+description: Aprenda a usar el método eth_getUncleCountByBlockHash para recuperar el número de bloques tío en un bloque específico de la blockchain Ethereum.
+keywords: eth_getUncleCountByBlockHash, bloques tío, bloques ommer, bloque ethereum, conteo de tíos, estadísticas de minería
+---
+
+# eth_getUncleCountByBlockHash
+
+El método `eth_getUncleCountByBlockHash` devuelve el número de tíos (bloques ommer) en un bloque especificado por el hash del bloque. Los bloques tío son bloques válidos que no fueron incluidos en la cadena principal pero aún son referenciados y parcialmente recompensados en Ethereum.
+
+## Casos de Uso
+
+- Estadísticas de exploradores de bloques
+- Análisis de pools de minería
+- Monitoreo de salud de la red
+- Verificación de validación de bloques
+- Investigación de algoritmos de consenso
+- Análisis de tasa de tíos
+- Recopilación de datos históricos de bloques
+- Cálculos de recompensas de minería
+
+## Detalles del Método
+
+Este método devuelve un conteo de bloques tío para un bloque específico identificado por su hash.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getUncleCountByBlockHash',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockHash',
+			required: true,
+			type: 'string',
+			desc: 'El hash del bloque',
+			value: '0xb3b20624f8f0f86eb50dd04688409e5cea4bd02d700bf6e79e9384d47d6a5a35',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'Entero del número de tíos en este bloque (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.blockHash || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x1" // 1 tío en este bloque
+}
+```
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockHashAndIndex">eth_getUncleByBlockHashAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockNumberAndIndex">eth_getUncleByBlockNumberAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getUncleCountByBlockNumber">eth_getUncleCountByBlockNumber</Link>
+- <Link to="/docs/ethereum/guides/uncle-blocks">Guía de Bloques Tío</Link>

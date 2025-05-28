@@ -1,0 +1,107 @@
+---
+title: eth_getBalance - Check Account Balance | Ethereum API Methods
+description: Learn how to use the eth_getBalance method to retrieve account balances from the Ethereum blockchain. Includes examples and best practices.
+keywords: eth_getBalance, ethereum balance, account balance, wei balance, ETH balance, wallet balance, crypto balance, ethereum address balance, blockchain balance
+---
+
+# eth_getBalance
+
+The `eth_getBalance` method returns the balance of a specified Ethereum address in wei. This essential method forms the foundation of wallet applications, financial dashboards, and any DApp that needs to display or work with user account balances.
+
+## Use Cases
+
+- Wallet balance monitoring and notifications
+- Payment verification and confirmation
+- Account analytics and portfolio tracking
+- DApp balance displays and interactive UIs
+- Transaction validation before submission
+- Financial reporting and tax calculations 
+- Historical balance analysis at specific blocks
+- Smart contract balance monitoring
+
+## Method Details
+
+This method queries the balance of any Ethereum address at a specified block, allowing for both current and historical balance checks.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBalance',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: 'The address to check for balance',
+			value: '0xF977814e90dA44bFA03b6295A0616a897441aceC', // Binance 8 Hot Wallet
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Block number or block tag',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'Account balance in wei (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.blockNumber || null]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x1B1AE4D6E2EF500000" // 500 ETH in wei
+}
+```
+
+### Understanding the Result
+
+The balance is returned in wei (the smallest unit of ether) as a hexadecimal string. To convert to ether:
+
+1. Convert the hexadecimal to decimal: `parseInt("0x1B1AE4D6E2EF500000", 16)` = 500000000000000000000
+2. Divide by 10^18: `500000000000000000000 / 1e18` = 500 ETH
+
+For user interfaces, always display balances in a readable format (ETH) rather than the raw wei value.
+
+### Block Tag Options
+
+The `blockNumber` parameter accepts these special tags:
+- `latest`: The most recently mined block (current balance)
+- `earliest`: The genesis block (initial state)
+- `pending`: The pending state/transactions
+- `safe`: The latest "safe" head block (Ethereum only)
+- `finalized`: The latest "finalized" block (Ethereum only)
+
+### Common Use Case Example
+
+```javascript
+// Example of checking multiple account balances
+const addresses = [
+	'0xF977814e90dA44bFA03b6295A0616a897441aceC', // Binance Hot Wallet
+	'0x42cC527cD31Eb1479ae27Cb4A5eec6a023Cd2E', // Example address
+];
+
+for (const address of addresses) {
+	const balance = await provider.send('eth_getBalance', [address, 'latest']);
+	console.log(`Balance of ${address}: ${parseInt(balance, 16) / 1e18} ETH`);
+}
+```
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getCode" title="Check if address is a contract">eth_getCode</Link> - Returns the code stored at a specific address
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="Get account transaction count">eth_getTransactionCount</Link> - Returns the number of transactions sent from an address
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Call contract functions">eth_call</Link> - Executes a call to get token balances or other information
+- <Link to="/docs/ethereum/core-methods/eth_getStorageAt" title="Access contract storage">eth_getStorageAt</Link> - Returns the value from contract storage

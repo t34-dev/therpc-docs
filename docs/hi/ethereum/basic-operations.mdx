@@ -1,0 +1,217 @@
+---
+title: बुनियादी Ethereum संचालन | ब्लॉकचेन API मेथड्स गाइड
+description: TheRPC API का उपयोग करके सामान्य Ethereum ब्लॉकचेन संचालन के लिए व्यापक गाइड, जिसमें बैलेंस प्राप्ति, लेन-देन संचालन, ब्लॉक जानकारी, कॉन्ट्रैक्ट इंटरैक्शन और गैस प्रबंधन शामिल हैं
+keywords: ethereum बेसिक्स, ब्लॉकचेन संचालन, web3 बेसिक्स, ethereum api ट्यूटोरियल, बेसिक ब्लॉकचेन संचालन, ethereum बैलेंस चेक, लेनदेन स्थिति, ethereum ब्लॉक इन्फो, स्मार्ट कॉन्ट्रैक्ट इंटरैक्शन, ethereum गैस, ब्लॉकचेन क्वेरी
+---
+
+# बुनियादी संचालन
+
+यह गाइड TheRPC API का उपयोग करके Ethereum ब्लॉकचेन के साथ आप जो सबसे आम संचालन करेंगे, उन्हें कवर करती है।
+
+## # बुनियादी जानकारी प्राप्त करना
+
+### नवीनतम ब्लॉक नंबर प्राप्त करें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_blockNumber",
+  "params": [],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Get the current block number in Ethereum">eth_blockNumber</Link> देखें।
+
+### खाता शेष जांचें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBalance",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Get the Ether balance for an Ethereum address">eth_getBalance</Link> देखें।
+
+## # लेनदेन संचालन
+
+### लेनदेन स्थिति प्राप्त करें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionByHash",
+  "params": [
+    "0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"
+  ],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Get transaction details by its hash">eth_getTransactionByHash</Link> देखें।
+
+### लेनदेन रसीद जांचें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionReceipt",
+  "params": [
+    "0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"
+  ],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Get transaction receipt and confirmation status">eth_getTransactionReceipt</Link> देखें।
+
+## # ब्लॉक जानकारी
+
+### नंबर द्वारा ब्लॉक प्राप्त करें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBlockByNumber",
+  "params": [
+    "0xE81224",
+    false
+  ],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Get block information by its number">eth_getBlockByNumber</Link> देखें।
+
+### हैश द्वारा ब्लॉक प्राप्त करें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBlockByHash",
+  "params": [
+    "0xdc0818cf78f21a8e70579cb46a43643f78291264dda342ae31049421c82d21ae",
+    false
+  ],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Get block information by its hash">eth_getBlockByHash</Link> देखें।
+
+## # स्मार्ट कॉन्ट्रैक्ट इंटरैक्शन
+
+### कॉन्ट्रैक्ट मेथड कॉल करें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_call",
+  "params": [
+    {
+      "to": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+      "data": "0x70a08231000000000000000000000000742d35Cc6634C0532925a3b844Bc454e4438f44e"
+    },
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_call" title="Execute smart contract view function without transaction">eth_call</Link> देखें।
+
+### कॉन्ट्रैक्ट कोड प्राप्त करें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getCode",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_getCode" title="Get the deployed bytecode at an address">eth_getCode</Link> देखें।
+
+## # नेटवर्क स्थिति
+
+### नेटवर्क संस्करण प्राप्त करें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "net_version",
+  "params": [],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/net_version" title="Get the current network ID">net_version</Link> देखें।
+
+### नोड सिंक स्थिति जांचें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_syncing",
+  "params": [],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_syncing" title="Check if the node is syncing and sync progress">eth_syncing</Link> देखें।
+
+## # गैस और नोंस
+
+### गैस मूल्य प्राप्त करें
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_gasPrice",
+  "params": [],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="Get current gas price in wei">eth_gasPrice</Link> देखें।
+
+### लेनदेन गणना प्राप्त करें (नोंस)
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionCount",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+अधिक जानकारी के लिए <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="Get transaction count (nonce) for an address">eth_getTransactionCount</Link> देखें।
+
+## कार्यान्वयन उदाहरण
+
+भाषा-विशिष्ट कार्यान्वयनों के लिए, हमारे SDK देखें:
+
+- <Link to="/docs/ethereum/tools/javascript-typescript" title="JavaScript and TypeScript tools for Ethereum development">JavaScript/TypeScript</Link>
+- <Link to="/docs/ethereum/tools/python" title="Python libraries for Ethereum blockchain development">Python</Link>
+- <Link to="/docs/ethereum/tools/java-kotlin" title="Java and Kotlin tools for Ethereum development">Java/Kotlin</Link>
+- सभी <Link to="/docs/ethereum/tools/overview" title="Complete overview of all available Ethereum development tools">टूल्स और SDK</Link> में देखें
+
+### अन्य संदर्भ
+
+- <Link to="/docs/ethereum/all-methods" title="Complete list of all available Ethereum API methods">सभी उपलब्ध मेथड्स</Link> - पूरा API संदर्भ
+- <Link to="/docs/ethereum/authentication" title="Guide to securing your API access">प्रमाणीकरण गाइड</Link> - अपने API पहुंच को सुरक्षित करें
+- <Link to="/docs/ethereum/faq" title="Frequently asked questions about Ethereum API usage">FAQ</Link> - सामान्य प्रश्न और उत्तर

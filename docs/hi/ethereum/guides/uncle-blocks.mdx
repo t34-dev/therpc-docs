@@ -1,0 +1,58 @@
+---
+title: Uncle Blocks Guide | Understanding Ommers in Ethereum
+description: Comprehensive guide to Ethereum uncle blocks (ommers), including their purpose in network security, reward structure, retrieval methods, and impact on mining economics.
+keywords: uncle blocks, ommer blocks, ethereum mining, block rewards, stale blocks, ethereum consensus, uncle reward, mining economics, blockchain uncles, network security
+---
+
+# Uncle Blocks Guide
+
+Uncle blocks (also known as ommer blocks) are valid blocks that weren't included in the main chain but are still rewarded in Ethereum. Understanding them is important for mining and block validation.
+
+## Understanding Uncle Blocks
+
+- What are uncle blocks
+- Why they exist
+- Reward structure
+- Impact on network security
+
+## Implementation Examples
+
+```javascript
+// Get uncle count for a block
+const getUncleCount = async (blockNumber) => {
+	const block = await web3.eth.getBlock(blockNumber);
+	return block.uncles.length;
+};
+
+// Get uncle block by index
+const getUncleBlock = async (blockNumber, uncleIndex) => {
+	return await web3.eth.getUncle(blockNumber, uncleIndex);
+};
+
+// Monitor uncle rates
+const calculateUncleRate = async (blockRange = 100) => {
+	const latestBlock = await web3.eth.getBlockNumber();
+	const startBlock = latestBlock - blockRange;
+
+	let totalUncles = 0;
+	for (let i = startBlock; i <= latestBlock; i++) {
+		const uncleCount = await getUncleCount(i);
+		totalUncles += uncleCount;
+	}
+
+	return totalUncles / blockRange;
+};
+```
+
+## Best Practices
+
+1. Consider uncle blocks in block confirmations
+2. Monitor uncle rates for network health
+3. Account for uncle rewards in mining calculations
+4. Handle uncle references properly
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockHashAndIndex" title="API method to retrieve uncle block by hash and index">eth_getUncleByBlockHashAndIndex</Link> - Retrieve uncle block by hash and index
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockNumberAndIndex" title="API method to retrieve uncle block by number and index">eth_getUncleByBlockNumberAndIndex</Link> - Retrieve uncle block by number and index
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="Learn fundamental techniques for working with Ethereum blocks">Working with Blocks</Link> - General block handling

@@ -1,0 +1,78 @@
+---
+title: eth_getUncleCountByBlockNumber - Obtener Cantidad de Tíos por Número de Bloque | Métodos API de Ethereum
+description: Aprenda a usar el método eth_getUncleCountByBlockNumber para recuperar el número de bloques tío en una altura de bloque específica de la blockchain Ethereum.
+keywords: eth_getUncleCountByBlockNumber, bloques tío, bloques ommer, conteo de tíos ethereum, número de bloque, estadísticas de minería
+---
+
+# eth_getUncleCountByBlockNumber
+
+El método `eth_getUncleCountByBlockNumber` devuelve el número de tíos (bloques ommer) en un bloque especificado por el número de bloque o etiqueta. Los bloques tío son bloques válidos que no fueron incluidos en la cadena principal pero aún son referenciados y parcialmente recompensados en Ethereum.
+
+## Casos de Uso
+
+- Monitoreo de red en tiempo real
+- Funcionalidad de exploradores de bloques
+- Cálculos de recompensas de minería
+- Evaluación de salud de la red
+- Análisis de datos históricos
+- Seguimiento de tasa de tíos
+- Operaciones de pools de minería
+- Investigación de consenso
+
+## Detalles del Método
+
+Este método devuelve un conteo de bloques tío para un bloque específico identificado por su número o una etiqueta de bloque.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getUncleCountByBlockNumber',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Número de bloque en formato hexadecimal o etiquetas: latest, earliest, pending, safe, finalized',
+			value: '0xE4E1C0', // Example block number (15,000,000)
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'Entero del número de tíos en este bloque (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x0" // 0 tíos en este bloque
+}
+```
+
+
+### Soporte de Etiquetas de Bloque
+
+El parámetro `blockNumber` acepta varias etiquetas especiales:
+
+- `latest`: El bloque más reciente
+- `earliest`: Bloque génesis
+- `pending`: Bloque actualmente pendiente
+- `safe`: Último bloque seguro
+- `finalized`: Último bloque finalizado
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockHashAndIndex">eth_getUncleByBlockHashAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockNumberAndIndex">eth_getUncleByBlockNumberAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getUncleCountByBlockHash">eth_getUncleCountByBlockHash</Link>
+- <Link to="/docs/ethereum/guides/uncle-blocks">Guía de Bloques Tío</Link>

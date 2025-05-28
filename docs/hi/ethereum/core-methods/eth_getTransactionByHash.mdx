@@ -1,0 +1,211 @@
+---
+title: eth_getTransactionByHash - Retrieve Transaction by Hash | Ethereum API Methods
+description: Learn how to use the eth_getTransactionByHash method to fetch detailed transaction information using a transaction hash. Includes examples for various transaction types.
+keywords: eth_getTransactionByHash, transaction hash, ethereum transaction, transaction details, tx hash lookup, blockchain query
+---
+
+# eth_getTransactionByHash
+
+The `eth_getTransactionByHash` method returns comprehensive information about a transaction identified by its unique hash. This is one of the most commonly used methods for retrieving transaction details directly.
+
+## Use Cases
+
+- Transaction status confirmation
+- Transaction validation
+- Payment verification
+- Smart contract interaction analysis
+- Transaction monitoring
+- Gas usage analysis
+- Historical transaction data retrieval
+- Transaction debugging
+
+## Method Details
+
+This method retrieves detailed transaction data using the transaction's unique hash.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getTransactionByHash',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'hash',
+			required: true,
+			type: 'string',
+			desc: 'The hash of the transaction',
+			value: '0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'The transaction object, or null if not found',
+			fields: [
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: 'Hash of the block containing this transaction, null for pending transactions',
+				},
+				{
+					id: 'blockNumber',
+					type: 'string',
+					desc: 'Block number containing this transaction (hex), null for pending transactions',
+				},
+				{
+					id: 'from',
+					type: 'string',
+					desc: 'Address of the sender',
+				},
+				{
+					id: 'gas',
+					type: 'string',
+					desc: 'Gas provided by the sender (hex)',
+				},
+				{
+					id: 'gasPrice',
+					type: 'string',
+					desc: 'Gas price in wei (hex)',
+				},
+				{
+					id: 'maxFeePerGas',
+					type: 'string',
+					desc: 'Maximum fee per gas (EIP-1559 transactions)',
+				},
+				{
+					id: 'maxPriorityFeePerGas',
+					type: 'string',
+					desc: 'Maximum priority fee per gas (EIP-1559 transactions)',
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: 'Transaction hash',
+				},
+				{
+					id: 'input',
+					type: 'string',
+					desc: 'Transaction data payload',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'Number of transactions from sender prior to this one (hex)',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					desc: 'Recipient address, null for contract creation transactions',
+				},
+				{
+					id: 'transactionIndex',
+					type: 'string',
+					desc: "Integer of the transaction's position in the block (hex), null for pending transactions",
+				},
+				{
+					id: 'value',
+					type: 'string',
+					desc: 'Value transferred in wei (hex)',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: 'Transaction type (0=legacy, 1=EIP2930, 2=EIP1559)',
+				},
+				{
+					id: 'accessList',
+					type: 'array',
+					desc: 'List of addresses and storage keys (EIP-2930 and EIP-1559)',
+				},
+				{
+					id: 'chainId',
+					type: 'string',
+					desc: 'Chain ID specified in the transaction',
+				},
+				{
+					id: 'v',
+					type: 'string',
+					desc: 'V parameter of the signature',
+				},
+				{
+					id: 'r',
+					type: 'string',
+					desc: 'R parameter of the signature',
+				},
+				{
+					id: 's',
+					type: 'string',
+					desc: 'S parameter of the signature',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.hash || null]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"blockHash": "0xb3b20624f8f0f86eb50dd04688409e5cea4bd02d700bf6e79e9384d47d6a5a35",
+		"blockNumber": "0x11a48cb",
+		"from": "0x28c6c06298d514db089934071355e5743bf21d60",
+		"gas": "0x21924",
+		"gasPrice": "0x1057b28df",
+		"maxFeePerGas": "0x11986c07a",
+		"maxPriorityFeePerGas": "0x77359400",
+		"hash": "0x5d15326cb350e13d19d1618b7534dcad9feac5cce8a877b8e6fdfd963a4889f7",
+		"input": "0xa9059cbb000000000000000000000000ae2fc483527b8ef99eb5d9b44875f005ba1fae9600000000000000000000000000000000000000000000001158e460913d00000",
+		"nonce": "0x3b50",
+		"to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+		"transactionIndex": "0x4d",
+		"value": "0x0",
+		"type": "0x2",
+		"accessList": [],
+		"chainId": "0x1",
+		"v": "0x0",
+		"r": "0x35707b530856150cec9ef609a724e2eb651f71ed9f0b0f94d9969919dae58387",
+		"s": "0x7b305ef8f21e889f63d5178e7d2cbb85880ceaae045b0f46aef808c70b3a7a42"
+	}
+}
+```
+
+### Identifying Transaction Types
+
+By examining the transaction data, you can identify common transaction patterns:
+
+1. **Simple ETH Transfer**:
+
+- `to` is a regular address (not a contract)
+- `input` is "0x" (empty data)
+- `value` is greater than 0
+
+2. **ERC-20 Token Transfer**:
+
+- `to` is a token contract address
+- `input` starts with "0xa9059cbb" (transfer method signature)
+- `value` is typically 0
+
+3. **Contract Deployment**:
+
+- `to` is null
+- `input` contains contract bytecode
+
+4. **Contract Method Call**:
+
+- `to` is a contract address
+- `input` starts with function signature (first 4 bytes of keccak256 hash of function name and parameters)
+- May include `value` if the function is payable
+
+```
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Check transaction execution status">eth_getTransactionReceipt</Link> - Get transaction receipt with execution results and events
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockHashAndIndex" title="Find transactions by position in a block">eth_getTransactionByBlockHashAndIndex</Link> - Look up transactions using a block hash and index position

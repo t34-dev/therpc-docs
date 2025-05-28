@@ -1,0 +1,135 @@
+---
+title: Guía de Autenticación | Seguridad de la API de Ethereum
+description: Guía completa para asegurar sus solicitudes a la API de Ethereum usando claves API, incluyendo ejemplos de implementación, mejores prácticas y recomendaciones de seguridad
+keywords: autenticación api, clave api, token bearer, seguridad api, autenticación therpc, seguridad api ethereum, seguridad api blockchain, acceso api seguro, gestión de claves api ethereum, autenticación web3
+---
+
+# Autenticación
+
+Todas las solicitudes a la API de TheRPC requieren autenticación mediante una clave API. Esta guía explica cómo obtener y usar su clave API de manera segura.
+
+## # Obtener una Clave API
+
+1. Regístrese en TheRPC.io
+2. Navegue al Panel de Control
+3. Vaya a la sección de Claves API
+4. Genere una nueva clave API
+
+## # Uso de su Clave API
+
+### Cabeceras HTTP
+
+Incluya su clave API en cada solicitud utilizando el esquema de autenticación Bearer:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+### Ejemplos de Solicitudes
+
+Usando curl:
+
+```bash
+curl --request POST 'YOUR_API_ENDPOINT' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+    "jsonrpc": "2.0",
+    "method": "eth_blockNumber",
+    "params": [],
+    "id": 1
+  }'
+```
+
+Usando JavaScript:
+
+```javascript
+const response = await fetch('YOUR_API_ENDPOINT', {
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json',
+		Authorization: `Bearer ${API_KEY}`,
+	},
+	body: JSON.stringify({
+		jsonrpc: '2.0',
+		method: 'eth_blockNumber',
+		params: [],
+		id: 1,
+	}),
+});
+```
+
+## # Mejores Prácticas de Seguridad
+
+1. **Mantenga las Claves en Secreto**
+
+- Nunca incluya claves API en el control de código fuente
+- No comparta claves en foros públicos
+- Use variables de entorno o bóvedas seguras
+
+2. **Rotación de Claves**
+
+- Rote las claves periódicamente
+- Revoque inmediatamente las claves comprometidas
+- Utilice diferentes claves para diferentes entornos
+
+3. **Control de Acceso**
+
+- Utilice claves separadas para diferentes aplicaciones
+- Monitoree el uso de claves a través del panel de control
+- Implemente una gestión adecuada de claves
+
+## # Manejo de Errores
+
+Errores comunes de autenticación:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32001,
+		"message": "Invalid authentication credentials"
+	},
+	"id": 1
+}
+```
+
+- Clave API faltante
+- Formato de clave API inválido
+- Clave expirada o revocada
+- Límite de tasa excedido
+
+## # Configuración del Entorno
+
+### Variables de Entorno
+
+```bash
+# archivo .env
+THERPC_API_KEY=your_api_key_here
+```
+
+### Ejemplos de Configuración
+
+Node.js:
+
+```javascript
+require('dotenv').config();
+const API_KEY = process.env.THERPC_API_KEY;
+```
+
+Python:
+
+```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+API_KEY = os.getenv('THERPC_API_KEY')
+```
+
+### Ver también
+
+- <Link to="/docs/ethereum/rate-limits" title="Guía sobre límites de uso de API y cuotas">Límites de Tasa</Link> - Entender las Cuotas de Uso
+- <Link to="/docs/ethereum/quick-start" title="Comience rápidamente con la API de Ethereum">Guía de Inicio Rápido</Link> - Implementación Básica
+- <Link to="/docs/ethereum/basic-operations" title="Operaciones comunes para la interacción con la blockchain Ethereum">Operaciones Básicas</Link> - Operaciones Comunes
+- <Link to="/docs/ethereum/faq" title="Preguntas frecuentes sobre el uso de la API de Ethereum">FAQ</Link> - Preguntas y Respuestas Comunes

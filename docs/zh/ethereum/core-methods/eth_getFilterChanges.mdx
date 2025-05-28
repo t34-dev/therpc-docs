@@ -1,0 +1,194 @@
+---
+title: eth_getFilterChanges - 轮询新事件 | 以太坊 API 方法
+description: 学习如何使用 eth_getFilterChanges 高效轮询新的区块链事件 - 对监控智能合约活动、代币转账和区块链状态变化至关重要。
+keywords: eth_getFilterChanges, 以太坊事件轮询, 区块链日志检索, 基于过滤器的监控, 智能合约事件, 事件日志更新, 过滤器轮询策略, 事件通知, 日志收集, 区块链事件
+---
+
+# eth_getFilterChanges
+
+`eth_getFilterChanges` 方法返回自上次轮询以来特定过滤器的日志数组。这个强大的订阅方法与 `eth_newFilter`、`eth_newBlockFilter` 和 `eth_newPendingTransactionFilter` 创建的过滤器协同工作，无需不断重新扫描历史数据即可高效监控区块链活动。
+
+## 使用场景
+
+- 以最小资源使用进行高效事件监控
+- 实时 dApp 更新和通知
+- 智能合约状态跟踪和同步
+- 交易确认监控
+- 代币转账检测和钱包更新
+- 协议活动分析和指标仪表板
+- 批量处理区块链事件
+- 大规模资源高效的区块链监控
+- 基于日志的自动化和触发器
+- 交易机器人通知和市场监控
+
+## 方法详情
+
+此方法接收过滤器 ID 并返回自上次轮询以来符合过滤器条件的任何新日志，为事件驱动的区块链应用提供基础。
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_getFilterChanges",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterId',
+      required: true,
+      type: 'string',
+      desc: "由 eth_newFilter、eth_newBlockFilter 或 eth_newPendingTransactionFilter 返回的过滤器 ID",
+      value: "0x1a4b0d22dbb7284cf485c969d2857ab3"
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'array',
+      desc: "日志对象数组，如果自上次轮询以来没有变化则为空数组"
+    }
+  ]}
+  getParams={(fields) => [fields?.filterId || null]}
+/>
+
+### 响应示例
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "topics": [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x000000000000000000000000a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+        "0x00000000000000000000000023a6b9c321aba35d18ca26e66824e917778d9d2b"
+      ],
+      "data": "0x0000000000000000000000000000000000000000000000003635c9adc5dea00000",
+      "blockNumber": "0x10892bc",
+      "transactionHash": "0x56b28388cadcf4da8cbd30aa3c3f126e0513550e6fab6fc20992f3e1435846c8",
+      "transactionIndex": "0x3",
+      "blockHash": "0x6b092af2e8fbe2ceba2034ef4f334f3274a1cce5ffe955fa1895565d9278dac7",
+      "logIndex": "0x7",
+      "removed": false
+    }
+  ]
+}
+```
+
+### 理解日志对象
+
+每个日志对象包含以下提供全面事件信息的字段：
+
+- **address**: 生成事件的合约地址
+- **topics**: 0-4 个 32 字节主题的数组（索引参数）
+  - 第一个主题通常是事件签名哈希（事件名称和参数的 keccak256）
+  - 后续主题是索引事件参数（每个限制为 32 字节）
+- **data**: 包含非索引事件参数（十六进制字符串）
+- **blockNumber**: 创建日志的区块号
+- **transactionHash**: 生成日志的交易哈希
+- **transactionIndex**: 交易在区块中的索引位置
+- **blockHash**: 创建日志的区块哈希
+- **logIndex**: 日志在区块中的索引位置
+- **removed**: 如果由于链重组（reorg）移除日志，则为 `true`
+
+### 常见事件签名
+
+一些常被监控的事件签名（第一个主题）:
+
+- ERC-20 Transfer: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`
+- ERC-20 Approval: `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925`
+- ERC-721 Transfer: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` (与 ERC-20 相同)
+- Uniswap V2 Swap: `0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822`
+
+### 完整轮询实现
+
+这是有效事件轮询的完整模式：
+
+```javascript
+// 1. 为特定事件创建过滤器
+async function monitorTokenTransfers(tokenAddress, fromBlock = 'latest') {
+  // ERC-20 Transfer 事件签名
+  const transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+  
+  // 创建过滤器
+  const filterId = await provider.send('eth_newFilter', [{
+    address: tokenAddress,
+    topics: [transferEventSignature],
+    fromBlock,
+    toBlock: 'latest'
+  }]);
+  
+  console.log(`Created filter: ${filterId}`);
+  return filterId;
+}
+
+// 2. 轮询变化
+async function pollForTransfers(filterId, interval = 10000) {
+  setInterval(async () => {
+    try {
+      const logs = await provider.send('eth_getFilterChanges', [filterId]);
+      
+      if (logs.length > 0) {
+        console.log(`Found ${logs.length} new transfers`);
+        
+        logs.forEach(log => {
+          // 解码转账事件数据
+          const from = '0x' + log.topics[1].slice(26);
+          const to = '0x' + log.topics[2].slice(26);
+          const value = BigInt(log.data);
+          
+          console.log(`Transfer: ${from} → ${to}: ${value}`);
+        });
+      }
+    } catch (error) {
+      console.error('Filter may have expired:', error);
+      // 如需要重新创建过滤器
+    }
+  }, interval);
+}
+
+// 3. 完成后清理
+async function stopMonitoring(filterId) {
+  await provider.send('eth_uninstallFilter', [filterId]);
+  console.log(`Filter ${filterId} uninstalled`);
+}
+```
+
+### 不同过滤器类型的返回值
+
+响应格式根据原始过滤器类型而变化：
+
+1. **日志过滤器** (使用 `eth_newFilter` 创建):
+   - 返回如上例所示的日志对象
+   - 包含带有所有参数的完整事件数据
+
+2. **区块过滤器** (使用 `eth_newBlockFilter` 创建):
+   - 返回区块哈希作为字符串数组
+   - 示例: `["0x4b7", "0x4b8", "0x4b9"]`
+
+3. **挂起交易过滤器** (使用 `eth_newPendingTransactionFilter` 创建):
+   - 返回挂起交易哈希作为字符串数组
+   - 示例: `["0xc6ef2fc5426d6ad6fd9e2a26abeab0aa2411b7ab17f30a99d3cb96aed1d1055b"]`
+
+### 重要注意事项和最佳实践
+
+- **过滤器过期**: 过滤器在一段时间不活动后过期（通常为 5 分钟）
+- **轮询频率**: 
+  - 过于频繁: 可能导致提供者限制速率
+  - 过于不频繁: 风险过滤器过期或在重组期间错过事件
+  - 推荐: 对大多数应用程序为 10-30 秒
+- **错误处理**: 始终为过滤器过期实现健壮的错误处理
+- **替代方案**: 对于持久连接，WebSocket 订阅更有效
+- **过滤器重新创建**: 准备好在过滤器过期时重新创建
+- **日志处理**: 始终在下一次轮询前完全处理所有返回的日志
+- **链重组**: 检查 `removed` 标志以正确处理重组事件
+- **大型响应**: 准备处理潜在的大批量日志
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="创建事件过滤器">eth_newFilter</Link> - 为特定事件日志创建新过滤器
+- <Link to="/docs/ethereum/core-methods/eth_getFilterLogs" title="获取所有过滤器日志">eth_getFilterLogs</Link> - 获取符合过滤器条件的所有日志
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="移除过滤器">eth_uninstallFilter</Link> - 在不再需要时移除过滤器
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="直接查询日志">eth_getLogs</Link> - 无需创建持久过滤器即可查询日志

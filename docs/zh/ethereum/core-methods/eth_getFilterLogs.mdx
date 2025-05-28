@@ -1,0 +1,213 @@
+---
+title: eth_getFilterLogs - 检索过滤器的所有日志 | 以太坊 API 方法
+description: 了解如何使用 eth_getFilterLogs 在一次请求中获取与过滤器条件匹配的所有历史日志 - 这对事件分析和 dApp 中的初始数据加载至关重要。
+keywords: eth_getFilterLogs, 以太坊日志检索, 历史区块链事件, 基于过滤器的查询, 智能合约日志, 完整事件历史, 过滤器日志提取, 事件回填, 代币转移, 区块链数据
+---
+
+# eth_getFilterLogs
+
+`eth_getFilterLogs` 方法返回与给定 ID 的过滤器匹配的所有日志数组。与 `eth_getFilterChanges` 不同，后者仅返回自上次轮询以来的新日志，此方法返回符合原始过滤器条件的所有日志，无论它们是否已被返回过，使其成为初始化应用程序状态或回填错过的事件的理想选择。
+
+## 使用场景
+
+- dApp 和钱包界面中的初始数据加载
+- 历史事件分析和交易历史
+- 从事件重建智能合约状态
+- 停机后的应用程序状态同步
+- 完整事件历史检索和审计
+- 数据分析和综合报告
+- 审计合约交互和治理
+- 服务中断后回填错过的事件
+- 代币余额历史重建
+- 交易应用程序的市场数据分析
+
+## 方法详情
+
+此方法接受过滤器 ID 并返回与过滤器条件匹配的所有日志，提供历史事件的全面视图。
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_getFilterLogs",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterId',
+      required: true,
+      type: 'string',
+      desc: "eth_newFilter 返回的过滤器 ID",
+      value: "0x1a4b0d22dbb7284cf485c969d2857ab3"
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'array',
+      desc: "与过滤器条件匹配的所有日志对象数组"
+    }
+  ]}
+  getParams={(fields) => [fields?.filterId || null]}
+/>
+
+### 响应示例
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "topics": [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x000000000000000000000000a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+        "0x00000000000000000000000023a6b9c321aba35d18ca26e66824e917778d9d2b"
+      ],
+      "data": "0x0000000000000000000000000000000000000000000000003635c9adc5dea00000",
+      "blockNumber": "0x10892bc",
+      "transactionHash": "0x56b28388cadcf4da8cbd30aa3c3f126e0513550e6fab6fc20992f3e1435846c8",
+      "transactionIndex": "0x3",
+      "blockHash": "0x6b092af2e8fbe2ceba2034ef4f334f3274a1cce5ffe955fa1895565d9278dac7",
+      "logIndex": "0x7",
+      "removed": false
+    },
+    {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "topics": [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x000000000000000000000000b5d85cbf7cb3ee0d56b3bb207d5fc4b82f43f511",
+        "0x00000000000000000000000023a6b9c321aba35d18ca26e66824e917778d9d2b"
+      ],
+      "data": "0x00000000000000000000000000000000000000000000000000000000007a1200",
+      "blockNumber": "0x10892be",
+      "transactionHash": "0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0",
+      "transactionIndex": "0x6",
+      "blockHash": "0x429e967f9b3b86ee1349669ebb49c5c4a7690287a6d215cc8d7e07d891823d33",
+      "logIndex": "0x5",
+      "removed": false
+    }
+  ]
+}
+```
+
+### 理解日志对象
+
+每个日志对象包含以下全面数据：
+
+- **address**：生成事件的合约地址
+- **topics**：0-4 个 32 字节主题数组（索引参数）
+  - 第一个主题通常是事件签名哈希（事件签名的 keccak256）
+  - 后续主题是索引事件参数（每个限制为 32 字节）
+- **data**：包含非索引事件参数（十六进制字符串）
+- **blockNumber**：创建日志的区块号
+- **transactionHash**：生成日志的交易哈希
+- **transactionIndex**：交易在区块中的索引位置
+- **blockHash**：创建日志的区块哈希
+- **logIndex**：日志在区块中的索引位置
+- **removed**：如果由于链重组而移除日志，则为 `true`
+
+### 解码日志数据
+
+要正确使用事件数据，需要根据事件的 ABI 解码：
+
+```javascript
+// 示例：解码 ERC-20 Transfer 事件
+function decodeTransferEvent(log) {
+  // ERC-20 Transfer: event Transfer(address indexed from, address indexed to, uint256 value)
+  
+  // From 和 To 是索引参数（在 topics 中）
+  const from = '0x' + log.topics[1].slice(26); // 移除填充
+  const to = '0x' + log.topics[2].slice(26);   // 移除填充
+  
+  // Value 是非索引参数（在 data 中）
+  const value = BigInt(log.data);
+  
+  return { from, to, value };
+}
+
+// 使用方法
+const transferEvents = logs
+  .filter(log => log.topics[0] === '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef')
+  .map(decodeTransferEvent);
+```
+
+### 与 eth_getLogs 的区别
+
+`eth_getFilterLogs` 和 `eth_getLogs` 都返回符合条件的日志，但它们有重要区别：
+
+1. **基于过滤器与直接查询**：
+   - `eth_getFilterLogs` 需要先用 `eth_newFilter` 创建过滤器
+   - `eth_getLogs` 在请求中直接采用过滤条件
+
+2. **过滤器可重用性**：
+   - 使用 `eth_getFilterLogs`，可以对多个调用重用相同的过滤器 ID
+   - 使用 `eth_getLogs`，每次都必须指定条件
+
+3. **资源管理**：
+   - `eth_getFilterLogs` 依赖服务器端过滤器状态，可能会过期
+   - `eth_getLogs` 是无状态的，不依赖服务器端过滤器状态
+
+4. **典型用例**：
+   - `eth_getFilterLogs` 与 `eth_getFilterChanges` 结合用于持续监控
+   - `eth_getLogs` 通常用于一次性历史查询更简单
+
+### 常见过滤器模式
+
+以下是使用此方法的一些典型过滤器模式：
+
+```javascript
+// 1. 特定地址的 ERC-20 代币转账
+async function getTokenTransfersForAddress(tokenAddress, userAddress) {
+  const transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+  const userAddressPadded = userAddress.replace('0x', '0x000000000000000000000000');
+  
+  // 创建传入或传出转账的过滤器
+  const filterId = await provider.send('eth_newFilter', [{
+    address: tokenAddress,
+    topics: [
+      transferEventSignature,
+      [userAddressPadded, null],  // From（传出）- OR 条件
+      [userAddressPadded, null]   // To（传入）- OR 条件
+    ],
+    fromBlock: '0x1000000',       // 起始区块号（根据需要调整）
+    toBlock: 'latest'
+  }]);
+  
+  // 获取所有匹配的日志
+  return provider.send('eth_getFilterLogs', [filterId]);
+}
+
+// 2. 特定函数的智能合约事件
+async function getSwapEvents(poolAddress) {
+  const swapEventSignature = '0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822';
+  
+  const filterId = await provider.send('eth_newFilter', [{
+    address: poolAddress,
+    topics: [swapEventSignature],
+    fromBlock: '0x1000000',
+    toBlock: 'latest'
+  }]);
+  
+  return provider.send('eth_getFilterLogs', [filterId]);
+}
+```
+
+### 性能考虑
+
+- 此方法在节点提供商上可能资源密集
+- 对于大范围的日期，结果可能非常大
+- 如果匹配太多日志，可能会超时
+- 考虑为高容量事件使用较小的区块范围
+- 许多提供商限制响应大小或返回的日志数量
+- 对于非常大的数据集，建议按区块范围批处理
+- 此调用在速率限制方面可能比其他方法更昂贵
+- 始终检查提供商文档了解具体限制
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="创建事件过滤器">eth_newFilter</Link> - 创建事件日志过滤器
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="获取自上次轮询以来的新日志">eth_getFilterChanges</Link> - 检索自上次轮询以来的新日志
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="移除过滤器">eth_uninstallFilter</Link> - 不再需要时移除过滤器
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="直接日志查询">eth_getLogs</Link> - 无需过滤器持久性即可查询日志

@@ -1,0 +1,61 @@
+---
+title: 以太坊API集成的Curl示例 | 直接HTTP交互指南
+description: 使用Curl命令和HTTP请求与以太坊区块链交互的综合指南，包括认证、请求格式化和常见API操作
+keywords: curl以太坊, http以太坊api, 以太坊json rpc, 直接api调用, 以太坊curl示例, 以太坊http请求, json-rpc以太坊, curl区块链命令, 以太坊api测试, 以太坊节点请求, 以太坊http接口
+---
+
+# Curl
+
+本指南演示了如何使用Curl命令直接与以太坊节点交互。这对测试、调试和理解底层API调用非常有用。
+
+<PayAttention category="Curl/Http" />
+
+## 基本用法
+
+以下是获取最新区块号的基本示例：
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+## 认证
+
+使用需要认证的端点时：
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+## 常见操作
+
+### 获取余额
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_getBalance","params":["0x742d35Cc6634C0532925a3b844Bc454e4438f44e","latest"],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+### 获取交易
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_getTransactionByHash","params":["0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/tools/overview" title="可用以太坊开发工具和SDK的完整概述">工具概述</Link> - 所有可用的SDK和工具
+- <Link to="/docs/ethereum/authentication" title="与以太坊节点和API服务认证的指南">认证指南</Link> - 详细认证信息
+- <Link to="/docs/ethereum/basic-operations" title="学习开发者的基本以太坊区块链操作">基本操作</Link> - 基础区块链操作
+- <Link to="/docs/ethereum/all-methods" title="所有可用以太坊API方法的完整参考">可用方法</Link> - 探索API功能

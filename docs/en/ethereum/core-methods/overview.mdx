@@ -1,0 +1,40 @@
+---
+title: Ethereum Core Methods | Essential JSON-RPC API Reference
+description: Comprehensive documentation for Ethereum core API methods including eth_, net_, txpool_, and web3_ endpoints with detailed examples, parameters, and return values
+keywords: ethereum api, eth methods, json-rpc, eth_call, eth_getBalance, eth_getBlockByHash, eth_getBlockByNumber, eth_getLogs, ethereum core methods, blockchain api methods
+---
+
+# Ethereum Core Methods
+
+This section documents the core Ethereum JSON-RPC API methods that provide essential functionality for interacting with the Ethereum blockchain. These methods form the foundation of most Ethereum applications and development workflows.
+
+## Core Ethereum Methods (eth_)
+
+These methods provide core functionality for interacting with the Ethereum blockchain, including account balances, transaction data, block information, and smart contract interactions.
+
+<DocsEndpointsTable createLink={(elem) => `/docs/ethereum/core-methods/${elem.key}`} prefixes={['eth_']} />
+
+## Network Methods (net_)
+
+These methods provide information about the network status and connections, helping developers monitor node connectivity and network configuration.
+
+<DocsEndpointsTable createLink={(elem) => `/docs/ethereum/core-methods/${elem.key}`} prefixes={['net_']} />
+
+## Transaction Pool Methods (txpool_)
+
+These methods allow inspection of the transaction pool status, providing visibility into pending transactions and mempool state.
+
+<DocsEndpointsTable createLink={(elem) => `/docs/ethereum/core-methods/${elem.key}`} prefixes={['txpool_']} />
+
+## Web3 Utility Methods (web3_)
+
+Basic web3 utility methods for general blockchain interaction, including hashing and client information.
+
+<DocsEndpointsTable createLink={(elem) => `/docs/ethereum/core-methods/${elem.key}`} prefixes={['web3_']} />
+
+### See also
+
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">All Available Methods</Link> - Complete Method Reference
+- <Link to="/docs/ethereum/debug-methods/overview" title="Ethereum debugging methods documentation">Debug Methods</Link> - Debugging and Analysis Tools
+- <Link to="/docs/ethereum/trace-methods/overview" title="Ethereum transaction and block tracing methods">Trace Methods</Link> - Detailed Transaction Tracing
+- <Link to="/docs/ethereum/guides/overview" title="Practical guides for Ethereum development">Development Guides</Link> - Practical Implementation Help

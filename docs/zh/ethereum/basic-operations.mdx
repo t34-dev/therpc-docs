@@ -1,0 +1,217 @@
+---
+title: 基本以太坊操作 | 区块链 API 方法指南
+description: 使用 TheRPC API 进行常见以太坊区块链操作的综合指南，包括余额检索、交易操作、区块信息、合约交互和 gas 管理
+keywords: 以太坊基础, 区块链操作, web3 基础, 以太坊 api 教程, 基本区块链操作, 以太坊余额检查, 交易状态, 以太坊区块信息, 智能合约交互, 以太坊 gas, 区块链查询
+---
+
+# 基本操作
+
+本指南涵盖了使用 TheRPC API 在以太坊区块链上执行的最常见操作。
+
+## # 检索基本信息
+
+### 获取最新区块号
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_blockNumber",
+  "params": [],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="获取以太坊中的当前区块号">eth_blockNumber</Link>。
+
+### 检查账户余额
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBalance",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_getBalance" title="获取以太坊地址的以太币余额">eth_getBalance</Link>。
+
+## # 交易操作
+
+### 获取交易状态
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionByHash",
+  "params": [
+    "0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"
+  ],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="通过哈希获取交易详情">eth_getTransactionByHash</Link>。
+
+### 检查交易收据
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionReceipt",
+  "params": [
+    "0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"
+  ],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="获取交易收据和确认状态">eth_getTransactionReceipt</Link>。
+
+## # 区块信息
+
+### 通过编号获取区块
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBlockByNumber",
+  "params": [
+    "0xE81224",
+    false
+  ],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="通过区块编号获取区块信息">eth_getBlockByNumber</Link>。
+
+### 通过哈希获取区块
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBlockByHash",
+  "params": [
+    "0xdc0818cf78f21a8e70579cb46a43643f78291264dda342ae31049421c82d21ae",
+    false
+  ],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="通过区块哈希获取区块信息">eth_getBlockByHash</Link>。
+
+## # 智能合约交互
+
+### 调用合约方法
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_call",
+  "params": [
+    {
+      "to": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+      "data": "0x70a08231000000000000000000000000742d35Cc6634C0532925a3b844Bc454e4438f44e"
+    },
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_call" title="无需交易执行智能合约视图函数">eth_call</Link>。
+
+### 获取合约代码
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getCode",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_getCode" title="获取地址处部署的字节码">eth_getCode</Link>。
+
+## # 网络状态
+
+### 获取网络版本
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "net_version",
+  "params": [],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/net_version" title="获取当前网络 ID">net_version</Link>。
+
+### 检查节点同步状态
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_syncing",
+  "params": [],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_syncing" title="检查节点是否正在同步及同步进度">eth_syncing</Link>。
+
+## # Gas 和 Nonce
+
+### 获取 Gas 价格
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_gasPrice",
+  "params": [],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="获取当前 gas 价格（以 wei 为单位）">eth_gasPrice</Link>。
+
+### 获取交易计数（Nonce）
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionCount",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+更多详情请参阅 <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="获取地址的交易计数（nonce）">eth_getTransactionCount</Link>。
+
+## 实现示例
+
+有关特定语言的实现，请查看我们的 SDK：
+
+- <Link to="/docs/ethereum/tools/javascript-typescript" title="用于以太坊开发的 JavaScript 和 TypeScript 工具">JavaScript/TypeScript</Link>
+- <Link to="/docs/ethereum/tools/python" title="用于以太坊区块链开发的 Python 库">Python</Link>
+- <Link to="/docs/ethereum/tools/java-kotlin" title="用于以太坊开发的 Java 和 Kotlin 工具">Java/Kotlin</Link>
+- 在 <Link to="/docs/ethereum/tools/overview" title="所有可用以太坊开发工具的完整概述">工具和 SDK</Link> 中查看全部
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/all-methods" title="所有可用以太坊 API 方法的完整列表">所有可用方法</Link> - 完整 API 参考
+- <Link to="/docs/ethereum/authentication" title="保护 API 访问的指南">身份验证指南</Link> - 保护您的 API 访问
+- <Link to="/docs/ethereum/faq" title="关于以太坊 API 使用的常见问题">常见问题解答</Link> - 常见问题和答案

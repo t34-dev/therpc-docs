@@ -1,0 +1,172 @@
+---
+title: eth_estimateGas - 估算交易 Gas 成本 | 以太坊 API 方法
+description: 了解如何使用 eth_estimateGas 方法计算以太坊交易所需的预估 gas。包括参数、示例和最佳实践。
+keywords: eth_estimateGas, gas 估算, 交易 gas, 以太坊 gas, 智能合约执行成本, gas 限制, 交易费用, 优化 gas, 失败交易
+---
+
+# eth_estimateGas
+
+`eth_estimateGas` 方法生成一个估算值，表示完成交易所需的 gas 量。该方法在不实际写入区块链的情况下模拟执行，为开发者提供了一种可靠的方式来避免 gas 不足错误并优化交易成本。
+
+## 使用场景
+
+- 为用户界面预先计算交易成本
+- 智能合约部署成本估算
+- 提交前检查交易可行性
+- Gas 优化分析和成本降低
+- 防止因 gas 不足导致的交易失败
+- 批量交易的预算规划
+- 确定复杂合约交互的 gas 限制
+- 在不消耗实际 gas 的情况下测试合约功能
+
+## 方法详情
+
+此方法模拟交易执行并返回估算的 gas 消耗量，通常会在原始值上添加安全缓冲区。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_estimateGas',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'transaction',
+			required: true,
+			type: 'object',
+			desc: '交易调用对象，包含以下字段：',
+			fields: [
+				{
+					id: 'from',
+					type: 'string',
+					desc: '发送交易的地址',
+					value: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Uniswap V2 Router
+				},
+				{
+					id: 'to',
+					type: 'string',
+					required: true,
+					desc: '交易接收地址',
+					value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH Contract
+				},
+				{
+					id: 'gas',
+					type: 'integer',
+					desc: '为交易执行提供的 gas 整数',
+					value: '',
+				},
+				{
+					id: 'gasPrice',
+					type: 'integer',
+					desc: '用于每个已支付 gas 的 gasPrice 整数，以十六进制编码',
+					value: '',
+				},
+				{
+					id: 'value',
+					type: 'integer',
+					desc: '与此交易一起发送的价值整数，以十六进制编码',
+					value: '0x186a0',
+				},
+				{
+					id: 'data',
+					type: 'string',
+					desc: '方法签名的哈希和编码参数',
+					value: '',
+				},
+			],
+		},
+		{
+			id: 'blockNumber',
+			type: 'string',
+			desc: '十六进制格式的区块号或标签：latest, earliest, pending, safe, finalized',
+			value: 'latest',
+		},
+		{
+			id: 'stateOverride',
+			type: 'object',
+			desc: '用于交易模拟的可选状态覆盖集',
+			fields: [
+				{
+					id: 'balance',
+					type: 'string',
+					desc: '为账户设置的虚假余额',
+					value: '',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: '为账户设置的虚假 nonce',
+					value: '',
+				},
+				{
+					id: 'code',
+					type: 'string',
+					desc: '要注入的虚假 EVM 字节码',
+					value: '',
+				},
+				{
+					id: 'state',
+					type: 'object',
+					desc: '虚假存储槽覆盖',
+					value: '',
+				},
+				{
+					id: 'stateDiff',
+					type: 'object',
+					desc: '虚假的单个存储槽覆盖',
+					value: '',
+				},
+			],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '十六进制格式的估算 gas 量',
+		},
+	]}
+	getParams={(fields) => {
+		const params = [fields?.transaction || null];
+		if (fields?.blockNumber) params.push(fields.blockNumber);
+		if (fields?.stateOverride) params.push(fields.stateOverride);
+		return params;
+	}}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x5208" // 21000 gas (标准 ETH 转账)
+}
+```
+
+### 常见 Gas 估算
+
+不同的操作需要不同数量的 gas：
+
+- ETH 转账：21,000 gas (`0x5208`)
+- ERC20 代币转账：约 45,000-65,000 gas
+- 简单智能合约调用：约 30,000-100,000 gas
+- 智能合约部署：根据合约大小和复杂度差异很大
+- NFT 铸造：约 50,000-300,000 gas
+
+为获得最佳结果，始终使用 `eth_estimateGas` 而不是硬编码这些值，因为合约更新和网络条件可能会改变 gas 需求。
+
+### 重要考虑因素
+
+- 估算值包含安全缓冲区，可能高于实际使用量
+- 如果交易在链上会失败，该方法将返回错误
+- Gas 估算可能因不同的节点和提供商而异
+- 内存密集型操作可显著增加 gas 使用量
+- 状态覆盖允许在不更改区块链的情况下测试不同场景
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_call" title="执行只读调用">eth_call</Link> - 执行调用而不创建交易
+- <Link to="/docs/ethereum/core-methods/eth_sendTransaction" title="在链上发送交易">eth_sendTransaction</Link> - 创建并发送交易
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="获取当前 gas 价格">eth_gasPrice</Link> - 获取以 wei 为单位的当前 gas 价格

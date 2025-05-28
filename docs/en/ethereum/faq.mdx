@@ -1,0 +1,141 @@
+---
+title: FAQ - Frequently Asked Questions | Ethereum API Troubleshooting
+description: Comprehensive guide answering common questions about TheRPC Ethereum API usage, including authentication, rate limits, error handling, performance optimization, and best implementation practices
+keywords: therpc faq, api questions, blockchain api faq, ethereum api help, json rpc troubleshooting, ethereum development questions, blockchain api errors, ethereum api performance, web3 best practices, smart contract interaction
+---
+
+# Frequently Asked Questions
+
+## # Authentication & Access
+
+- #### How do I get an API key?
+
+  Sign up at TheRPC.io and navigate to the dashboard to generate your API key. Each key has its own rate limits and permissions.
+
+- #### Can I use multiple API keys?
+
+  Yes, you can create multiple API keys for different applications or environments. This helps with monitoring usage and maintaining security.
+
+- #### What happens if my API key is compromised?
+  Immediately revoke the compromised key from your dashboard and generate a new one. Your old key will stop working instantly.
+
+## # API Usage
+
+### What's the difference between HTTP and WebSocket endpoints?
+
+- **HTTP**: Best for single requests and simple integrations. Use methods like <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Method to get the current block number">eth_blockNumber</Link> or <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Method to retrieve an account's ETH balance">eth_getBalance</Link>
+- **WebSocket**: Ideal for real-time data and subscriptions to events like <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Method to subscribe to real-time blockchain events">eth_subscribe</Link>
+
+### How do I handle rate limits?
+
+Implement exponential backoff when you receive rate limit errors. Consider upgrading your plan if you consistently hit limits.
+
+### What are the recommended timeout settings?
+
+We recommend:
+
+- HTTP requests: 30-second timeout
+- WebSocket connections: 60-second ping/pong interval
+- Subscription operations: 30-second timeout
+
+## # Error Handling
+
+### Common Error Codes
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32601,
+		"message": "Method not found"
+	},
+	"id": 1
+}
+```
+
+- `-32700`: Parse error
+- `-32600`: Invalid request
+- `-32601`: Method not found
+- `-32602`: Invalid params
+- `-32603`: Internal error
+- `-32000 to -32099`: Server error
+
+### Best Practices for Error Handling
+
+1. Always check the response for an `error` field
+2. Implement proper retry logic with backoff
+3. Log detailed error information for debugging
+4. Handle network timeouts appropriately
+
+## # Technical Questions
+
+### How do I track pending transactions?
+
+Use <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Method to get transaction receipt and confirmation status">eth_getTransactionReceipt</Link> to poll for transaction status. For real-time updates, subscribe to pending transactions via <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Method to subscribe to real-time blockchain events">eth_subscribe</Link> using WebSocket.
+
+```javascript
+// Example of transaction tracking
+const receipt = await web3.eth.getTransactionReceipt(txHash);
+if (receipt) {
+	console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
+}
+```
+
+### How can I ensure my requests are processed in order?
+
+Use the `nonce` parameter for transactions and maintain a queue in your application for sequential processing. You can get the current nonce using <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="Method to get the transaction count (nonce) for an account">eth_getTransactionCount</Link>.
+
+### What's the recommended way to handle chain reorganizations?
+
+1. Wait for sufficient block confirmations using <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Method to get the current block number">eth_blockNumber</Link>
+2. Listen for `newHeads` events through <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Method to subscribe to real-time blockchain events">eth_subscribe</Link>
+3. Verify transaction finality using <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Method to get block information by block number">eth_getBlockByNumber</Link>
+
+## # Performance
+
+### How can I optimize my API usage?
+
+1. Batch related requests when possible
+2. Use WebSocket for real-time data through <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Method to subscribe to real-time blockchain events">eth_subscribe</Link>
+3. Implement proper caching
+4. Choose appropriate polling intervals
+
+### What are the best practices for high-throughput applications?
+
+1. Use connection pooling
+2. Implement request queuing
+3. Monitor rate limits
+4. Consider dedicated infrastructure
+
+## # Network Specific
+
+### How do I switch between networks?
+
+Simply use the appropriate endpoint for each network while maintaining the same API key and request format. You can verify the network using <Link to="/docs/ethereum/core-methods/net_version" title="Method to get the current network ID">net_version</Link>.
+
+### Can I use the same code for different networks?
+
+Yes, our API provides consistent interfaces across networks. Just update the endpoint URL for different networks. You can check the chain ID using <Link to="/docs/ethereum/core-methods/eth_chainId" title="Method to get the current chain ID">eth_chainId</Link>.
+
+## # Development & Integration
+
+### Which Web3 library should I use?
+
+- **JavaScript**: web3.js or ethers.js
+- **Python**: web3.py
+- **Java**: web3j
+- **Other languages**: See our <Link to="/docs/tools/overview" title="Overview of tools for different programming languages">Tools & SDKs</Link> section
+
+### How do I test my integration?
+
+1. Start with testnet endpoints
+2. Use our test API keys
+3. Implement proper error handling
+4. Validate responses using methods like <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Method to get the current block number">eth_blockNumber</Link>
+5. Monitor performance
+
+### See also
+
+- <Link to="/docs/ethereum/quick-start" title="Get started quickly with the Ethereum API">Quick Start Guide</Link> - Get Started Quickly
+- <Link to="/docs/ethereum/authentication" title="Guide to securing your API access">Authentication Guide</Link> - Detailed Auth Info
+- <Link to="/docs/ethereum/rate-limits" title="Information about API usage limits and quotas">Rate Limits</Link> - Understand Usage Limits

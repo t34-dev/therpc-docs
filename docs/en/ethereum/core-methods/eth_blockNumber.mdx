@@ -1,0 +1,87 @@
+---
+title: eth_blockNumber - Get Current Block Number | Ethereum API Methods
+description: Learn how to use the eth_blockNumber method to retrieve the most recent block number from the Ethereum blockchain. Includes examples, parameters, and response format.
+keywords: eth_blockNumber, ethereum block number, latest block, blockchain height, ethereum rpc, current block, block height, chain status
+---
+
+# eth_blockNumber
+
+The `eth_blockNumber` method returns the number of the most recent block on the Ethereum blockchain. This simple yet powerful method helps developers track the current state of the network, check synchronization status, and ensure applications work with up-to-date data.
+
+## Use Cases
+
+- Checking if your node is fully synchronized with the network
+- Monitoring real-time block progression for time-sensitive applications
+- Determining the current height of the blockchain
+- Verifying transaction confirmations by comparing block numbers
+- Creating blockchain explorers and monitoring tools
+- Implementing wait functions that execute code after a certain number of blocks
+
+## Method Details
+
+This method is lightweight and commonly used for basic blockchain queries. It requires no parameters and returns the latest block number in hexadecimal format, which can easily be converted to decimal.
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    "method": "eth_blockNumber",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[]}
+  returns={[
+    {
+      id: 'result',
+      desc: "The latest block number in hexadecimal format",
+      type: "string"
+    }
+  ]}
+  getParams={(meta, scheme, data) => {
+    return [];
+  }}
+  onTry={async (meta, scheme, data) => {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    const url = meta.proxy_url_req || "";
+    if (!url) return {error: "Endpoint URL is required"};
+    if (meta.proxy_api_key) headers["Authorization"] = `Bearer ${meta.proxy_api_key}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        ...scheme,
+        params: []
+      })
+    });
+
+    return response.json();
+
+}}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0xE81224" // Hex value: 15,200,804 in decimal
+}
+```
+
+### Working with Block Numbers
+
+Block numbers in Ethereum represent the chain's height and serve as a timestamp mechanism. Each new block is added approximately every 12 seconds. You can use the block number to:
+
+1. Calculate the approximate time elapsed since a specific event
+2. Check if enough confirmations have occurred for transaction finality
+3. Monitor network activity by tracking block creation rates
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Retrieve block details by number">eth_getBlockByNumber</Link> - Retrieve detailed information about a specific block by its number
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Get block information by hash">eth_getBlockByHash</Link> - Get block information using the block hash
+- <Link to="/docs/ethereum/core-methods/eth_syncing" title="Check node synchronization status">eth_syncing</Link> - Check the synchronization status of the node
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="Guide to Ethereum blocks">Working with Blocks</Link> - Comprehensive guide on handling Ethereum blocks

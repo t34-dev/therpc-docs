@@ -1,0 +1,191 @@
+---
+title: debug_getBadBlocks - Detectar y Analizar Bloques Inválidos en Ethereum | Métodos de API de Ethereum
+description: Aprenda a utilizar el método debug_getBadBlocks para recuperar, analizar y comprender los bloques inválidos detectados por su nodo Ethereum, esencial para operadores de red e investigadores de problemas de consenso.
+keywords: debug_getBadBlocks, bloques inválidos ethereum, detección de errores de consenso, bloques malos, validación de blockchain, violación de consenso, verificación de bloques, integridad de la cadena, depuración de red, detección de bifurcaciones, fallos de validación de bloques, problemas de red ethereum, fallos de consenso, depuración ethereum, errores de verificación de bloques, problemas de sincronización de nodos, análisis de bifurcaciones ethereum, bloques rechazados, análisis forense de blockchain, transiciones de estado inválidas, errores de mineros, problemas de clientes ethereum, validación de cabeceras de bloques, bloques malformados, problemas de propagación de bloques
+---
+
+# debug_getBadBlocks
+
+El método `debug_getBadBlocks` devuelve una lista de bloques inválidos que han sido observados y rechazados por el nodo Ethereum. Este método es particularmente valioso para desarrolladores, operadores de red e investigadores de seguridad que necesitan detectar, analizar y comprender fallos de consenso o inconsistencias en la red.
+
+## Casos de Uso
+
+- Detectar problemas de consenso y violaciones de protocolo en la red
+- Analizar ocurrencias de bifurcaciones y sus causas subyacentes
+- Depurar problemas de sincronización de nodos y cuestiones relacionadas con reorganizaciones
+- Validar la integridad de la blockchain a través de diferentes clientes
+- Monitorear la salud de la red e identificar posibles ataques
+- Investigar reorganizaciones de la cadena y sus patrones
+- Diagnosticar problemas de validación específicos del cliente
+- Auditar la lógica de validación de bloques en implementaciones de clientes
+- Identificar productores de bloques maliciosos y sus patrones
+- Investigar incidentes de partición de red
+
+## Detalles del Método
+
+Este método no requiere ningún parámetro y devuelve información sobre cualquier bloque inválido detectado por el nodo.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'debug_getBadBlocks',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: 'Un array de bloques inválidos con información detallada',
+			fields: [
+				{
+					id: 'hash',
+					type: 'string',
+					desc: 'El hash del bloque inválido',
+				},
+				{
+					id: 'block',
+					type: 'object',
+					desc: 'El objeto bloque con detalles completos',
+					fields: [
+						{
+							id: 'baseFeePerGas',
+							type: 'string',
+							desc: 'La tarifa base por gas en el bloque (post-EIP-1559)',
+						},
+						{
+							id: 'difficulty',
+							type: 'string',
+							desc: 'El nivel de dificultad del bloque',
+						},
+						{
+							id: 'extraData',
+							type: 'string',
+							desc: 'Datos adicionales incluidos en el bloque',
+						},
+						{
+							id: 'gasLimit',
+							type: 'string',
+							desc: 'El gas máximo permitido en el bloque',
+						},
+						{
+							id: 'gasUsed',
+							type: 'string',
+							desc: 'Gas total utilizado por todas las transacciones en el bloque',
+						},
+						{
+							id: 'miner',
+							type: 'string',
+							desc: 'La dirección del minero que minó el bloque',
+						},
+						{
+							id: 'transactions',
+							type: 'array',
+							desc: 'Array de objetos de transacción en el bloque',
+						},
+					],
+				},
+				{
+					id: 'rlp',
+					type: 'string',
+					desc: 'Los datos del bloque codificados en RLP para un análisis detallado',
+				},
+			],
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"hash": "0x4a62f91774346144245d80e21065ab1cbc807f43611b675966dced62a6e7f7a6",
+			"block": {
+				"parentHash": "0x825e81563696f5eb82fe94ad52526fec1c8937b28d36bd88051e33739281d85a",
+				"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+				"miner": "0x3daeee3e90d51acd79fe4446fe6962c4e0e78e9977f39cf731ed0d5b5418269b",
+				"stateRoot": "0xf2790a1421d95c8d3f3d1c8a8e2342a704aef457d3996a5df9a77a818f2c8fa5",
+				"transactionsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+				"receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+				"logsBloom": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+				"difficulty": "0x1",
+				"number": "0xc9b44",
+				"gasLimit": "0x1c9c380",
+				"gasUsed": "0x0",
+				"timestamp": "0x65b131e7",
+				"extraData": "0xd983010a1d846765746888676f312e32312e30856c696e7578",
+				"mixHash": "0x9a7ab7c6c8fde86c8b9d6f49cd579bb2e9a868b8ff53bc3c3b767deaacc21c0a",
+				"nonce": "0x0000000000000000",
+				"baseFeePerGas": "0x12a05f200",
+				"transactions": []
+			},
+			"rlp": "0xf90226a0825e81563696f5eb82fe94ad52526fec1c8937b28d36bd88051e33739281d85aa01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347943daeee3e90d51acd79fe4446fe6962c4e0e78e9977f39cf731ed0d5b5418269ba0f2790a1421d95c8d3f3d1c8a8e2342a704aef457d3996a5df9a77a818f2c8fa5a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421b901000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000083000c9b44831c9c38080846583135f11d983010a1d846765746888676f312e32312e30856c696e7578a09a7ab7c6c8fde86c8b9d6f49cd579bb2e9a868b8ff53bc3c3b767deaacc21c0a880000000000000000850212a05f200c0"
+		}
+	]
+}
+```
+
+### Ejemplo de Respuesta Vacía
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": []
+}
+```
+
+### Errores Comunes de Validación de Bloques
+
+Los bloques inválidos pueden fallar en la validación por varias razones:
+
+1. **Transición de estado inválida**: El estado resultante no coincide con la raíz de estado esperada
+2. **Cabecera de bloque inválida**: Campos como nonce, dificultad o límite de gas violan las reglas de consenso
+3. **Transacción inválida**: Contiene una transacción inválida (p. ej., problemas de firma)
+4. **Validación de bloques tío**: Las referencias de tío no siguen las reglas del protocolo
+5. **Problemas de marca de tiempo**: La marca de tiempo del bloque viola las reglas de desviación permitidas
+6. **Violaciones del límite de gas**: Los ajustes del límite de gas exceden el rango permitido
+7. **Fallos de validación de PoW**: La prueba de trabajo no cumple con los requisitos de dificultad
+8. **Violación de EIP**: Viola las reglas introducidas por una Propuesta de Mejora de Ethereum activada
+
+### Analizando los Datos RLP
+
+Los datos codificados en RLP (Recursive Length Prefix) proporcionan la representación bruta del bloque:
+
+- Use decodificadores RLP para analizar la estructura exacta
+- Compare con bloques válidos para identificar diferencias
+- Extraiga campos específicos que pueden estar causando problemas de validación
+- Valioso para investigaciones técnicas profundas de problemas de consenso
+
+### Consideraciones de Rendimiento
+
+- Este método tiene un impacto mínimo en el rendimiento de los nodos
+- El tamaño de la respuesta depende de cuántos bloques malos se han observado
+- El uso de este método no afecta la operación o el estado de sincronización del nodo
+- Los nodos pueden limitar cuántos bloques malos almacenan para conservar memoria
+
+### Notas Importantes
+
+- Este método es utilizado principalmente por operadores de nodos y desarrolladores que investigan problemas de consenso
+- Se devuelve un array vacío si no se han detectado bloques inválidos
+- El método requiere que las API de depuración estén habilitadas en el nodo Ethereum (--http.api=eth,debug,net,web3)
+- No todos los clientes de Ethereum admiten este método (disponible principalmente en Geth)
+- Los bloques inválidos pueden ser descartados por los nodos después de algún tiempo para mejorar la eficiencia de memoria
+- Cuando se ejecuta un nodo en modo de poda, es posible que los bloques malos históricos no estén disponibles
+- Los bloques malos normalmente no se propagan a través de la red después de ser rechazados
+- Diferentes clientes pueden tener pequeñas diferencias en la lógica de validación de bloques
+- Los datos codificados en RLP son esenciales para un análisis forense detallado
+- Los bloques pueden ser inválidos debido a errores honestos o intentos maliciosos
+
+### Ver también
+
+- <Link to="/docs/ethereum/debug-methods/debug_traceBlock" title="Obtener trazas detalladas de todas las transacciones en un bloque">debug_traceBlock</Link> - Rastrear todas las transacciones en un bloque
+- <Link to="/docs/ethereum/debug-methods/debug_traceBlockByHash" title="Rastrear transacciones en un bloque especificado por el hash del bloque">debug_traceBlockByHash</Link> - Rastrear transacciones de bloque por hash
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Obtener información básica del bloque sin rastreo detallado">eth_getBlockByHash</Link> - Obtener información básica del bloque
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Obtener información del bloque por número de bloque">eth_getBlockByNumber</Link> - Obtener bloque por número

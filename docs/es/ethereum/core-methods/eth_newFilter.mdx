@@ -1,0 +1,178 @@
+---
+title: eth_newFilter - Crear Filtros de Registro de Eventos para Contratos Inteligentes | Métodos API de Ethereum
+description: Aprenda a usar eth_newFilter para crear filtros para registros de eventos de Ethereum - la clave para monitorear eventos de contratos inteligentes, rastrear transferencias de tokens y construir aplicaciones blockchain en tiempo real.
+keywords: eth_newFilter, filtro de eventos ethereum, monitoreo de eventos blockchain, eventos de contratos inteligentes, filtro de registro de eventos, registros ethereum, creación de filtros, desarrollo de dApp, parámetros indexados, seguimiento de eventos, notificaciones blockchain, eventos web3, eventos ERC20, eventos de transacción, indexación de datos blockchain, eventos de transferencia de tokens, cambios de estado de contratos, receptor de eventos ethereum
+---
+
+# eth_newFilter
+
+El método `eth_newFilter` crea un objeto de filtro para notificar cuando nuevos registros (eventos) que coinciden con los criterios de filtro dados se incluyen en la blockchain. Este método es crucial para monitorear eventos de contratos inteligentes y es uno de los bloques de construcción fundamentales para arquitecturas de dApps reactivas.
+
+## Casos de Uso
+
+- Monitoreo de eventos de contratos inteligentes en aplicaciones en tiempo real
+- Seguimiento de transferencias de tokens (ERC-20, ERC-721, ERC-1155) para billeteras
+- Detección de cambios de estado en protocolos DeFi y pools de liquidez
+- Construcción de aplicaciones blockchain basadas en eventos con alta capacidad de respuesta
+- Implementación de notificaciones en tiempo real para actividades de usuarios
+- Agregación de datos históricos a partir de eventos de contratos para análisis
+- Actualizaciones automáticas de UI basadas en eventos blockchain en dApps
+- Monitoreo de actividades del mercado NFT (listados, ventas, ofertas)
+- Seguimiento de votos de gobernanza y ejecuciones de propuestas
+- Creación de feeds de actividad para aplicaciones blockchain
+
+## Detalles del Método
+
+Este método toma un objeto de filtro como parámetro y devuelve un ID de filtro que puede usarse con `eth_getFilterChanges` y `eth_getFilterLogs`.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_newFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterObject',
+      required: true,
+      type: 'object',
+      desc: "Objeto de opciones de filtro",
+      fields: [
+        {
+          id: 'fromBlock',
+          type: 'string',
+          desc: "Número/etiqueta de bloque para comenzar a filtrar (p.ej., \"0x1\" o \"latest\")",
+          value: "0x1"
+        },
+        {
+          id: 'toBlock',
+          type: 'string',
+          desc: "Número/etiqueta de bloque hasta donde filtrar (p.ej., \"0x1000\" o \"latest\")",
+          value: "latest"
+        },
+        {
+          id: 'address',
+          type: 'string',
+          desc: "Dirección(es) de contrato para filtrar registros",
+          value: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        },
+        {
+          id: 'topics',
+          type: 'array',
+          desc: "Temas para filtrar, en orden, con null para coincidencias comodín",
+          value: [
+            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+            null,
+            "0x00000000000000000000000023a6b9c321aba35d18ca26e66824e917778d9d2b"
+          ]
+        }
+      ]
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'string',
+      desc: "ID del filtro (cadena hexadecimal) usado para consultar con eth_getFilterChanges"
+    }
+  ]}
+  getParams={(fields) => {
+    const filterObject = {};
+
+    if (fields?.filterObject?.fromBlock)
+      filterObject.fromBlock = fields.filterObject.fromBlock;
+
+    if (fields?.filterObject?.toBlock)
+      filterObject.toBlock = fields.filterObject.toBlock;
+
+    if (fields?.filterObject?.address)
+      filterObject.address = fields.filterObject.address;
+
+    if (fields?.filterObject?.topics && fields.filterObject.topics.length > 0)
+      filterObject.topics = fields.filterObject.topics;
+
+    return [filterObject];
+  }}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x1a4b0d22dbb7284cf485c969d2857ab3"
+}
+```
+
+### Entendiendo los Temas y Firmas de Eventos
+
+El array `topics` es una de las características más potentes del filtrado de registros Ethereum. Permite coincidencias con parámetros específicos indexados de eventos:
+
+1. **Topic[0]**: Generalmente el hash de la firma del evento (keccak256 del nombre del evento y tipos de parámetros)
+2. **Topic[1]**: Primer parámetro indexado
+3. **Topic[2]**: Segundo parámetro indexado
+4. **Topic[3]**: Tercer parámetro indexado
+
+#### Cómo Funcionan las Firmas de Eventos
+
+Las firmas de eventos se crean tomando el hash keccak256 del nombre del evento y sus tipos de parámetros:
+
+```solidity
+// Definición de evento en Solidity
+event Transfer(address indexed from, address indexed to, uint256 value);
+
+// La firma del evento se calcula como:
+keccak256("Transfer(address,address,uint256)")
+// Lo que equivale a:
+// 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+```
+
+Los eventos Ethereum pueden tener hasta 4 temas (1 firma de evento + 3 parámetros indexados).
+
+#### Reglas de Coincidencia de Temas:
+
+- **Null**: Coincide con cualquier valor en esa posición
+- **String**: Coincide con el valor exacto en esa posición
+- **Array de strings**: Coincide con cualquier valor en el array (OR lógico)
+
+### Firmas de Eventos Comunes
+
+| Tipo de Evento | Firma de Evento | Formato de Evento |
+|------------|-----------------|--------------|
+| Transferencia ERC-20 | `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` | `Transfer(address,address,uint256)` |
+| Aprobación ERC-20 | `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925` | `Approval(address,address,uint256)` |
+| Transferencia ERC-721 | `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` | `Transfer(address,address,uint256)` |
+| Swap Uniswap V2 | `0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822` | `Swap(address,uint256,uint256,uint256,uint256,address)` |
+| PairCreated | `0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9` | `PairCreated(address,address,address,uint256)` |
+
+### Uso del ID de Filtro
+
+Después de crear un filtro, recibirá un ID de filtro que puede usarse con:
+
+1. `eth_getFilterChanges` - Para consultar nuevos registros desde la última consulta
+2. `eth_getFilterLogs` - Para obtener todos los registros que coinciden con los criterios de filtro
+3. `eth_uninstallFilter` - Para eliminar el filtro cuando ya no sea necesario
+
+### Notas Importantes y Mejores Prácticas
+
+1. **Expiración de Filtros**: Los filtros expiran después de un período de inactividad (normalmente alrededor de 5 minutos)
+2. **Relleno de Temas**: Los temas de dirección deben rellenarse a 32 bytes (rellenado con ceros a la izquierda)
+3. **Rendimiento**: Los filtros amplios (p.ej., muchas direcciones o bloques) pueden consumir muchos recursos
+4. **Límites de Tasa**: El sondeo excesivo puede llevar a limitaciones de tasa de los proveedores RPC
+5. **Rango de Bloques**: Rangos de bloques muy grandes pueden causar tiempos de espera o ser rechazados
+6. **Límites de Filtros**: Algunos proveedores limitan el número de filtros activos por conexión
+7. **Alternativa**: Considere usar suscripciones WebSocket para eventos en tiempo real cuando estén disponibles
+8. **Indexados vs No-indexados**: Solo los parámetros indexados aparecen en temas; los no indexados están en el campo de datos
+9. **Campo de Datos**: Para eventos complejos, el campo de datos necesita decodificación ABI para extraer valores
+10. **Orden de Temas**: El orden de temas es crítico y debe coincidir con el orden de los parámetros indexados
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Consultar nuevos eventos desde la última verificación">eth_getFilterChanges</Link> - Recuperar nuevos registros desde la última consulta
+- <Link to="/docs/ethereum/core-methods/eth_getFilterLogs" title="Obtener todos los registros para un filtro">eth_getFilterLogs</Link> - Obtener todos los registros que coinciden con criterios de filtro
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Eliminar un filtro activo">eth_uninstallFilter</Link> - Eliminar un filtro cuando ya no sea necesario
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Consultar registros históricos sin crear un filtro">eth_getLogs</Link> - Consultar registros sin persistencia de filtro
+- <Link to="/docs/ethereum/core-methods/eth_newBlockFilter" title="Crear filtro para nuevos bloques">eth_newBlockFilter</Link> - Crear filtro para nuevos bloques
+- <Link to="/docs/ethereum/core-methods/eth_newPendingTransactionFilter" title="Crear filtro para transacciones pendientes">eth_newPendingTransactionFilter</Link> - Crear filtro para transacciones pendientes

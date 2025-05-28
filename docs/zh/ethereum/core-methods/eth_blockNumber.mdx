@@ -1,0 +1,87 @@
+---
+title: eth_blockNumber - 获取当前区块号 | 以太坊 API 方法
+description: 学习如何使用 eth_blockNumber 方法从以太坊区块链检索最新区块号。包括示例、参数和响应格式。
+keywords: eth_blockNumber, 以太坊区块号, 最新区块, 区块链高度, 以太坊 rpc, 当前区块, 区块高度, 链状态
+---
+
+# eth_blockNumber
+
+`eth_blockNumber` 方法返回以太坊区块链上最新区块的编号。这个简单而强大的方法帮助开发者跟踪网络的当前状态，检查同步状态，并确保应用程序使用最新数据。
+
+## 使用场景
+
+- 检查您的节点是否与网络完全同步
+- 为时间敏感的应用程序监控实时区块进展
+- 确定区块链的当前高度
+- 通过比较区块号验证交易确认
+- 创建区块链浏览器和监控工具
+- 实现在特定区块数后执行代码的等待功能
+
+## 方法详情
+
+该方法轻量级且常用于基本区块链查询。它不需要参数，并以十六进制格式返回最新区块号，可以轻松转换为十进制。
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    "method": "eth_blockNumber",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[]}
+  returns={[
+    {
+      id: 'result',
+      desc: "十六进制格式的最新区块号",
+      type: "string"
+    }
+  ]}
+  getParams={(meta, scheme, data) => {
+    return [];
+  }}
+  onTry={async (meta, scheme, data) => {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    const url = meta.proxy_url_req || "";
+    if (!url) return {error: "Endpoint URL is required"};
+    if (meta.proxy_api_key) headers["Authorization"] = `Bearer ${meta.proxy_api_key}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        ...scheme,
+        params: []
+      })
+    });
+
+    return response.json();
+
+}}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0xE81224" // 十六进制值：十进制为 15,200,804
+}
+```
+
+### 处理区块号
+
+以太坊中的区块号代表链的高度，并作为时间戳机制。每个新区块大约每 12 秒添加一次。您可以使用区块号：
+
+1. 计算自特定事件以来经过的大致时间
+2. 检查是否已发生足够的确认以达成交易最终性
+3. 通过跟踪区块创建率监控网络活动
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="通过编号检索区块详情">eth_getBlockByNumber</Link> - 通过区块号检索特定区块的详细信息
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="通过哈希获取区块信息">eth_getBlockByHash</Link> - 使用区块哈希获取区块信息
+- <Link to="/docs/ethereum/core-methods/eth_syncing" title="检查节点同步状态">eth_syncing</Link> - 检查节点的同步状态
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="以太坊区块指南">处理区块</Link> - 处理以太坊区块的综合指南

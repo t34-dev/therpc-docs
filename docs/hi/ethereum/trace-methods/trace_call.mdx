@@ -1,0 +1,373 @@
+---
+title: trace_call - लेनदेन कॉल निष्पादित और ट्रेस करें | Ethereum API विधियां
+description: ब्लॉकचेन स्थिति को संशोधित किए बिना कॉल ट्रेस करने और लेनदेन निष्पादन का सिमुलेशन करने के लिए trace_call विधि का उपयोग कैसे करें। स्मार्ट कॉन्ट्रैक्ट परीक्षण और डीबगिंग के लिए बिल्कुल उपयुक्त।
+keywords: trace_call, ethereum trace call, trace api, ethereum debug transaction, smart contract trace, dry run transaction, call trace, contract execution trace, ethereum dry run, transaction simulation, debug smart contract, call tracing, transaction analysis, ethereum contract debugging, off-chain execution, contract state analysis, ethereum vm trace, contract call simulation, ethereum debug api, transaction tracing
+---
+
+# trace_call
+
+`trace_call` विधि आपको ब्लॉकचेन में लेनदेन जोड़े बिना एक नया संदेश कॉल निष्पादित करने और उसके निष्पादन का विस्तृत ट्रेस प्राप्त करने की अनुमति देती है। यह `eth_call` जैसा है लेकिन विस्तृत चरण-दर-चरण निष्पादन ट्रेस के साथ।
+
+## उपयोग के मामले
+
+- लेनदेन भेजने से पहले जटिल कॉन्ट्रैक्ट इंटरैक्शन को डीबग करें
+- वास्तविक गैस खर्च किए बिना गैस खपत पैटर्न का विश्लेषण करें
+- विभिन्न पैरामीटर्स के साथ स्मार्ट कॉन्ट्रैक्ट फंक्शंस का परीक्षण करें
+- विभिन्न ब्लॉकचेन स्थितियों में लेनदेन का सिमुलेशन करें
+- कॉन्ट्रैक्ट कोड में संभावित सुरक्षा कमजोरियों का पता लगाएं
+- कॉन्ट्रैक्ट निष्पादन प्रवाह और स्थिति परिवर्तनों को समझें
+- विशिष्ट एज केस स्थितियों में कॉन्ट्रैक्ट व्यवहार को सत्यापित करें
+- कॉन्ट्रैक्ट निष्पादन विज़ुअलाइज़ेशन टूल बनाएं
+- कॉन्ट्रैक्ट कोड का स्थैतिक विश्लेषण करें
+- सुरक्षित रूप से लेनदेन रिवर्ट और त्रुटि स्थितियों का परीक्षण करें
+
+## विधि विवरण
+
+यह विधि एक लेनदेन का सिमुलेशन करती है और उसके निष्पादन के विस्तृत ट्रेस लौटाती है।
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    "method": "trace_call",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'transaction',
+      required: true,
+      type: 'object',
+      desc: "लेनदेन कॉल ऑब्जेक्ट",
+      fields: [
+        {
+          id: 'from',
+          type: 'string',
+          desc: "जिस पते से लेनदेन भेजा जाता है",
+          value: "0x6f1FB6EFDf50F34bFA3F2bC0E5576EdD71631638"
+        },
+        {
+          id: 'to',
+          type: 'string',
+          desc: "जिस पते पर लेनदेन निर्देशित है",
+          value: "0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e"
+        },
+        {
+          id: 'gas',
+          type: 'string',
+          desc: "लेनदेन के लिए प्रदान की गई गैस (हेक्स)",
+          value: "0x100000"
+        },
+        {
+          id: 'gasPrice',
+          type: 'string',
+          desc: "wei में गैस मूल्य (हेक्स)",
+          value: "0x4A817C800"
+        },
+        {
+          id: 'value',
+          type: 'string',
+          desc: "wei में स्थानांतरित मूल्य (हेक्स)",
+          value: "0x0"
+        },
+        {
+          id: 'data',
+          type: 'string',
+          desc: "कॉन्ट्रैक्ट मेथड कॉल डेटा",
+          value: "0xa67a6a45000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      id: 'traceTypes',
+      required: true,
+      type: 'array',
+      desc: "प्रतिक्रिया में शामिल करने के लिए ट्रेस प्रकारों की सरणी",
+      value: ["trace"]
+    },
+    {
+      id: 'blockParameter',
+      type: 'string',
+      desc: "पूर्णांक ब्लॉक नंबर, या 'latest', 'earliest', 'pending' (वैकल्पिक)",
+      value: "latest"
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'object',
+      desc: "निष्पादन विवरण के साथ ट्रेस परिणाम ऑब्जेक्ट",
+      fields: [
+        {
+          id: 'output',
+          type: 'string',
+          desc: "कॉल से रिटर्न डेटा"
+        },
+        {
+          id: 'stateDiff',
+          type: 'object',
+          desc: "कॉल के कारण स्थिति परिवर्तन (यदि अनुरोधित हो)"
+        },
+        {
+          id: 'trace',
+          type: 'array',
+          desc: "ट्रेस ऑब्जेक्ट्स की सरणी",
+          fields: [
+            {
+              id: 'action',
+              type: 'object',
+              desc: "कॉल एक्शन के बारे में विवरण",
+              fields: [
+                {
+                  id: 'callType',
+                  type: 'string',
+                  desc: "कॉल का प्रकार (call, delegatecall, आदि)"
+                },
+                {
+                  id: 'from',
+                  type: 'string',
+                  desc: "प्रेषक पता"
+                },
+                {
+                  id: 'gas',
+                  type: 'string',
+                  desc: "कॉल के लिए प्रदान की गई गैस"
+                },
+                {
+                  id: 'input',
+                  type: 'string',
+                  desc: "कॉल के लिए इनपुट डेटा"
+                },
+                {
+                  id: 'to',
+                  type: 'string',
+                  desc: "प्राप्तकर्ता पता"
+                },
+                {
+                  id: 'value',
+                  type: 'string',
+                  desc: "wei में स्थानांतरित मूल्य"
+                }
+              ]
+            },
+            {
+              id: 'result',
+              type: 'object',
+              desc: "कॉल का परिणाम",
+              fields: [
+                {
+                  id: 'gasUsed',
+                  type: 'string',
+                  desc: "उपयोग की गई गैस की मात्रा"
+                },
+                {
+                  id: 'output',
+                  type: 'string',
+                  desc: "कॉल से आउटपुट डेटा"
+                }
+              ]
+            },
+            {
+              id: 'subtraces',
+              type: 'integer',
+              desc: "सबट्रेस की संख्या"
+            },
+            {
+              id: 'traceAddress',
+              type: 'array',
+              desc: "कॉल ट्री में ट्रेस स्थान का पता पथ"
+            },
+            {
+              id: 'type',
+              type: 'string',
+              desc: "ट्रेस का प्रकार"
+            },
+            {
+              id: 'error',
+              type: 'string',
+              desc: "यदि कॉल विफल हो गया तो त्रुटि संदेश"
+            }
+          ]
+        },
+        {
+          id: 'vmTrace',
+          type: 'object',
+          desc: "वर्चुअल मशीन निष्पादन ट्रेस (यदि अनुरोधित हो)"
+        }
+      ]
+    }
+  ]}
+  getParams={(fields) => {
+    const params = [];
+
+    // Build transaction object
+    const tx = {};
+    if (fields?.transaction?.from) tx.from = fields.transaction.from;
+    if (fields?.transaction?.to) tx.to = fields.transaction.to;
+    if (fields?.transaction?.gas) tx.gas = fields.transaction.gas;
+    if (fields?.transaction?.gasPrice) tx.gasPrice = fields.transaction.gasPrice;
+    if (fields?.transaction?.value) tx.value = fields.transaction.value;
+    if (fields?.transaction?.data) tx.data = fields.transaction.data;
+
+    params.push(tx);
+
+    // Add trace types
+    params.push(fields?.traceTypes || ["trace"]);
+
+    // Add block parameter if provided
+    if (fields?.blockParameter) {
+      params.push(fields.blockParameter);
+    }
+
+    return params;
+
+}}
+/>
+
+### प्रतिक्रिया उदाहरण
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"output": "0x",
+		"stateDiff": null,
+		"trace": [
+			{
+				"action": {
+					"callType": "call",
+					"from": "0x6f1fb6efdf50f34bfa3f2bc0e5576edd71631638",
+					"gas": "0x1dcd11f8",
+					"input": "0xa67a6a45000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000",
+					"to": "0x1e0447b19bb6ecfdae1e4ae1694b0c3659614e4e",
+					"value": "0x0"
+				},
+				"error": "Reverted",
+				"subtraces": 0,
+				"traceAddress": [],
+				"type": "call"
+			}
+		],
+		"vmTrace": null
+	}
+}
+```
+
+### कॉल प्रकार
+
+ट्रेस एक्शन में `callType` फ़ील्ड कॉल के प्रकार को इंगित करता है:
+
+- **call**: पतों के बीच मानक कॉल
+- **staticcall**: केवल पढ़ने के लिए कॉल (स्थिति को संशोधित नहीं कर सकता)
+- **delegatecall**: कॉल जो कॉलर के कॉन्टेक्स्ट को बनाए रखता है
+- **callcode**: लेगेसी कॉल प्रकार (अप्रचलित)
+
+### ट्रेस प्रकार
+
+ट्रेस में `type` फ़ील्ड ऑपरेशन के प्रकार को इंगित करता है:
+
+- **call**: एक संदेश कॉल
+- **create**: एक कॉन्ट्रैक्ट निर्माण
+- **suicide**: एक कॉन्ट्रैक्ट सेल्फ-डिस्ट्रक्ट (SELFDESTRUCT ऑपकोड)
+
+### traceAddress को समझना
+
+`traceAddress` फ़ील्ड कॉल ट्री में स्थिति को इंगित करता है:
+
+- टॉप-लेवल कॉल के लिए खाली सरणी (`[]`)
+- नेस्टेड कॉल के माध्यम से पथ दिखाने वाले इंडिसेस की सरणी
+- जटिल इंटरैक्शन के माध्यम से सटीक निष्पादन पथ को ट्रैक करने में आपकी मदद करता है
+
+### सफल कॉल के साथ प्रतिक्रिया उदाहरण
+
+यहां `trace_call` से प्रतिक्रिया का एक उदाहरण है:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "stateDiff": { /* state changes */ },
+    "trace": [
+      {
+        "action": {
+          "callType": "call",
+          "from": "0x407d73d8a49eeb85d32cf465507dd71d507100c1",
+          "gas": "0x1dcd12f8",
+          "input": "0xa9059cbb0000000000000000000000002710000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a",
+          "to": "0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b",
+          "value": "0x0"
+        },
+        "result": {
+          "gasUsed": "0x765",
+          "output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "subtraces": 1,
+        "traceAddress": [],
+        "type": "call"
+      },
+      {
+        "action": {
+          "callType": "call",
+          "from": "0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b",
+          "gas": "0x1dcd0393",
+          "input": "0x",
+          "to": "0x2710000000000000000000000000000000000000",
+          "value": "0xa"
+        },
+        "result": {
+          "gasUsed": "0x0",
+          "output": "0x"
+        },
+        "subtraces": 0,
+        "traceAddress": [0],
+        "type": "call"
+      }
+    ],
+    "vmTrace": { /* detailed VM execution information */ }
+  }
+}
+```
+
+### eth_call से अंतर
+
+जबकि `trace_call` और `eth_call` दोनों सिमुलेटेड कॉल करते हैं:
+
+- `trace_call` विस्तृत निष्पादन ट्रेस प्रदान करता है जो `eth_call` में उपलब्ध नहीं हैं
+- `trace_call` कई प्रकार के ट्रेस (ऑपरेशन, VM स्टेप्स, स्टेट चेंजेस) लौटा सकता है
+- `trace_call` डीबगिंग और विश्लेषण के लिए अधिक जानकारी देता है
+- `eth_call` अधिक हल्का है और सभी Ethereum क्लाइंट्स में मानक है
+- `trace_call` ऐतिहासिक ब्लॉक स्टेट सिमुलेशन का समर्थन करता है
+
+### प्रदर्शन विचार
+
+- ट्रेसिंग कम्प्यूटेशनल रूप से गहन है, विशेषकर सभी ट्रेस प्रकार सक्षम होने पर
+- vmTrace और stateDiff विशेष रूप से प्रतिक्रिया आकार और गणना समय बढ़ाते हैं
+- केवल आवश्यक ट्रेस प्रकारों का अनुरोध करने पर विचार करें
+- जटिल कॉन्ट्रैक्ट्स के लिए, प्रतिक्रियाएँ बहुत बड़ी हो सकती हैं
+- सार्वजनिक नोड्स या रेट-सीमित एंडपॉइंट्स पर टाइमआउट हो सकता है
+- प्रतिक्रिया समय लेनदेन की जटिलता के साथ बढ़ता है
+- यदि कई कॉल्स को ट्रेस कर रहे हैं तो बैच अनुरोधों का उपयोग करने पर विचार करें
+- प्रोडक्शन अनुप्रयोगों के लिए, समर्पित इन्फ्रास्ट्रक्चर की सिफारिश की जाती है
+
+### महत्वपूर्ण नोट्स
+
+- इस विधि के लिए नोड पर ट्रेस API सक्षम होने की आवश्यकता है
+- सभी क्लाइंट इस विधि का समर्थन नहीं करते (मुख्य रूप से `--gcmode=archive` के साथ Geth और OpenEthereum/Nethermind)
+- यह विधि ब्लॉकचेन को संशोधित नहीं करती या वास्तविक गैस का उपयोग नहीं करती
+- सिमुलेशन विवरणों के कारण गैस अनुमान वास्तविक लेनदेन से थोड़ा भिन्न हो सकता है
+- विभिन्न क्लाइंट थोड़े अलग ट्रेस प्रारूप लौटा सकते हैं
+- रिवर्ट किए गए लेनदेन में रिवर्ट पॉइंट तक ट्रेस जानकारी शामिल होगी
+- ऐतिहासिक ब्लॉक्स के लिए, नोड के पास उस स्थिति के लिए आर्काइव डेटा होना चाहिए
+- `stateDiff` प्रतिक्रिया उन लेनदेन के लिए बहुत बड़ी हो सकती है जो कई स्टोरेज स्लॉट्स को संशोधित करते हैं
+- मेननेट पर ट्रेसिंग अधिकांश सार्वजनिक RPC प्रदाताओं पर अनुपलब्ध हो सकती है
+- ट्रेस वास्तविक निष्पादन पथ दिखाते हैं, सभी संभावित पथ नहीं
+
+### यह भी देखें
+
+- <Link to="/docs/ethereum/trace-methods/trace_transaction" title="Get detailed execution traces for a specific transaction that's already on the blockchain">trace_transaction</Link> - मौजूदा लेनदेन के लिए ट्रेस प्राप्त करें
+- <Link to="/docs/ethereum/trace-methods/trace_filter" title="Search for transaction traces matching specific criteria across multiple blocks">trace_filter</Link> - कई ब्लॉक्स में विशिष्ट मानदंडों से मेल खाने वाले ट्रेस खोजें
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="Get all transaction execution traces within a specified block">trace_block</Link> - एक ब्लॉक में सभी लेनदेन के ट्रेस प्राप्त करें
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Execute a new message call without creating a transaction on the blockchain">eth_call</Link> - समान विधि लेकिन विस्तृत ट्रेस जानकारी के बिना
+- <Link to="/docs/ethereum/debug-methods/debug_traceCall" title="Low-level tracing of a call with custom tracing options">debug_traceCall</Link> - अलग ट्रेसिंग विकल्पों के साथ वैकल्पिक ट्रेस विधि

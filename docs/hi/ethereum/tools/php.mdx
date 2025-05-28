@@ -1,0 +1,192 @@
+---
+title: Ethereum विकास के लिए PHP टूल्स | Web3.php एकीकरण गाइड
+description: Ethereum ब्लॉकचेन विकास के लिए PHP लाइब्रेरीज़ का व्यापक गाइड, जिसमें Web3.php फ्रेमवर्क, Laravel एकीकरण, स्मार्ट कॉन्ट्रैक्ट इंटरैक्शन और प्रोडक्शन उदाहरण शामिल हैं
+keywords: php ethereum, web3.php, ethereum php, php blockchain, web3 php, laravel ethereum, php smart contracts, blockchain php, ethereum api php, php dapp, web3 laravel, blockchain web development
+---
+
+# PHP टूल्स
+
+PHP डेवलपर्स वेब एप्लिकेशन के साथ एकीकरण को सक्षम करने के लिए Ethereum विकास के लिए Web3.php लाइब्रेरी का उपयोग कर सकते हैं।
+
+<PayAttention category="PHP" />
+
+## # Web3.php
+
+Ethereum नोड्स के साथ इंटरैक्ट करने के लिए PHP इंटरफेस।
+
+```php
+<?php
+
+use Web3\Web3;
+use Web3\Providers\HttpProvider;
+use Web3\RequestManagers\HttpRequestManager;
+
+class EthereumService
+{
+    private $web3;
+
+    public function __construct(string $nodeUrl)
+    {
+        $this->web3 = new Web3(new HttpProvider(new HttpRequestManager($nodeUrl)));
+    }
+
+    public function getBalance(string $address): string
+    {
+        $balance = null;
+        $this->web3->eth->getBalance($address, 'latest', function ($err, $result) use (&$balance) {
+            if ($err !== null) {
+                throw new Exception($err->getMessage());
+            }
+            $balance = $result;
+        });
+
+        return $this->web3->utils->fromWei($balance, 'ether');
+    }
+
+    public function sendTransaction(array $transaction): string
+    {
+        $hash = null;
+        $this->web3->eth->sendTransaction($transaction, function ($err, $result) use (&$hash) {
+            if ($err !== null) {
+                throw new Exception($err->getMessage());
+            }
+            $hash = $result;
+        });
+
+        return $hash;
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/web3p/web3.php" target="_blank" absolute>web3.php</Link>
+- **Packagist**: <Link to="https://packagist.org/packages/web3p/web3.php" target="_blank" absolute>web3.php package</Link>
+- **विशेषताएँ**:
+  - JSON-RPC समर्थन
+  - कॉन्ट्रैक्ट इंटरैक्शंस
+  - लेनदेन हैंडलिंग
+  - ETH यूनिट कन्वर्ज़न
+  - ABI एन्कोडिंग/डिकोडिंग
+
+## # Laravel एकीकरण
+
+Laravel एकीकरण का उदाहरण:
+
+```php
+<?php
+
+namespace App\Services;
+
+use Web3\Web3;
+use Illuminate\Support\Facades\Cache;
+
+class EthereumService
+{
+    private $web3;
+
+    public function __construct()
+    {
+        $this->web3 = new Web3(config('services.ethereum.node_url'));
+    }
+
+    public function getCachedBalance(string $address): string
+    {
+        return Cache::remember("eth_balance_{$address}", 300, function () use ($address) {
+            return $this->getBalance($address);
+        });
+    }
+
+    public function getTransactionCount(string $address): int
+    {
+        $count = null;
+        $this->web3->eth->getTransactionCount($address, 'latest', function ($err, $result) use (&$count) {
+            if ($err !== null) {
+                throw new Exception($err->getMessage());
+            }
+            $count = hexdec($result);
+        });
+
+        return $count;
+    }
+}
+```
+
+## # स्मार्ट कॉन्ट्रैक्ट एकीकरण
+
+PHP में स्मार्ट कॉन्ट्रैक्ट्स के साथ काम करना:
+
+```php
+<?php
+
+use Web3\Contract;
+
+class SmartContractService
+{
+    private $contract;
+
+    public function __construct(string $nodeUrl, string $abi, string $contractAddress)
+    {
+        $web3 = new Web3(new HttpProvider(new HttpRequestManager($nodeUrl)));
+        $this->contract = new Contract($web3->provider, $abi);
+        $this->contract->at($contractAddress);
+    }
+
+    public function callMethod(string $method, array $params = [])
+    {
+        $result = null;
+        $this->contract->call($method, $params, function ($err, $response) use (&$result) {
+            if ($err !== null) {
+                throw new Exception($err->getMessage());
+            }
+            $result = $response;
+        });
+
+        return $result;
+    }
+}
+```
+
+## # त्रुटि प्रबंधन
+
+PHP में उचित त्रुटि प्रबंधन:
+
+```php
+<?php
+
+class EthereumException extends Exception
+{
+    private $ethError;
+
+    public function __construct(string $message, $ethError = null)
+    {
+        parent::__construct($message);
+        $this->ethError = $ethError;
+    }
+
+    public function getEthError()
+    {
+        return $this->ethError;
+    }
+}
+
+class SafeEthereumService
+{
+    public function safeGetBalance(string $address): string
+    {
+        try {
+            return $this->getBalance($address);
+        } catch (Exception $e) {
+            throw new EthereumException(
+                "Failed to get balance for address: {$address}",
+                $e
+            );
+        }
+    }
+}
+```
+
+### इसे भी देखें
+
+- <Link to="/docs/ethereum/tools/overview" title="उपलब्ध Ethereum विकास टूल्स और SDK का पूर्ण अवलोकन">टूल्स अवलोकन</Link> - सभी उपलब्ध SDK और टूल्स
+- <Link to="/docs/ethereum/authentication" title="Ethereum नोड्स और API सेवाओं के साथ प्रमाणीकरण के लिए गाइड">प्रमाणीकरण गाइड</Link> - विस्तृत प्रमाणीकरण जानकारी
+- <Link to="/docs/ethereum/basic-operations" title="डेवलपर्स के लिए मूलभूत Ethereum ब्लॉकचेन ऑपरेशंस सीखें">मूलभूत ऑपरेशंस गाइड</Link> - आधारभूत ऑपरेशंस
+- <Link to="/docs/ethereum/all-methods" title="सभी उपलब्ध Ethereum API विधियों का पूर्ण संदर्भ">उपलब्ध विधियां</Link> - API क्षमताओं का अन्वेषण करें

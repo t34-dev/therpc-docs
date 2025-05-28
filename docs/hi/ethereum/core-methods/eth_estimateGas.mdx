@@ -1,0 +1,172 @@
+---
+title: eth_estimateGas - Estimate Transaction Gas Cost | Ethereum API Methods
+description: Learn how to use the eth_estimateGas method to calculate the estimated gas required for Ethereum transactions. Includes parameters, examples, and best practices.
+keywords: eth_estimateGas, gas estimation, transaction gas, ethereum gas, smart contract execution cost, gas limit, transaction fees, optimize gas, failed transaction
+---
+
+# eth_estimateGas
+
+The `eth_estimateGas` method generates an estimate of how much gas is necessary to allow a transaction to complete. This method simulates execution without actually writing to the blockchain, giving developers a reliable way to avoid out-of-gas errors and optimize transaction costs.
+
+## Use Cases
+
+- Pre-calculating transaction costs for user interfaces
+- Smart contract deployment cost estimation
+- Transaction feasibility checking before submission
+- Gas optimization analysis and cost reduction
+- Preventing failed transactions due to insufficient gas
+- Budget planning for batch transactions
+- Determining gas limits for complex contract interactions
+- Testing contract functionality without spending actual gas
+
+## Method Details
+
+This method simulates the transaction execution and returns the estimated gas consumption, typically adding a safety buffer to the raw value.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_estimateGas',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'transaction',
+			required: true,
+			type: 'object',
+			desc: 'The transaction call object which contains the following fields:',
+			fields: [
+				{
+					id: 'from',
+					type: 'string',
+					desc: 'The address from which the transaction is sent',
+					value: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Uniswap V2 Router
+				},
+				{
+					id: 'to',
+					type: 'string',
+					required: true,
+					desc: 'The address to which the transaction is addressed',
+					value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH Contract
+				},
+				{
+					id: 'gas',
+					type: 'integer',
+					desc: 'The integer of gas provided for the transaction execution',
+					value: '',
+				},
+				{
+					id: 'gasPrice',
+					type: 'integer',
+					desc: 'The integer of gasPrice used for each paid gas encoded as hexadecimal',
+					value: '',
+				},
+				{
+					id: 'value',
+					type: 'integer',
+					desc: 'The integer of value sent with this transaction encoded as hexadecimal',
+					value: '0x186a0',
+				},
+				{
+					id: 'data',
+					type: 'string',
+					desc: 'The hash of the method signature and encoded parameters',
+					value: '',
+				},
+			],
+		},
+		{
+			id: 'blockNumber',
+			type: 'string',
+			desc: 'The block number in hexadecimal format or tags: latest, earliest, pending, safe, finalized',
+			value: 'latest',
+		},
+		{
+			id: 'stateOverride',
+			type: 'object',
+			desc: 'Optional state override set for transaction simulation',
+			fields: [
+				{
+					id: 'balance',
+					type: 'string',
+					desc: 'Fake balance to set for the account',
+					value: '',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'Fake nonce to set for the account',
+					value: '',
+				},
+				{
+					id: 'code',
+					type: 'string',
+					desc: 'Fake EVM bytecode to inject',
+					value: '',
+				},
+				{
+					id: 'state',
+					type: 'object',
+					desc: 'Fake storage slot overrides',
+					value: '',
+				},
+				{
+					id: 'stateDiff',
+					type: 'object',
+					desc: 'Fake individual storage slot overrides',
+					value: '',
+				},
+			],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The estimated gas amount in hexadecimal format',
+		},
+	]}
+	getParams={(fields) => {
+		const params = [fields?.transaction || null];
+		if (fields?.blockNumber) params.push(fields.blockNumber);
+		if (fields?.stateOverride) params.push(fields.stateOverride);
+		return params;
+	}}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x5208" // 21000 gas (standard ETH transfer)
+}
+```
+
+### Common Gas Estimates
+
+Different operations require different amounts of gas:
+
+- ETH transfer: 21,000 gas (`0x5208`)
+- ERC20 token transfer: ~45,000-65,000 gas
+- Simple smart contract call: ~30,000-100,000 gas
+- Smart contract deployment: Varies widely based on contract size and complexity
+- NFT minting: ~50,000-300,000 gas
+
+For best results, always use `eth_estimateGas` rather than hardcoding these values, as contract updates and network conditions can change gas requirements.
+
+### Important Considerations
+
+- The estimate includes a safety buffer and may be higher than actual usage
+- The method will fail with an error if the transaction would fail on-chain
+- Gas estimates may vary between different nodes and providers
+- Memory-intensive operations can significantly increase gas usage
+- State overrides allow for testing different scenarios without changing the blockchain
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Execute read-only calls">eth_call</Link> - Execute a call without creating a transaction
+- <Link to="/docs/ethereum/core-methods/eth_sendTransaction" title="Send transactions on-chain">eth_sendTransaction</Link> - Create and send transaction
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="Get current gas price">eth_gasPrice</Link> - Get the current gas price in wei

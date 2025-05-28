@@ -1,0 +1,103 @@
+---
+title: net_version - Get Network ID | Ethereum API Methods
+description: Learn how to use the net_version method to identify which Ethereum network your client is connected to, including mainnet, testnets, and other EVM-compatible networks.
+keywords: net_version, network id, ethereum network, chain id, network identification, blockchain network, ethereum mainnet, testnet detection, network switching, multi-chain, evm networks, network verification, blockchain id, chain selection, network diagnostics, chain detection
+---
+
+# net_version
+
+The `net_version` method returns the current network ID as a string. This allows applications to determine which Ethereum network the client is connected to, such as mainnet, testnets, or other EVM-compatible networks.
+
+## Use Cases
+
+- Network verification before sending transactions
+- Cross-chain compatibility checks in multi-chain applications
+- Environment-specific functionality for dApps
+- Security validations to prevent sending to wrong networks
+- Multi-network dApp development and testing
+- Preventing accidental testnet vs mainnet operations
+- Smart contract deployment verification
+- Wallet network switching confirmation
+- Transaction validation safety checks
+- Network-specific feature enablement
+
+## Method Details
+
+This method requires no parameters and returns a string value representing the network ID.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'net_version',
+		id: 67,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The current network ID as a string',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 67,
+	"result": "1" // Ethereum Mainnet
+}
+```
+
+### Common Network IDs
+
+| Network ID | Network Name                 |
+| ---------- | ---------------------------- |
+| "1"        | Ethereum Mainnet             |
+| "5"        | Goerli Testnet               |
+| "11155111" | Sepolia Testnet              |
+| "10"       | Optimism Mainnet             |
+| "42161"    | Arbitrum One                 |
+| "42170"    | Arbitrum Nova                |
+| "137"      | Polygon Mainnet              |
+| "80001"    | Polygon Mumbai Testnet       |
+| "56"       | BNB Smart Chain Mainnet      |
+| "97"       | BNB Smart Chain Testnet      |
+| "43114"    | Avalanche C-Chain            |
+| "250"      | Fantom Opera                 |
+| "100"      | Gnosis Chain (formerly xDai) |
+| "1284"     | Moonbeam                     |
+| "1285"     | Moonriver                    |
+| "324"      | zkSync Era Mainnet           |
+| "59144"    | Linea Mainnet                |
+| "8453"     | Base Mainnet                 |
+| "84531"    | Base Goerli Testnet          |
+| "534352"   | Scroll Mainnet               |
+| "7777777"  | Zora Mainnet                 |
+
+### Important Notes
+
+- Network ID is returned as a string, not a number
+- Network ID is sometimes the same as Chain ID, but not always
+- Some networks may change their network ID over time
+- Always verify network ID when developing cross-chain applications
+- For security-critical applications, consider using multiple verification methods
+- EIP-155 introduced Chain ID for replay protection, which is different from Network ID in some cases
+- For transaction signing, Chain ID (from `eth_chainId`) is usually more relevant than Network ID
+
+### Difference Between Network ID and Chain ID
+
+- **Network ID**: Identifies the network in the P2P protocol
+- **Chain ID**: Used for transaction signing to prevent replay attacks
+- For most networks, they are the same value, but there are exceptions
+- Always use the appropriate ID for the specific use case
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_chainId" title="Get the chain ID used for transaction signing">eth_chainId</Link> - Returns the chain ID used for transaction signing
+- <Link to="/docs/ethereum/core-methods/net_listening" title="Check if your node is actively listening for connections">net_listening</Link> - Returns whether the client is actively networking
+- <Link to="/docs/ethereum/core-methods/net_peerCount" title="Check how many peers are connected to your node">net_peerCount</Link> - Returns the number of connected peers

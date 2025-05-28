@@ -1,0 +1,164 @@
+---
+title: eth_getCode - 检索智能合约字节码 | 以太坊 API 方法
+description: 学习如何使用 eth_getCode 方法从以太坊智能合约中检索编译后的字节码。包括字节码验证和分析的示例。
+keywords: eth_getCode, 智能合约字节码, 合约代码, 以太坊合约, 字节码验证, evm 代码, 合约分析, solidity 字节码, 合约检测, 代理合约
+---
+
+# eth_getCode
+
+`eth_getCode` 方法返回指定地址处智能合约的编译字节码。这个基本方法允许开发者验证合约实现、执行安全审计，以及区分以太坊区块链上的普通账户和智能合约。
+
+## 使用场景
+
+- 智能合约验证和实现检查
+- 合约字节码比较和版本验证
+- 合约审计和安全分析工作流程
+- 区分合约和 EOA（外部拥有账户）
+- 可升级系统的合约实现分析
+- 代理合约验证和委托实现检查
+- 检测自毁合约和合约存在性
+- 确定地址是否为代币合约
+- 智能合约逆向工程和分析
+- 跨不同区块的历史字节码分析
+
+## 方法详情
+
+此方法在请求的区块高度检索特定地址部署的 EVM 字节码。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getCode',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: '智能合约的地址',
+			value: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', // UNI token contract
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '十六进制格式的区块号或区块标签',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '给定地址的字节码，以十六进制字符串表示',
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.blockNumber || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x60806040526004361061016a5763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166306fdde03811461016f578063095ea7b3146101f957806318160ddd1461023957806323b872dd14610260578063313ce567146102a..." // 为简洁起见而截断
+}
+```
+
+### 特殊情况和返回值
+
+- **空合约**: 如果地址处不存在代码，返回 "0x"
+- **EOA 地址**: 对于普通钱包地址（外部拥有账户），返回 "0x"
+- **自毁合约**: 合约通过 `selfdestruct` 被销毁后，返回 "0x"
+- **预部署**: 如果检查合约部署前的区块，返回 "0x"
+- **标准合约**: 对于典型合约，返回完整的 EVM 字节码
+- **代理合约**: 返回代理代码，而非它们委托的实现代码
+
+### 识别合约类型
+
+不同类型的合约有可识别的字节码模式：
+
+1. **代理合约**: 通常包含委托调用操作
+2. **ERC20 代币**: 包含转账和批准函数
+3. **ERC721 NFT**: 包含标准 NFT 接口
+4. **最小代理 (EIP-1167)**: 以 `0x363d3d37363d73...` 开头
+5. **钻石代理 (EIP-2535)**: 包含分面管理逻辑
+6. **UUPS 代理**: 实现中包含升级功能
+
+### 实用示例
+
+```javascript
+// 示例：验证地址是合约还是 EOA
+async function isContract(address) {
+	const code = await provider.send('eth_getCode', [address, 'latest']);
+	return code !== '0x';
+}
+
+// 示例：验证代理实现
+async function verifyProxyImplementation(proxyAddress, expectedImplementation) {
+	// 对于 EIP-1967 代理，实现地址存储在特定插槽
+	const implementationSlot = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
+
+	const storageValue = await provider.send('eth_getStorageAt', [proxyAddress, implementationSlot, 'latest']);
+
+	// 从存储值中提取地址（移除填充）
+	const implementationAddress = '0x' + storageValue.slice(26);
+
+	// 获取实现字节码
+	const implementationCode = await provider.send('eth_getCode', [implementationAddress, 'latest']);
+
+	const expectedCode = await provider.send('eth_getCode', [expectedImplementation, 'latest']);
+
+	return {
+		isProxy: implementationCode !== '0x',
+		implementationAddress,
+		implementationMatches: implementationCode === expectedCode,
+	};
+}
+
+// 使用
+const addressToCheck = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'; // UNI token
+const isContractResult = await isContract(addressToCheck);
+console.log(`${addressToCheck} is ${isContractResult ? 'a contract' : 'an EOA'}`);
+```
+
+### 高级用法: 合约类型检测
+
+```javascript
+// 基于字节码模式的简单合约类型检测器
+async function detectContractType(address) {
+    const code = await provider.send('eth_getCode', [address, 'latest']);
+    
+    if (code === '0x') return 'Not a contract (EOA or self-destructed)';
+    
+    // 检查代理模式
+    if (code.includes('363d3d37363d73')) return 'EIP-1167 Minimal Proxy';
+    if (code.includes('5c60806040527f360894')) return 'EIP-1967 Transparent Proxy';
+    
+    // 检查常见 ERC 标准（简化）
+    if (code.includes('6e0a6eecd9d3362a2dcfb7fac5fea5d4bd0a73001ddb12dd96e21df6ab138d72')) 
+        return 'Likely ERC-20 Token';
+    if (code.includes('80ac58cd')) return 'Likely ERC-721 NFT';
+    if (code.includes('d9b67a26')) return 'Likely ERC-1155 Multi-Token';
+    
+    return 'Standard contract (type unknown)';
+}
+```
+
+### 常见合约字节码前缀
+
+- **0x60806040**: Solidity 合约的常见 EVM 字节码前缀 (版本 0.4.x-0.8.x)
+- **0x6080604052**: Solidity 合约的另一个常见前缀
+- **0x363d3d373d3d3d363d73**: 代理合约的常见前缀
+- **0x363d3d37363d73**: 常见最小代理模式 (EIP-1167)
+- **0x3d602d80600a3d3981f3**: 最小代理的另一个变体
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getStorageAt" title="访问合约存储">eth_getStorageAt</Link> - 返回特定存储位置的值
+- <Link to="/docs/ethereum/core-methods/eth_call" title="执行合约调用">eth_call</Link> - 执行合约的只读调用
+- <Link to="/docs/ethereum/core-methods/eth_getBalance" title="检查账户余额">eth_getBalance</Link> - 返回账户的以太币余额
+- <Link to="/docs/ethereum/core-methods/eth_getProof" title="生成合约状态证明">eth_getProof</Link> - 生成账户和存储值的证明

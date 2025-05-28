@@ -1,0 +1,125 @@
+---
+title: txpool_inspect - Get Transaction Pool Summary | Ethereum API Methods
+description: Learn how to use the txpool_inspect method to get a human-readable overview of pending and queued transactions in your Ethereum node's mempool for monitoring and diagnostics.
+keywords: txpool_inspect, transaction pool, pending transactions, queued transactions, mempool, ethereum txpool, geth, transaction summary, ethereum mempool, tx inspection, blockchain transactions, memory pool overview, pending tx analysis, transaction queue, gas price monitoring, nonce tracking, ethereum transaction inspection
+---
+
+# txpool_inspect
+
+The `txpool_inspect` method returns a textual summary of all pending and queued transactions in the transaction pool. This method is primarily supported by Geth clients and provides a human-readable overview of transactions waiting to be included in blocks, without the full transaction details.
+
+## Use Cases
+
+- Monitoring transaction pool status for node health checks
+- Debugging stuck transactions in wallets and applications
+- Gas price analysis for optimal transaction submission
+- Network congestion monitoring and visualization
+- Transaction replacement verification (checking if a speed-up worked)
+- MEV (Miner Extractable Value) research and analysis
+- Node operation diagnostics in infrastructure setups
+- Identifying transaction patterns during high network activity
+- Monitoring transaction pool for specific addresses
+- Observing nonce gaps that might prevent transaction confirmation
+
+## Method Details
+
+This method requires no parameters and returns a structured summary of the transaction pool.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'txpool_inspect',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	disabled={true}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'Object containing pending and queued transaction summaries',
+			fields: [
+				{
+					id: 'pending',
+					type: 'object',
+					desc: 'Map of pending transactions grouped by sender address and nonce',
+				},
+				{
+					id: 'queued',
+					type: 'object',
+					desc: 'Map of queued transactions grouped by sender address and nonce',
+				},
+			],
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"pending": {
+			"0x0216d5032f356960cd3749c31ab34eeff21b3395": {
+				"806": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984: 0 wei + 21000 gas × 8000000000 wei"
+			},
+			"0x0239769a1adf4def9f1b1e5e2ab4d89c3cc5ba59": {
+				"4": "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2: 0 wei + 400000 gas × 10000000000 wei"
+			}
+		},
+		"queued": {
+			"0x00e4d0b50e4294f9b9eb2381b0ef33745f5a0a69": {
+				"7": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2: 0 wei + 21000 gas × 24200000000 wei"
+			},
+			"0x0216d5032f356960cd3749c31ab34eeff21b3395": {
+				"807": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D: 0 wei + 189000 gas × 3000000000 wei"
+			}
+		}
+	}
+}
+```
+
+### Understanding the Response
+
+The response is structured as follows:
+
+1. **Pending Transactions**: Transactions that are ready to be included in the next blocks.
+
+- Organized by sender address and nonce
+- Each entry shows: `recipientAddress: value + gasLimit × gasPrice`
+
+2. **Queued Transactions**: Transactions that cannot yet be executed (e.g., because of a nonce gap).
+
+- Same structure as pending transactions
+- Typically have future nonces or other execution constraints
+
+### Transaction State Categories
+
+- **Pending**: Transactions eligible for inclusion in the next block
+- Have valid nonces (equal to the sender's current nonce)
+- Meet all other validity criteria
+
+- **Queued**: Transactions not yet eligible for execution
+- May have future nonces (higher than sender's current nonce + pending count)
+- May be waiting for other transactions from the same sender
+- May have other constraints preventing immediate execution
+
+### Important Notes
+
+- This method is primarily supported by Geth clients
+- Not all Ethereum client implementations support the txpool namespace
+- During high network congestion, the response can be very large
+- The textual format is designed for human readability rather than programmatic processing
+- For more detailed transaction data, consider using `txpool_content` instead
+- Pending transactions may not be immediately included in blocks despite being valid
+- The transaction pool is dynamic and changes with each new block and incoming transaction
+- Some clients may limit the number of transactions shown in the response
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/txpool_status" title="Get a count of transactions in the mempool">txpool_status</Link> - Returns the number of transactions in the pool
+- <Link to="/docs/ethereum/core-methods/txpool_content" title="Get detailed information about all transactions in the mempool">txpool_content</Link> - Returns complete transaction data from the pool

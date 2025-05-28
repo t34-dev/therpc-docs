@@ -1,0 +1,163 @@
+---
+title: eth_call - Execute Smart Contract Call | Ethereum API Methods
+description: Learn how to use the eth_call method to execute message calls without creating blockchain transactions. Includes parameters, response format, and examples.
+keywords: eth_call, ethereum call, message call, smart contract read, contract state, view functions, blockchain query, gas-free calls, erc20 balance, contract data
+---
+
+# eth_call
+
+The `eth_call` method executes a new message call immediately without creating a transaction on the blockchain. This method is perfect for reading data from smart contracts without spending gas or modifying the blockchain state, making it one of the most frequently used methods for DApp development.
+
+## Use Cases
+
+- Reading token balances from ERC20 contracts
+- Querying contract state variables and mappings
+- Checking transaction validity before submission
+- Debugging smart contract functions
+- Testing contract behavior with different inputs
+- Simulating complex transaction outcomes
+- Fetching price data from DEX contracts
+- Verifying access rights before attempting state changes
+
+## Method Details
+
+This method allows interaction with deployed smart contracts in a read-only manner with optional state overrides. The state overrides feature is particularly useful for testing "what-if" scenarios.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_call',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'transaction',
+			required: true,
+			type: 'object',
+			desc: 'The transaction call object which contains the following fields:',
+			fields: [
+				{
+					id: 'from',
+					type: 'string',
+					desc: 'The address from which the transaction is sent',
+					value: '',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					required: true,
+					desc: 'The address to which the transaction is addressed',
+					value: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+				},
+				{
+					id: 'gas',
+					type: 'integer',
+					desc: 'The integer of gas provided for the transaction execution',
+					value: '',
+				},
+				{
+					id: 'gasPrice',
+					type: 'integer',
+					desc: 'The integer of gasPrice used for each paid gas encoded as hexadecimal',
+					value: '',
+				},
+				{
+					id: 'value',
+					type: 'integer',
+					desc: 'The integer of value sent with this transaction encoded as hexadecimal',
+					value: '',
+				},
+				{
+					id: 'data',
+					type: 'string',
+					desc: 'The hash of the method signature and encoded parameters. For more information, see the Contract ABI description in the Solidity documentation',
+					value: '0x70a082310000000000000000000000006E0d01A76C3Cf4288372a29124A26D4353EE51BE',
+				},
+			],
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'The block number in hexadecimal format or one of the string tags: latest, earliest, pending, safe or finalized (safe and finalized tags are only supported on Ethereum, Gnosis, Arbitrum, Arbitrum Nova and Avalanche C-chain)',
+			value: 'latest',
+		},
+		{
+			id: 'stateOverride',
+			type: 'object',
+			desc: 'The State Override Set option allows you to change the state of a contract before executing the call',
+			fields: [
+				{
+					id: 'balance',
+					type: 'string',
+					desc: 'The fake balance to set for the account before executing the call',
+					value: '0xFFFFFFFFFFFFFFFFFFFF',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'The fake nonce to set for the account before executing the call',
+					value: '',
+				},
+				{
+					id: 'code',
+					type: 'string',
+					desc: 'The fake EVM bytecode to inject into the account before executing the call',
+					value: '',
+				},
+				{
+					id: 'state',
+					type: 'object',
+					desc: 'The fake key-value mapping to override all slots in the account storage before executing the call',
+					value: '',
+				},
+				{
+					id: 'stateDiff',
+					type: 'integer',
+					desc: 'The fake key-value mapping to override individual slots in the account storage before executing the call',
+					value: '',
+				},
+			],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The return value of the executed contract method',
+		},
+	]}
+	getParams={(fields) => {
+		const q = [fields?.transaction || null, fields?.blockNumber || null];
+		if (fields.stateOverride && fields?.transaction?.to) q.push({ [fields?.transaction?.to]: fields.stateOverride });
+		return q;
+	}}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x00000000000000000000000000000000000000000000015af1d78b58c4000000"
+}
+```
+
+### Common ERC20 Function Calls
+
+One of the most common uses of `eth_call` is to check ERC20 token balances. The data field typically contains the function signature followed by the parameters:
+
+- **balanceOf(address)**: `0x70a08231` + padded address
+- **decimals()**: `0x313ce567`
+- **symbol()**: `0x95d89b41`
+- **totalSupply()**: `0x18160ddd`
+
+The response will need to be decoded according to the expected return type.
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="Estimate transaction gas costs">eth_estimateGas</Link> - Estimate gas needed to execute a transaction
+- <Link to="/docs/ethereum/core-methods/eth_sendTransaction" title="Send new transactions">eth_sendTransaction</Link> - Create and send a new transaction
+- <Link to="/docs/ethereum/core-methods/eth_sendRawTransaction" title="Submit signed transactions">eth_sendRawTransaction</Link> - Submit a signed transaction

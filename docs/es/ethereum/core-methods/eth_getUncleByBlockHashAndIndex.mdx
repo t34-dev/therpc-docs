@@ -1,0 +1,217 @@
+---
+title: eth_getUncleByBlockHashAndIndex - Obtener Bloque Tío por Hash de Bloque e Índice | Métodos API de Ethereum
+description: Aprenda a usar el método eth_getUncleByBlockHashAndIndex para obtener información de bloques tío (ommer) usando un hash de bloque y un índice de tío.
+keywords: eth_getUncleByBlockHashAndIndex, bloques tío, bloques ommer, tíos ethereum, recompensas de bloque, seguridad de red, hash de bloque
+---
+
+# eth_getUncleByBlockHashAndIndex
+
+El método `eth_getUncleByBlockHashAndIndex` devuelve información sobre un bloque tío (ommer) mediante un hash de bloque y la posición del índice del tío.
+
+## Casos de Uso
+
+- Análisis de la salud de la red blockchain
+- Verificación de la distribución de recompensas de tíos
+- Investigación de competencia en minería/validación
+- Estudio del rendimiento y latencia de la blockchain
+- Comprensión de la seguridad de la red a través de la tasa de tíos
+- Análisis de estrategias de minería
+- Investigación histórica de blockchain
+- Verificación de confirmación de bloques
+
+## Detalles del Método
+
+Devuelve información sobre el bloque tío (ommer) mediante el hash del bloque y la posición del índice del tío.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getUncleByBlockHashAndIndex',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockHash',
+			required: true,
+			type: 'string',
+			desc: 'Hash del bloque que contiene al tío',
+			value: '0xc8df1f061abb4d0c107b2b1a794ade8780b3120e681f723fe55a7be586d95ba6', // Example block with uncle
+		},
+		{
+			id: 'uncleIndex',
+			required: true,
+			type: 'string',
+			desc: 'La posición del índice del tío (hex)',
+			value: '0x0',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'Objeto de bloque tío, o null si no existe ningún tío en ese índice',
+			fields: [
+				{
+					id: 'number',
+					type: 'string',
+					desc: "Número del bloque tío (hex)",
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: 'Hash del bloque tío',
+				},
+				{
+					id: 'parentHash',
+					type: 'string',
+					desc: 'Hash del bloque padre',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'Nonce usado en minería/validación de bloques (solo bloques PoW)',
+				},
+				{
+					id: 'sha3Uncles',
+					type: 'string',
+					desc: 'Hash SHA3 de los datos de tíos en el bloque',
+				},
+				{
+					id: 'logsBloom',
+					type: 'string',
+					desc: 'Filtro Bloom para que los clientes ligeros recuperen rápidamente logs relacionados',
+				},
+				{
+					id: 'transactionsRoot',
+					type: 'string',
+					desc: 'Raíz del trie de transacciones para este bloque',
+				},
+				{
+					id: 'stateRoot',
+					type: 'string',
+					desc: 'Raíz del trie de estado para este bloque',
+				},
+				{
+					id: 'receiptsRoot',
+					type: 'string',
+					desc: 'Raíz del trie de recibos para este bloque',
+				},
+				{
+					id: 'miner',
+					type: 'string',
+					desc: 'Dirección que recibió la recompensa de minería',
+				},
+				{
+					id: 'difficulty',
+					type: 'string',
+					desc: 'Objetivo de dificultad para este bloque (hex)',
+				},
+				{
+					id: 'totalDifficulty',
+					type: 'string',
+					desc: 'Dificultad total de la cadena hasta este bloque (hex)',
+				},
+				{
+					id: 'extraData',
+					type: 'string',
+					desc: 'Datos extra incluidos por el minero en el bloque',
+				},
+				{
+					id: 'size',
+					type: 'string',
+					desc: 'Tamaño del bloque en bytes (hex)',
+				},
+				{
+					id: 'gasLimit',
+					type: 'string',
+					desc: 'Gas máximo permitido en este bloque (hex)',
+				},
+				{
+					id: 'gasUsed',
+					type: 'string',
+					desc: 'Gas total usado por todas las transacciones en este bloque (hex)',
+				},
+				{
+					id: 'timestamp',
+					type: 'string',
+					desc: 'Marca de tiempo Unix cuando se recopiló el bloque (hex)',
+				},
+				{
+					id: 'uncles',
+					type: 'array',
+					desc: 'Array de hashes de tíos (estará vacío para bloques tío)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockHash || null, fields?.uncleIndex || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"difficulty": "0x57f17a09378",
+		"extraData": "0x476574682f76312e302e302f6c696e75782f676f312e342e32",
+		"gasLimit": "0x1388",
+		"gasUsed": "0x0",
+		"hash": "0x932bdf904546a2287a2c9b2ede37925f698a7657484b172d4e5184f80bdd464d",
+		"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+		"miner": "0xbb7b8287f3f0a933474a79eae42cbca977791171",
+		"mixHash": "0x4500aa4ee2b3044a155252e35273770edeb2ab6f8cb19ca8e732771484462169",
+		"nonce": "0x24732773618271bc",
+		"number": "0x299",
+		"parentHash": "0xa779859b1ee558258b7008bbabff272280136c5dd3eb3ea3bfa8f6ae03bf91e5",
+		"receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+		"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+		"size": "0x21d",
+		"stateRoot": "0x2604fbf5183f5360da249b51f1b9f1e0f315d2ff3ffa1a4143ff221ad9ca1fec",
+		"timestamp": "0x55ba4827",
+		"totalDifficulty": null,
+		"transactionsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+		"uncles": []
+	}
+}
+```
+
+## Entendiendo los Bloques Tío
+
+Los bloques tío (también llamados ommers) son bloques válidos que fueron minados pero no incluidos en la blockchain principal. Esto sucede cuando dos mineros encuentran un bloque válido casi al mismo tiempo, pero solo uno puede ser aceptado en la cadena principal.
+
+### Por Qué Importan los Bloques Tío
+
+- **Seguridad de Red**: Una tasa alta de tíos puede indicar latencia de red o alta competencia de minería
+- **Recompensas**: Los mineros de bloques tío reciben recompensas parciales (2/32 de la recompensa de bloque pre-EIP-1559)
+- **Inclusión de Bloques**: Los tíos son referenciados en bloques regulares (hasta 2 por bloque)
+- **Confirmación de Cadena**: Los tíos contribuyen a la seguridad de la blockchain a pesar de no estar en la cadena principal
+
+### Cálculo de Recompensas de Tíos
+
+Los mineros de bloques tío reciben recompensas basadas en la fórmula:
+
+```
+((Número de Bloque Tío + 8) - Número de Bloque Principal) * (Recompensa de Bloque / 8)
+```
+
+Donde:
+- Número de Bloque Tío es el número de bloque del bloque tío
+- Número de Bloque Principal es el número de bloque que incluyó la referencia al tío
+- Recompensa de Bloque es la recompensa estándar de bloque (varía según la actualización de red)
+
+### Notas Importantes
+
+- Los bloques tío contienen solo información de cabecera, no transacciones
+- Los tíos deben estar dentro de 6 bloques del bloque incluyente
+- Post-Fusión (PoS), los tíos ya no existen ya que los validadores producen bloques en slots
+- La tasa de tíos es una métrica importante de salud de la red
+- La información de tíos puede ser vital para analizar datos históricos de blockchain
+
+## Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockNumberAndIndex" title="Recuperar bloques tío usando número de bloque">eth_getUncleByBlockNumberAndIndex</Link> - Obtener datos de bloques tío usando el número de bloque e índice de tío
+- <Link to="/docs/ethereum/core-methods/eth_getUncleCountByBlockHash" title="Contar tíos en un bloque específico">eth_getUncleCountByBlockHash</Link> - Contar el número de tíos en un bloque usando su hash
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Obtener detalles completos del bloque por hash">eth_getBlockByHash</Link> - Obtener información completa del bloque incluyendo referencias a tíos

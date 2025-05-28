@@ -1,0 +1,140 @@
+---
+title: eth_getBlockTransactionCountByHash - 统计区块中的交易数量 | 以太坊 API 方法
+description: 了解如何使用 eth_getBlockTransactionCountByHash 方法获取通过区块哈希标识的以太坊区块中的交易数量。
+keywords: eth_getBlockTransactionCountByHash, 交易数量, 区块交易数量, 以太坊区块哈希, 区块链交易, 区块大小, 交易计数, 交易量
+---
+
+# eth_getBlockTransactionCountByHash
+
+`eth_getBlockTransactionCountByHash` 方法返回通过区块哈希标识的区块中的交易数量。这种轻量级方法提供了一种快速方式来检查交易量，而无需检索完整的区块数据，使其成为区块浏览器和网络分析工具的实用功能。
+
+## 使用场景
+
+- 区块浏览器功能和交易列表
+- 网络活动监控和交易量分析
+- 交易量分析和历史跟踪
+- 区块大小估算和 gas 使用预测
+- 链重组检测和验证
+- 节点之间的同步验证
+- 交易吞吐量测量
+- 区块链分析和使用指标
+- 区块验证和确认检查
+- MEV（最大可提取价值）研究
+
+## 方法详情
+
+此方法接受区块哈希并返回该区块中的交易数量，提供了一种简单而高效的方式来衡量区块活动。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBlockTransactionCountByHash',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'hash',
+			required: true,
+			type: 'string',
+			desc: '区块的哈希值（32 字节）',
+			value: '0xdc0818cf78f21a8e70579cb46a43643f78291264dda342ae31049421c82d21ae',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '指定区块中的交易数量（十六进制）',
+		},
+	]}
+	getParams={(fields) => [fields?.hash || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x134" // 十进制为 308 笔交易
+}
+```
+
+### 理解响应
+
+响应是一个十六进制字符串，表示区块中的交易数量：
+- `"0x0"` 表示区块没有交易（空区块）
+- `"0x1"` 表示只有一笔交易
+- `"0x134"`（如上所示）转换为十进制为 308，表示有 308 笔交易
+
+在 JavaScript 中将十六进制响应转换为十进制：
+```javascript
+const txCount = parseInt("0x134", 16); // 308
+```
+
+### 区块哈希与区块编号
+
+此方法使用区块哈希作为标识符，具有以下特点：
+- **唯一性**：即使在链重组的情况下，区块哈希也能唯一标识特定区块
+- **不可变性**：区块哈希永远不会改变，而区块编号可能会被重新分配
+- **可验证性**：哈希可以被独立验证，因为它是由区块内容派生的
+
+如果您有区块编号而不是哈希，请使用 `eth_getBlockTransactionCountByNumber` 替代。
+
+### 实际示例
+
+```javascript
+// 示例：查找交易数量高的区块
+const significantBlockHashes = [
+	'0xba9ded5ca1ec9adb9451bf053b33cbf5bd60f2a7ea39256278db165de9a88e5c', // 高活动区块示例
+	'0xb37a9f99b47975acc1ea43bd2e02e0567566bd3dad8f034ab676b4a94d1bac9a', // 另一个需要检查的区块
+	'0x98c3125c2993d90b396f638115821ba17b9852e4001869061b800d32f96cdd2b', // 再一个区块
+];
+
+async function findHighActivityBlocks(blockHashes, threshold = 100) {
+	const results = [];
+
+	for (const hash of blockHashes) {
+		const count = await provider.send('eth_getBlockTransactionCountByHash', [hash]);
+		const txCount = parseInt(count, 16);
+
+		if (txCount > threshold) {
+			results.push({
+				blockHash: hash,
+				transactionCount: txCount,
+			});
+		}
+	}
+
+	return results.sort((a, b) => b.transactionCount - a.transactionCount);
+}
+
+// 使用方法
+const highActivityBlocks = await findHighActivityBlocks(significantBlockHashes);
+console.log('交易数量高的区块:', highActivityBlocks);
+```
+
+### 历史背景
+
+以太坊历史上的每个区块的交易数量有显著变化：
+
+- 早期以太坊（2015-2016 年）：每个区块 0-50 笔交易
+- 2017 年 ICO 热潮：每个区块 70-150 笔交易
+- 2020 年 DeFi 夏季：每个区块 150-250 笔交易
+- 伦敦升级后（EIP-1559）：每个区块 200-300+ 笔交易
+- 合并后（2022 年+）：根据网络需求，每个区块 200-400+ 笔交易
+
+高交易数量通常与以下因素相关：
+- 由于需求增加导致的更高 gas 价格
+- 高峰使用期间的网络拥堵
+- 重大市场变动或重要事件
+- 热门 NFT 铸造或代币发行
+- DeFi 收益耕作机会
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockTransactionCountByNumber" title="按区块编号统计交易">eth_getBlockTransactionCountByNumber</Link> - 按区块编号返回区块中的交易数量
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="按哈希获取区块详情">eth_getBlockByHash</Link> - 按哈希返回区块的详细信息
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockHashAndIndex" title="按位置获取交易">eth_getTransactionByBlockHashAndIndex</Link> - 按区块哈希和索引位置返回交易信息
+- <Link to="/docs/ethereum/core-methods/eth_getBlockReceipts" title="获取区块中的所有收据">eth_getBlockReceipts</Link> - 返回指定区块的所有交易收据

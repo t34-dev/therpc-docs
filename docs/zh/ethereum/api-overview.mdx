@@ -1,0 +1,133 @@
+---
+title: API 概述 | 以太坊 JSON-RPC 技术文档
+description: TheRPC API 架构的全面技术概述，包括 JSON-RPC 2.0 规范、请求格式、身份验证、响应结构和错误处理
+keywords: json rpc 概述, api 架构, 区块链 api 技术, 以太坊 api 规范, json-rpc 2.0, 区块链通信, 以太坊 rpc 协议, web3 api 结构
+---
+
+# API 概述
+
+## 架构
+
+TheRPC API 遵循 JSON-RPC 2.0 规范并提供：
+
+- 标准 HTTP 和 WebSocket 端点
+- 通过 API 密钥进行身份验证
+- 统一的响应格式
+- 跨网络兼容性
+
+## 通信协议
+
+### HTTP 端点
+
+最适合单个请求和简单集成。在我们的 <Link to="/docs/ethereum/tools/curl" title="以太坊 API 集成的 HTTP/Curl 示例">HTTP/Curl 指南</Link> 中查看示例。
+
+```
+https://YOUR_API_ENDPOINT
+```
+
+### WebSocket 端点
+
+适用于订阅和实时数据。在 <Link to="/docs/ethereum/core-methods/eth_subscribe" title="用于实时区块链事件的以太坊订阅方法">eth_subscribe</Link> 中查看订阅示例。
+
+```
+wss://YOUR_API_ENDPOINT
+```
+
+## JSON-RPC 格式
+
+### 请求结构
+
+所有 API 调用都遵循 JSON-RPC 2.0 格式。在我们的 <Link to="/docs/ethereum/basic-operations" title="常见以太坊区块链操作指南">基本操作指南</Link> 中查看完整示例：
+
+```json
+{
+	"jsonrpc": "2.0",
+	"method": "eth_blockNumber",
+	"params": [],
+	"id": 1
+}
+```
+
+必填字段：
+
+- `jsonrpc`：版本标识符（始终为 "2.0"）
+- `method`：要调用的 RPC 方法（参见 <Link to="/docs/ethereum/all-methods" title="可用以太坊 API 方法的完整列表">可用方法</Link>）
+- `params`：参数数组（可以为空）
+- `id`：请求标识符
+
+### 响应格式
+
+所有响应都遵循一致的结构：
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x..."
+}
+```
+
+或者在出错的情况下：
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"error": {
+		"code": -32600,
+		"message": "Invalid Request"
+	}
+}
+```
+
+## 身份验证
+
+所有请求都需要在 Authorization 头中提供 API 密钥。有关详细设置，请参阅我们的 <Link to="/docs/ethereum/authentication" title="通过身份验证保护 API 访问的指南">身份验证指南</Link>：
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+## 方法类别
+
+### 标准方法
+
+- **eth\_**：以太坊协议方法（<Link to="/docs/ethereum/core-methods/eth_blockNumber" title="获取最新以太坊区块号的方法">eth_blockNumber</Link>、<Link to="/docs/ethereum/core-methods/eth_getBalance" title="检索账户 ETH 余额的方法">eth_getBalance</Link> 等）
+- **net\_**：网络状态方法（<Link to="/docs/ethereum/core-methods/net_version" title="获取当前网络 ID 的方法">net_version</Link>）
+- **web3\_**：Web3 实用方法（<Link to="/docs/ethereum/core-methods/web3_clientVersion" title="获取以太坊客户端版本的方法">web3_clientVersion</Link>）
+
+### 高级方法
+
+- **debug\_**：调试功能（<Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="跟踪以太坊交易执行的方法">debug_traceTransaction</Link>）
+- **trace\_**：交易跟踪（<Link to="/docs/ethereum/trace-methods/trace_transaction" title="获取交易进行的外部调用的方法">trace_transaction</Link>）
+- **txpool\_**：交易池信息（<Link to="/docs/ethereum/core-methods/txpool_status" title="获取待处理交易统计信息的方法">txpool_status</Link>）
+
+## 错误处理
+
+常见错误代码（详细错误处理策略请参见 <Link to="/docs/ethereum/faq" title="关于以太坊 API 使用的常见问题">常见问题解答</Link>）：
+
+- `-32700`：解析错误
+- `-32600`：无效请求
+- `-32601`：方法未找到
+- `-32602`：无效参数
+- `-32603`：内部错误
+
+## 实施示例
+
+查看我们的特定语言指南，获取实际实施示例：
+
+- <Link to="/docs/ethereum/tools/javascript-typescript" title="用于以太坊开发的 JavaScript 和 TypeScript 工具">JavaScript/TypeScript 指南</Link>
+- <Link to="/docs/ethereum/tools/python" title="用于以太坊开发的 Python 工具和库">Python 指南</Link>
+- <Link to="/docs/ethereum/tools/curl" title="以太坊 API 的直接 HTTP 请求示例">HTTP/Curl 示例</Link>
+- 在我们的 <Link to="/docs/ethereum/tools/overview" title="所有可用以太坊开发工具概述">工具和 SDK</Link> 部分查看所有可用的 SDK
+
+## 速率限制
+
+有关请求限制和配额的信息，请参阅我们的 <Link to="/docs/ethereum/rate-limits" title="关于 API 使用限制和配额的信息">速率限制文档</Link>。
+
+## 另请参阅
+
+- <Link to="/docs/ethereum/authentication" title="通过身份验证保护 API 访问的指南">身份验证指南</Link> - 详细认证信息
+- <Link to="/docs/ethereum/all-methods" title="可用以太坊 API 方法的完整列表">可用方法</Link> - 完整方法列表
+- <Link to="/docs/ethereum/basic-operations" title="常见以太坊区块链操作指南">基本操作</Link> - 常见使用模式
+- <Link to="/docs/ethereum/faq" title="关于以太坊 API 使用的常见问题">常见问题解答</Link> - 常见问题和答案

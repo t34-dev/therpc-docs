@@ -1,0 +1,319 @@
+---
+title: debug_traceTransaction - 详细重放和分析交易执行 | 以太坊API方法
+description: 了解如何使用debug_traceTransaction方法获取任何历史交易的操作码级执行详情，通过精确重现原始区块链状态来进行准确的调试和分析。
+keywords: debug_traceTransaction, 以太坊交易调试, 历史交易跟踪, 操作码级分析, 交易重放, evm执行跟踪, 交易调试, 智能合约分析, 交易流程, 区块链取证, 燃气分析, 堆栈跟踪, 执行快照, 交易跟踪, 操作码执行, evm调试, 交易调查, 失败交易分析, 智能合约故障排除, 交易回滚原因, 执行跟踪分析, 调用树可视化, 燃气分析, 安全审计, 交易状态检查, 执行路径分析, evm状态, 交易燃气使用, 合约交互, 交易内省, 内部调用, 内存操作, 堆栈操作, 存储变更, 执行上下文
+---
+
+# debug_traceTransaction
+
+`debug_traceTransaction`方法重建历史交易的精确执行状态，提供详细的操作码级跟踪信息。它在交易执行的特定区块上重现原始状态，允许对交易执行流程、堆栈操作、内存变化、存储修改和燃气消耗进行完整分析。
+
+与只提供基本交易数据的其他交易检索方法不同，`debug_traceTransaction`提供了交易处理过程中EVM内部执行的内省能力。
+
+## 用途
+
+- **失败交易分析**：通过检查导致回滚的精确指令和当时的EVM状态，确定交易失败的确切原因
+- **智能合约调试**：通过检查完整的执行路径和状态变化，调查合约执行中的意外行为
+- **燃气使用优化**：通过分析每个操作码的燃气消耗，识别昂贵的操作和低效的代码模式
+- **安全审计**：通过分析交易处理过程中的精确执行流程和状态转换，检测潜在漏洞
+- **交易验证**：通过查看执行的所有操作，确认合约在特定交易中的行为符合预期
+- **合约状态检查**：查看交易执行期间对合约存储所做的精确更改
+- **取证调查**：重建交易执行过程，用于调查安全事件或分析历史事件
+- **调用图分析**：可视化合约之间的执行流程，包括内部函数调用和消息值
+- **查找状态不一致**：识别复杂合约交互过程中的意外状态变化
+- **重建执行环境**：重现交易执行时存在的精确区块链环境
+
+## 方法详情
+
+此方法通过交易哈希跟踪交易，提供操作码级别的执行详情。
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    "method": "debug_traceTransaction",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'transactionHash',
+      required: true,
+      type: 'string',
+      desc: "要跟踪的交易哈希",
+      value: "0xcd718a69d478340dc28fdf6bf8056374a52dc95841b44083163ced8dfe29310c"
+    },
+    {
+      id: 'options',
+      type: 'object',
+      desc: "跟踪选项",
+      fields: [
+        {
+          id: 'disableStorage',
+          type: 'boolean',
+          desc: "设置为true禁用存储捕获",
+          value: false
+        },
+        {
+          id: 'disableMemory',
+          type: 'boolean',
+          desc: "设置为true禁用内存捕获",
+          value: false
+        },
+        {
+          id: 'disableStack',
+          type: 'boolean',
+          desc: "设置为true禁用堆栈捕获",
+          value: false
+        },
+        {
+          id: 'tracer',
+          type: 'string',
+          desc: "使用自定义跟踪器（可用：callTracer、prestateTracer等）",
+          value: "callTracer"
+        },
+        {
+          id: 'timeout',
+          type: 'string',
+          desc: "覆盖基于JavaScript跟踪的默认5秒超时",
+          value: "10s"
+        }
+      ]
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'object',
+      desc: "包含执行详情的跟踪结果",
+      fields: [
+        {
+          id: 'gas',
+          type: 'integer',
+          desc: "交易使用的燃气"
+        },
+        {
+          id: 'failed',
+          type: 'boolean',
+          desc: "交易是否失败"
+        },
+        {
+          id: 'returnValue',
+          type: 'string',
+          desc: "交易的返回值"
+        },
+        {
+          id: 'structLogs',
+          type: 'array',
+          desc: "结构化的EVM操作日志数组",
+          fields: [
+            {
+              id: 'pc',
+              type: 'integer',
+              desc: "程序计数器位置"
+            },
+            {
+              id: 'op',
+              type: 'string',
+              desc: "执行的操作码"
+            },
+            {
+              id: 'gas',
+              type: 'integer',
+              desc: "剩余燃气"
+            },
+            {
+              id: 'gasCost',
+              type: 'integer',
+              desc: "此操作的燃气成本"
+            },
+            {
+              id: 'depth',
+              type: 'integer',
+              desc: "调用深度"
+            },
+            {
+              id: 'memory',
+              type: 'array',
+              desc: "EVM内存内容（如果未禁用）"
+            },
+            {
+              id: 'stack',
+              type: 'array',
+              desc: "EVM堆栈内容（如果未禁用）"
+            },
+            {
+              id: 'storage',
+              type: 'object',
+              desc: "存储变更（如果未禁用）"
+            }
+          ]
+        }
+      ]
+    }
+  ]}
+  getParams={(fields) => {
+    const params = [
+      fields?.transactionHash || null
+    ];
+
+    const options = {};
+
+    if (fields?.options?.disableStorage !== undefined) {
+      options.disableStorage = fields.options.disableStorage;
+    }
+
+    if (fields?.options?.disableMemory !== undefined) {
+      options.disableMemory = fields.options.disableMemory;
+    }
+
+    if (fields?.options?.disableStack !== undefined) {
+      options.disableStack = fields.options.disableStack;
+    }
+
+    if (fields?.options?.tracer) {
+      options.tracer = fields.options.tracer;
+    }
+
+    if (fields?.options?.timeout) {
+      options.timeout = fields.options.timeout;
+    }
+
+    if (Object.keys(options).length > 0) {
+      params.push(options);
+    } else {
+      params.push(null);
+    }
+
+    return params;
+
+}}
+/>
+
+### 响应示例（默认跟踪器）
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"gas": 21000,
+		"failed": false,
+		"returnValue": "",
+		"structLogs": [
+			{
+				"pc": 0,
+				"op": "PUSH1",
+				"gas": 4677951,
+				"gasCost": 3,
+				"depth": 1,
+				"stack": [],
+				"memory": [],
+				"storage": {}
+			},
+			{
+				"pc": 2,
+				"op": "MSTORE",
+				"gas": 4677948,
+				"gasCost": 12,
+				"depth": 1,
+				"stack": ["0x60", "0x40"],
+				"memory": [
+					"0000000000000000000000000000000000000000000000000000000000000000",
+					"0000000000000000000000000000000000000000000000000000000000000000"
+				],
+				"storage": {}
+			}
+			// 更多的操作码日志...
+		]
+	}
+}
+```
+
+### 响应示例（callTracer）
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "from": "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
+    "gas": "0x2d48c",
+    "gasUsed": "0x594c",
+    "to": "0x55d398326f99059ff775485246999027b3197955",
+    "input": "0xa9059cbb000000000000000000000000b5cfcb4b073ebcda22f57097dbd0e0be5731ca5c00000000000000000000000000000000000000000000000011c37937e08000",
+    "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "calls": [
+      {
+        "type": "CALL",
+        "from": "0x55d398326f99059ff775485246999027b3197955",
+        "to": "0xb5cfcb4b073ebcda22f57097dbd0e0be5731ca5c",
+        "gas": "0x1e25b",
+        "gasUsed": "0x30b",
+        "input": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "output": "0x"
+      }
+    ],
+    "value": "0x0"
+  }
+}
+```
+
+## 通过跟踪识别的常见问题
+
+- 燃气不足错误
+- 堆栈下溢或溢出
+- 无效操作码执行
+- 断言或require条件失败
+- 意外回滚
+- 内存分配问题
+- 意外的合约状态
+- 转账失败
+- 访问控制问题
+- 逻辑错误
+
+## 可用的跟踪器
+
+1. **默认跟踪器**：返回每个操作码的结构化日志
+2. **callTracer**：显示合约之间的调用图
+3. **prestateTracer**：显示交易执行前的状态
+4. **4byteTracer**：收集函数选择器
+5. **noopTracer**：丢弃所有信息
+6. **自定义JavaScript跟踪器**：创建您自己的跟踪逻辑
+
+## 跟踪选项
+
+您可以通过配置以下选项来调整性能和输出：
+
+- 禁用堆栈、内存或存储捕获以加快执行速度
+- 为复杂交易使用自定义超时
+- 应用自定义跟踪器配置以满足特定分析需求
+
+## 性能考虑
+
+- 跟踪复杂交易可能会消耗大量资源且速度较慢
+- 具有多个操作的大型合约可能会产生非常大的响应负载
+- 使用选项禁用某些捕获（内存、存储、堆栈）可以提高性能
+- 考虑使用特定的自定义跟踪器进行有针对性的分析，而不是捕获所有内容
+- 跟踪具有大量初始化代码的创建合约的交易特别消耗资源
+- 具有许多内部调用或高调用深度的交易需要更多资源来跟踪
+
+## 重要说明
+
+- 此方法需要在节点上启用调试API（通常使用`--http.api=debug`标志）
+- `debug_traceTransaction`提供比`trace_transaction`更详细的信息
+- 为了获得准确的结果，您需要访问交易发生的区块的历史状态
+- 跟踪较旧的交易需要归档节点
+- 某些客户端可能不支持所有跟踪器类型
+- 自定义JavaScript跟踪器仅在Geth和某些Geth兼容客户端上可用
+- 此方法将完全按照交易发生的方式重放交易，包括任何副作用
+- 跟踪不包括事件/日志（这些必须单独查询）
+- 一些操作如`BLOCKHASH`的结果从原始执行中缓存并重用
+- 在非常旧的区块中的交易上使用此方法可能会在某些节点上导致状态不一致
+
+## 另请参阅
+
+- [debug_traceCall](/docs/en/ethereum/debug-methods/debug_traceCall "执行调用而不生成交易并返回跟踪数据") - 执行调用而不生成交易并返回跟踪数据
+- [debug_traceCallMany](/docs/en/ethereum/debug-methods/debug_traceCallMany "执行多个调用而不生成交易并返回跟踪数据") - 执行多个调用而不生成交易并返回跟踪数据
+- [trace_transaction](/docs/en/ethereum/trace-methods/trace_transaction "返回特定交易的跟踪数据") - 返回特定交易的跟踪数据
+- [eth_getTransactionByHash](/docs/en/ethereum/json-rpc-methods/eth_getTransactionByHash "通过哈希检索基本交易信息") - 通过哈希检索基本交易信息
+- [eth_getTransactionReceipt](/docs/en/ethereum/json-rpc-methods/eth_getTransactionReceipt "通过哈希获取交易收据信息") - 通过哈希获取交易收据信息

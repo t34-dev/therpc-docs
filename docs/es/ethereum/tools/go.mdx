@@ -1,0 +1,189 @@
+---
+title: Herramientas Go para Desarrollo Blockchain Ethereum | Guía Go-Ethereum
+description: Guía completa de herramientas Go para desarrollo Ethereum, incluyendo la implementación oficial Go-Ethereum (geth), integración de contratos inteligentes y ejemplos de código listos para producción
+keywords: go ethereum, geth, ethereum go, golang blockchain, go-ethereum, golang web3, ethereum golang, ethereum node go, geth client, go smart contracts, golang dapp, blockchain golang
+---
+
+# Herramientas Go
+
+Go proporciona la implementación oficial de Ethereum a través de go-ethereum (geth), convirtiéndolo en una opción potente para el desarrollo en Ethereum.
+
+<PayAttention category="Go" />
+
+## # Go-Ethereum (geth)
+
+Implementación oficial en Go del protocolo Ethereum.
+
+```go
+package ethereum
+
+import (
+    "context"
+    "math/big"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/core/types"
+)
+
+type EthereumClient struct {
+    client *ethclient.Client
+}
+
+func NewEthereumClient(url string) (*EthereumClient, error) {
+    client, err := ethclient.Dial(url)
+    if err != nil {
+        return nil, err
+    }
+    return &EthereumClient{client: client}, nil
+}
+
+func (ec *EthereumClient) GetBalance(address string) (*big.Float, error) {
+    account := common.HexToAddress(address)
+    balance, err := ec.client.BalanceAt(context.Background(), account, nil)
+    if err != nil {
+        return nil, err
+    }
+
+    fbalance := new(big.Float)
+    fbalance.SetString(balance.String())
+    ethValue := new(big.Float).Quo(fbalance, big.NewFloat(1e18))
+
+    return ethValue, nil
+}
+
+func (ec *EthereumClient) SendTransaction(from, to common.Address, value *big.Int) (*types.Transaction, error) {
+    nonce, err := ec.client.PendingNonceAt(context.Background(), from)
+    if err != nil {
+        return nil, err
+    }
+
+    gasPrice, err := ec.client.SuggestGasPrice(context.Background())
+    if err != nil {
+        return nil, err
+    }
+
+    tx := types.NewTransaction(nonce, to, value, 21000, gasPrice, nil)
+    return tx, nil
+}
+```
+
+- **GitHub**: <Link to="https://github.com/ethereum/go-ethereum" target="_blank" absolute>go-ethereum</Link>
+- **Documentación**: <Link to="https://geth.ethereum.org/" target="_blank" absolute>geth.ethereum.org</Link>
+- **Características**:
+  - Implementación completa de nodo
+  - Protocolo Ethereum completo
+  - Alto rendimiento
+  - Herramientas CLI
+  - Soporte móvil
+  - Vinculaciones para contratos
+
+## # Integración de Contratos Inteligentes
+
+Trabajando con contratos inteligentes en Go:
+
+```go
+package contracts
+
+import (
+    "github.com/ethereum/go-ethereum/accounts/abi/bind"
+    "github.com/ethereum/go-ethereum/common"
+)
+
+type SmartContractClient struct {
+    contract *bind.BoundContract
+    address  common.Address
+}
+
+func NewContract(address common.Address, client *ethclient.Client) (*SmartContractClient, error) {
+    parsed, err := abi.JSON(strings.NewReader(ContractABI))
+    if err != nil {
+        return nil, err
+    }
+
+    contract := bind.NewBoundContract(address, parsed, client, client, client)
+    return &SmartContractClient{
+        contract: contract,
+        address:  address,
+    }, nil
+}
+
+func (sc *SmartContractClient) CallMethod(method string, args ...interface{}) error {
+    opts := &bind.CallOpts{
+        Pending: false,
+        Context: context.Background(),
+    }
+
+    return sc.contract.Call(opts, method, args...)
+}
+```
+
+## # Monitoreo de Eventos
+
+Suscripción y monitoreo de eventos Ethereum:
+
+```go
+func (ec *EthereumClient) MonitorBlocks() (<-chan *types.Header, error) {
+    headers := make(chan *types.Header)
+    sub, err := ec.client.SubscribeNewHead(context.Background(), headers)
+    if err != nil {
+        return nil, err
+    }
+
+    go func() {
+        for {
+            select {
+            case err := <-sub.Err():
+                log.Fatal(err)
+            case header := <-headers:
+                block, err := ec.client.BlockByHash(context.Background(), header.Hash())
+                if err != nil {
+                    log.Fatal(err)
+                }
+                fmt.Println("New block:", block.Number().Uint64())
+            }
+        }
+    }()
+
+    return headers, nil
+}
+```
+
+## # Utilidades y Ayudantes
+
+Utilidades útiles para el desarrollo en Ethereum:
+
+```go
+package utils
+
+import (
+    "math/big"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/common/hexutil"
+)
+
+// WeiToEther converts wei to ether
+func WeiToEther(wei *big.Int) *big.Float {
+    return new(big.Float).Quo(
+        new(big.Float).SetInt(wei),
+        new(big.Float).SetInt(big.NewInt(1e18)),
+    )
+}
+
+// EtherToWei converts ether to wei
+func EtherToWei(ether *big.Float) *big.Int {
+    truncInt, _ := new(big.Float).Mul(ether, big.NewFloat(1e18)).Int(nil)
+    return truncInt
+}
+
+// IsValidAddress checks if the address is valid
+func IsValidAddress(address string) bool {
+    return common.IsHexAddress(address)
+}
+```
+
+### Ver también
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">Visión General de Herramientas</Link> - Todos los SDKs y Herramientas Disponibles
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">Guía de Autenticación</Link> - Información Detallada de Autenticación
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">Guía de Operaciones Básicas</Link> - Operaciones Fundamentales
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">Métodos Disponibles</Link> - Explorar Capacidades de la API

@@ -1,0 +1,49 @@
+---
+title: 区块时间戳指南 | 以太坊时间管理
+description: 全面了解以太坊区块时间戳，包括准确性考虑、实现基于时间的操作，以及开发安全的时间依赖型智能合约和应用程序。
+keywords: 区块时间戳, 以太坊时间, 区块链计时, 区块时间, 以太坊时钟, 矿工时间戳, 基于时间的合约, 区块链年表, 时间戳操纵, 以太坊日期时间
+---
+
+# 区块时间戳指南
+
+以太坊区块时间戳为交易和智能合约提供时间信息。了解如何使用它们对于时间敏感的应用程序至关重要。
+
+## 理解区块时间戳
+
+- 时间戳如何确定
+- 准确性和限制
+- 矿工操纵考虑因素
+- 网络时间偏移
+
+## 使用时间戳
+
+```javascript
+// 获取区块时间戳
+const getBlockTimestamp = async (blockNumber) => {
+	const block = await web3.eth.getBlock(blockNumber);
+	return block.timestamp;
+};
+
+// 计算平均区块时间
+const getAverageBlockTime = async (blockCount = 100) => {
+	const latestBlock = await web3.eth.getBlockNumber();
+	const oldBlock = await web3.eth.getBlock(latestBlock - blockCount);
+	const newBlock = await web3.eth.getBlock(latestBlock);
+
+	return (newBlock.timestamp - oldBlock.timestamp) / blockCount;
+};
+```
+
+## 最佳实践
+
+1. 不要依赖精确的时间戳精度
+2. 考虑潜在的矿工操纵
+3. 使用区块号进行精确排序
+4. 考虑网络时间偏移
+5. 实现安全时间缓冲
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlock" title="检索包括时间戳在内的区块信息的API方法">eth_getBlock</Link> - 检索包括时间戳在内的区块信息
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="学习处理以太坊区块的基本技术">使用区块</Link> - 一般区块处理
+- <Link to="/docs/ethereum/guides/block-gas-management" title="以太坊中管理跨时间燃气成本的指南">区块燃气管理</Link> - 管理随时间的燃气成本

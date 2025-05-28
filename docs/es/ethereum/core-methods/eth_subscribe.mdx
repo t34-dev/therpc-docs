@@ -1,0 +1,322 @@
+---
+title: eth_subscribe - Notificaciones de Eventos Ethereum en Tiempo Real | API WebSocket
+description: Aprenda a usar el método eth_subscribe para recibir notificaciones en tiempo real sobre eventos de blockchain incluyendo nuevos bloques, transacciones pendientes, logs y estado de sincronización a través de conexiones WebSocket.
+keywords: eth_subscribe, websocket ethereum, eventos blockchain en tiempo real, notificaciones ethereum, suscripciones blockchain, suscripción de logs ethereum, suscripción de nuevos bloques, transacciones pendientes, eventos de estado de sincronización, streaming de eventos ethereum, webhooks ethereum, api de suscripción web3, receptores blockchain, monitoreo de eventos ethereum, api eth websocket, monitoreo de transacciones, eventos de contratos inteligentes, suscripción a cabeza de cadena, eventos de sincronización, eth pub/sub
+---
+
+# eth_subscribe
+
+El método `eth_subscribe` crea una suscripción a eventos específicos en la blockchain Ethereum. Requiere una conexión WebSocket y permite a los clientes recibir notificaciones en tiempo real sobre nuevos bloques, transacciones pendientes, logs y estado de sincronización.
+
+## Casos de Uso
+
+- Construir exploradores y paneles de blockchain en tiempo real
+- Monitorear eventos de contratos inteligentes sin sondeo constante
+- Crear dApps receptivas que se actualizan instantáneamente cuando cambia el estado
+- Rastrear transacciones pendientes para detectar cuándo son minadas
+- Recibir notificación inmediata cuando llega un pago
+- Implementar arquitectura eficiente basada en eventos para aplicaciones blockchain
+- Monitorear actividad de contratos inteligentes con carga mínima del servidor
+- Construir sistemas de trading de alto rendimiento que requieren datos en tiempo real
+- Rastrear la sincronización de nodos en tiempo real
+- Implementar webhooks para eventos blockchain
+
+## Detalles del Método
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+		method: 'eth_subscribe',
+		id: 1,
+		jsonrpc: '2.0',
+  }}
+  fields={[
+    {
+			id: 'subscription_name',
+      type: 'string',
+			desc: 'Tipo de suscripción: "newHeads", "logs", "newPendingTransactions", o "syncing"',
+			value: "newHeads",
+    },
+    {
+			id: 'subscription_options',
+      type: 'object',
+			desc: 'Objeto de filtro opcional (requerido para suscripción "logs")',
+			fields: [
+				{
+					id: 'address',
+					type: 'string',
+					desc: "Dirección(es) de contrato para filtrar logs (para suscripción logs)",
+					value: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"
+				},
+				{
+					id: 'topics',
+					type: 'array',
+					desc: "Temas para filtrar logs (para suscripción logs)",
+					value: ["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"]
+				}
+			]
+		},
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'string',
+			desc: 'ID de suscripción que puede usarse para identificar la suscripción y darse de baja más tarde',
+		},
+  ]}
+		getParams={(fields) => {
+			const params = [fields?.subscription_name || "newHeads"];
+
+			if (fields?.subscription_name === "logs") {
+				const options = {};
+
+				if (fields?.subscription_options?.address) {
+					options.address = fields.subscription_options.address;
+				}
+
+				if (fields?.subscription_options?.topics && fields.subscription_options.topics.length > 0) {
+					options.topics = fields.subscription_options.topics;
+				}
+
+				if (Object.keys(options).length > 0) {
+					params.push(options);
+				}
+			}
+
+			return params;
+
+		}}
+/>
+
+## Tipos de Suscripción
+
+### newHeads
+
+Suscribirse para recibir información sobre nuevos bloques añadidos a la blockchain. Esto es útil para aplicaciones que necesitan reaccionar a nuevos bloques o monitorear el progreso de la cadena.
+
+#### Solicitud
+
+```json
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "eth_subscribe",
+  "params": ["newHeads"]
+}
+```
+
+#### Respuesta
+
+Respuesta inicial con ID de suscripción:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x9cef478923ff08bf67fde6c64013158d"
+}
+```
+
+Notificaciones posteriores cuando se añaden nuevos bloques:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"method": "eth_subscription",
+	"params": {
+		"subscription": "0x9cef478923ff08bf67fde6c64013158d",
+		"result": {
+      "difficulty": "0x0",
+      "extraData": "0xd883010b05846765746888676f312e32302e35856c696e7578",
+			"gasLimit": "0x1c9c380",
+      "gasUsed": "0xe8c35a",
+      "logsBloom": "0x24a0a00e2800a84002408401021c8200410a40340440800900000820804830202d00004204204804800900110314a0088ac11a0a402809a044404a943d0812ce408101342401004a6080490900245000240140901901124288a20d840008200014150600a2080832000220250912a0400124009c00202430c00298b0a8d0822d1a10188080000c0124203a041100601880308406a2600d0420a140801000a4c80a2a0080a5108042302008080a0050a000a44214011610400002090000170003800020d0c1840022008408a4810401d881002202a2100a00204244120200000000810600da940000a0018a40406100006100c044a0202400200420000200211000880",
+      "miner": "0x86c501ed1cb7123feb9db41f10eca511fb3e1416",
+      "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "nonce": "0x0000000000000000",
+      "number": "0x1b4",
+      "parentHash": "0x3863a513b3d30160cf76cefee31652f188ddd2e2c9b169bc7d35e324f99cd24e",
+      "receiptsRoot": "0x28d996993bebb61fb8056d9938f148c3c683e772ae5d53b63ef9bcc601072a66",
+      "sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+      "size": "0x973",
+      "stateRoot": "0xb9c737605971351a00b9a978b72271874ef3cf0a2dc87a7c4325993ddf84e83f",
+      "timestamp": "0x64",
+      "transactionsRoot": "0xf25ff1909e48c93a122b52d9c576b62c141a2f51f3d9b7c53afa7cdb2eec62b2",
+      "baseFeePerGas": "0x42214d6b"
+		}
+	}
+}
+```
+
+#### Campos Clave de Cabecera de Bloque
+
+La notificación incluye una cabecera de bloque completa con los siguientes campos clave:
+
+- **number**: La altura del bloque (hexadecimal)
+- **hash**: El hash del bloque (puede ser null si aún está pendiente)
+- **parentHash**: Hash del bloque padre
+- **timestamp**: Marca de tiempo Unix cuando se minó el bloque
+- **gasUsed**: Gas total usado por todas las transacciones en el bloque
+- **gasLimit**: Gas máximo permitido en el bloque
+- **baseFeePerGas**: Tarifa base por gas (post-EIP-1559)
+- **miner**: Dirección del minero/validador que produjo el bloque
+- **difficulty**: Dificultad del bloque (será 0 después de The Merge)
+- **size**: Tamaño del bloque en bytes
+
+### logs
+
+Suscribirse para recibir logs que coincidan con criterios de filtro específicos. Esto es particularmente útil para rastrear eventos emitidos por contratos inteligentes.
+
+#### Solicitud con Opciones de Filtro
+
+```json
+{
+  "id": 1,
+	"jsonrpc": "2.0",
+	"method": "eth_subscribe",
+	"params": [
+		"logs",
+		{
+      "address": "0x8320fe7702b96808f7bbc0d4a888ed1468216cfd",
+      "topics": ["0xd78a0cb8bb633d06981248b816e7bd33c2a35a6089241d099fa519e361cab902"]
+    }
+  ]
+}
+```
+
+#### Opciones de Filtro Explicadas
+
+El segundo parámetro es un objeto de filtro que puede incluir:
+
+- **address** (opcional): String o array de strings con direcciones para filtrar logs
+- **topics** (opcional): Array de filtros de temas, soporta null para comodín
+- **fromBlock** (opcional): Altura de bloque desde la cual comenzar a obtener logs (hexadecimal)
+- **toBlock** (opcional): Altura de bloque hasta la cual obtener logs (hexadecimal)
+
+#### Formato de Array de Temas
+
+Los temas están ordenados y corresponden a la firma del evento y parámetros indexados:
+
+1. Primer tema: hash keccak256 de la firma del evento (p.ej., `Transfer(address,address,uint256)`)
+2. Segundo tema: Primer parámetro indexado
+3. Tercer tema: Segundo parámetro indexado (si está presente)
+4. Cuarto tema: Tercer parámetro indexado (si está presente)
+
+Los temas pueden ser:
+- Un único tema: se requiere coincidencia exacta
+- Null: cualquier valor aceptado (comodín)
+- Array de temas: cualquiera de los temas en el array coincidirá (condición OR)
+
+#### Respuesta
+
+Respuesta inicial con ID de suscripción:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x4a8a4c0517381924f9838102c5a4dcb7"
+}
+```
+
+Notificaciones posteriores cuando se emiten logs coincidentes:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"method": "eth_subscription",
+	"params": {
+    "subscription": "0x4a8a4c0517381924f9838102c5a4dcb7",
+		"result": {
+      "address": "0x8320fe7702b96808f7bbc0d4a888ed1468216cfd",
+      "blockHash": "0x61cdb2a09ab99abf791d474f20c2ea89bf8de2923a2d42bb49944c8c993cbf04",
+      "blockNumber": "0x29e87",
+      "data": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000003",
+      "logIndex": "0x0",
+      "removed": false,
+      "topics": ["0xd78a0cb8bb633d06981248b816e7bd33c2a35a6089241d099fa519e361cab902"],
+      "transactionHash": "0xe044554a0a55067caafd07f8020ab9f2af60bdfe337e395ecd84b4877a3d1ab4",
+      "transactionIndex": "0x0"
+		}
+	}
+}
+```
+
+#### Campos del Objeto Log
+
+Cada notificación de log contiene:
+
+- **address**: La dirección del contrato que emitió el log
+- **topics**: Array de 0-4 temas de 32 bytes, parámetros indexados del evento
+- **data**: Contiene los parámetros no indexados del log
+- **blockNumber**: Bloque en el que se incluyó la transacción
+- **transactionHash**: Hash de la transacción
+- **transactionIndex**: Entero de la posición de la transacción en el bloque
+- **blockHash**: Hash del bloque
+- **logIndex**: Entero de la posición de índice del log en el bloque
+- **removed**: `true` cuando el log fue eliminado debido a una reorganización de la cadena, `false` si es un log válido
+
+### newPendingTransactions
+
+Suscribirse para recibir notificación de nuevas transacciones pendientes a medida que se añaden al pool de transacciones.
+
+#### Solicitud
+
+```json
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "eth_subscribe",
+  "params": ["newPendingTransactions"]
+}
+```
+
+#### Respuesta
+
+Respuesta inicial con ID de suscripción:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0xc3b33aa549fb9a60e95d21862596617c"
+}
+```
+
+Notificaciones posteriores cuando se añaden nuevas transacciones pendientes:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "eth_subscription",
+  "params": {
+    "subscription": "0xc3b33aa549fb9a60e95d21862596617c",
+    "result": "0xd6fdc5cc41a9959e922f30cb772a9aef46f4daea279307bc5f7024edc8f1c857"
+  }
+}
+```
+
+
+## Notas Importantes
+
+1. **WebSocket Requerido**: `eth_subscribe` solo está disponible a través de conexiones WebSocket, no HTTP
+2. **Límites de Suscripción**: Muchos proveedores limitan el número de suscripciones activas por conexión
+3. **Eventos Perdidos**: Si la conexión cae, los eventos que ocurren durante la desconexión se pierden
+4. **Reorganizaciones de Cadena**: Los eventos pueden marcarse como eliminados durante reorganizaciones de la cadena
+5. **Soporte de Cliente**: No todos los clientes Ethereum soportan todos los tipos de suscripción
+6. **Restricciones de Nodo Público**: Nodos públicos como Infura pueden tener limitaciones para suscripciones
+7. **Precisión de Filtro**: Filtros más específicos mejoran el rendimiento y reducen el volumen de datos
+8. **Consideraciones de Seguridad**: WebSockets tienen diferentes requisitos de seguridad que HTTP
+9. **Entrega Garantizada**: A diferencia de las colas de mensajes, WebSocket no garantiza la entrega
+10. **Estabilidad de Conexión**: Las suscripciones de larga duración deberían implementar lógica de reconexión
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_unsubscribe" title="Aprenda cómo darse de baja de notificaciones WebSocket">eth_unsubscribe</Link> - Cancela una suscripción activa
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Crear un filtro para sondear logs">eth_newFilter</Link> - Alternativa basada en HTTP para filtrado de logs
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Consultar logs históricos con opciones de filtrado">eth_getLogs</Link> - Consultar eventos históricos
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Sondear nuevos logs usando ID de filtro">eth_getFilterChanges</Link> - Alternativa basada en sondeo para logs
+- <Link to="/docs/ethereum/core-methods/eth_newBlockFilter" title="Crear un filtro para nuevos bloques">eth_newBlockFilter</Link> - Alternativa basada en HTTP para nuevos bloques
+- <Link to="/docs/ethereum/core-methods/eth_newPendingTransactionFilter" title="Crear un filtro para transacciones pendientes">eth_newPendingTransactionFilter</Link> - Alternativa basada en HTTP para transacciones pendientes
+- <Link to="/docs/ethereum/guides/websockets" title="Aprenda más sobre WebSockets en Ethereum">Guía de WebSockets</Link> - Guía completa sobre conexiones WebSocket
+- <Link to="/docs/ethereum/guides/event-logging" title="Entender el registro de eventos de Ethereum">Guía de Registro de Eventos</Link> - Guía sobre eventos y logs de contratos

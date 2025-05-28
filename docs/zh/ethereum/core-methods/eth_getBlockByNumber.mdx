@@ -1,0 +1,280 @@
+---
+title: eth_getBlockByNumber - 按高度获取区块数据 | 以太坊 API 方法
+description: 了解如何使用 eth_getBlockByNumber 方法通过区块编号或特殊标签（如"latest"）访问以太坊区块的详细信息。包括示例和字段说明。
+keywords: eth_getBlockByNumber, 以太坊区块, 区块高度, 区块编号, 区块链数据, 区块信息, 最新区块, 区块详情, 区块头, 区块交易
+---
+
+# eth_getBlockByNumber
+
+`eth_getBlockByNumber` 方法通过区块编号或使用"latest"等特殊区块标识符检索区块的详细信息。这一基本方法提供对区块数据的完整访问，包括交易、gas 使用、时间戳和其他关键区块链指标，使其成为区块链应用的基础工具。
+
+## 使用场景
+
+- 实时区块链监控和数据馈送
+- 交易验证和确认跟踪
+- 区块浏览器和分析仪表板
+- Gas 优化研究和费用分析
+- 历史数据分析和时间序列研究
+- 网络状态评估和健康指标
+- 同步验证和链验证
+- 智能合约部署确认
+- MEV（最大可提取价值）研究
+
+## 方法详情
+
+此方法允许您通过链中的高度或使用预定义标签查询区块，并可选择包含完整的交易对象或仅包含哈希。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBlockByNumber',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '十六进制格式的区块号或标签：latest, earliest, pending, safe, finalized',
+			value: '0x112A880', // 区块 18,000,000
+		},
+		{
+			id: 'transaction_detail_flag',
+			required: true,
+			type: 'boolean',
+			desc: '如果为 true，返回完整交易对象；如果为 false，仅返回交易哈希',
+			value: false,
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: '区块对象，如果未找到区块则为 null',
+			fields: [
+				{
+					id: 'baseFeePerGas',
+					type: 'string',
+					desc: '十六进制格式的每单位 gas 基础费用（EIP-1559 后）',
+				},
+				{
+					id: 'difficulty',
+					type: 'string',
+					desc: '十六进制格式的区块难度',
+				},
+				{
+					id: 'extraData',
+					type: 'string',
+					desc: '此区块的额外数据字段',
+				},
+				{
+					id: 'gasLimit',
+					type: 'string',
+					desc: '十六进制格式的区块允许的最大 gas',
+				},
+				{
+					id: 'gasUsed',
+					type: 'string',
+					desc: '十六进制格式的所有交易使用的总 gas',
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: '区块的哈希，如果待处理则为 null',
+				},
+				{
+					id: 'logsBloom',
+					type: 'string',
+					desc: '日志的布隆过滤器，如果待处理则为 null',
+				},
+				{
+					id: 'miner',
+					type: 'string',
+					desc: '矿工/验证者的地址',
+				},
+				{
+					id: 'mixHash',
+					type: 'string',
+					desc: '十六进制格式的 256 位哈希',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: '工作量证明的哈希，如果待处理则为 null',
+				},
+				{
+					id: 'number',
+					type: 'string',
+					desc: '十六进制格式的区块号，如果待处理则为 null',
+				},
+				{
+					id: 'parentHash',
+					type: 'string',
+					desc: '父区块的哈希',
+				},
+				{
+					id: 'receiptsRoot',
+					type: 'string',
+					desc: '收据树的根',
+				},
+				{
+					id: 'sha3Uncles',
+					type: 'string',
+					desc: '叔块数据的 SHA3',
+				},
+				{
+					id: 'size',
+					type: 'string',
+					desc: '此区块的大小，以字节为单位（十六进制）',
+				},
+				{
+					id: 'stateRoot',
+					type: 'string',
+					desc: '最终状态树的根',
+				},
+				{
+					id: 'timestamp',
+					type: 'string',
+					desc: '区块整理时的 Unix 时间戳',
+				},
+				{
+					id: 'totalDifficulty',
+					type: 'string',
+					desc: '直到此区块的链的总难度',
+				},
+				{
+					id: 'transactions',
+					type: 'array',
+					desc: '交易对象或哈希的数组',
+				},
+				{
+					id: 'transactionsRoot',
+					type: 'string',
+					desc: '交易树的根',
+				},
+				{
+					id: 'uncles',
+					type: 'array',
+					desc: '叔块哈希的数组',
+				},
+				{
+					id: 'withdrawals',
+					type: 'array',
+					desc: '验证者提款数组（EIP-4895 后）',
+				},
+				{
+					id: 'withdrawalsRoot',
+					type: 'string',
+					desc: '提款的默克尔根（EIP-4895 后）',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [
+		fields?.blockNumber,
+		['1', 'true', 'TRUE'].includes(fields?.transaction_detail_flag) ? true : false,
+	]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"baseFeePerGas": "0x41a2b3591",
+		"difficulty": "0x0",
+		"extraData": "0x556e697377617020426c6f636b20231242353045",
+		"gasLimit": "0x1c9c380",
+		"gasUsed": "0x189b1f1",
+		"hash": "0x4f32106f6ac5b44248aeda10c3e718f1048ddc274629cd1897a0ff1f7926c41e",
+		"logsBloom": "0xe54b0921498ad482b83...[truncated]",
+		"miner": "0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990",
+		"mixHash": "0x51c1b337d7ec2023e7bfd47907a1ee256668e46fb9feb0007c62f9bc2a8a19a7",
+		"nonce": "0x0000000000000000",
+		"number": "0x112a880",
+		"parentHash": "0xeea8dce30e2d7c2a7ffe35b6fc2c60782f59a123ff2812e85bf4a49839c6d5a2",
+		"receiptsRoot": "0x14a87619e588c1ef9f8c69fd8e3dff2a49b2c73f19871a74a7e1d97d67d00416",
+		"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+		"size": "0x1284d",
+		"stateRoot": "0xb87823a3aea0dd94ffe84481962c8f988e3c2ffac98a9af2b81c1c3e4fcc6dc0",
+		"timestamp": "0x65f0d46e",
+		"totalDifficulty": "0xc70d815d562d3cfa955",
+		"transactions": [
+			"0x5a8b22ab3e70ee6ee4b15b48b1c88d8c01806a677ab8938c68dc4323cf51ae7a",
+			"0x8d2fcaa1aef4f4f19aa35bf9d91b34e24902efcaf670953a0bf7e0a6dc585e53"
+			// ... 其他交易哈希
+		],
+		"transactionsRoot": "0x39f9c7a211b008becd35bfbceaf186d564fcb737a9c026f8af7b5d89a8989143",
+		"uncles": [],
+		"withdrawals": [
+			{
+				"index": "0x57ca86",
+				"validatorIndex": "0x17384",
+				"address": "0xb9d7934878b5fb9610b3fe8a5e441e8fad7e293f",
+				"amount": "0x12a05f200"
+			}
+			// ... 其他提款
+		],
+		"withdrawalsRoot": "0x36a75a6993b676f8196354ed14e3c77167b9ae823211706b30aa125c3a5dac28"
+	}
+}
+```
+
+### 区块标签含义
+
+- `latest`：最近挖出的区块（最常用）
+- `earliest`：创世区块（区块 0）
+- `pending`：当前待处理区块（内存池中的交易）
+- `safe`：网络认为安全的最新区块（终结性正在进行中）
+- `finalized`：已达到终结性的最新区块（合并后）
+
+### 交易详情标志
+
+第二个参数决定如何返回交易数据：
+- `false`：仅返回交易哈希（区块扫描更高效）
+- `true`：返回完整交易对象（用于详细的交易分析）
+
+### 关键区块字段解释
+
+- **number**：链中的区块编号（高度）
+- **timestamp**：区块创建时的 Unix 时间戳（自 1970 年 1 月 1 日以来的秒数）
+- **gasUsed/gasLimit**：实际消耗的 gas 与此区块中允许的最大值
+- **baseFeePerGas**：EIP-1559 引入的每单位 gas 基础费用
+- **difficulty**：合并到权益证明后始终为 0
+- **miner**：接收区块奖励的地址（PoS 中的验证者）
+- **withdrawals**：上海升级后可用的验证者提款
+
+### 实际示例
+
+```javascript
+// 跟踪区块时间和交易量的示例
+async function analyzeNetworkActivity() {
+	const latestBlock = await provider.send('eth_getBlockByNumber', ['latest', false]);
+	const prevBlockNum = (parseInt(latestBlock.number, 16) - 100).toString(16);
+	const prevBlock = await provider.send('eth_getBlockByNumber', [`0x${prevBlockNum}`, false]);
+
+	// 计算区块间时间
+	const latestTime = parseInt(latestBlock.timestamp, 16);
+	const prevTime = parseInt(prevBlock.timestamp, 16);
+	const timespan = latestTime - prevTime;
+	const avgBlockTime = timespan / 100;
+
+	// 交易量
+	const txCount = latestBlock.transactions.length;
+	const gasUsed = parseInt(latestBlock.gasUsed, 16);
+
+	console.log(`Average block time: ${avgBlockTime.toFixed(2)} seconds`);
+	console.log(`Latest block transactions: ${txCount}`);
+	console.log(`Gas used: ${gasUsed.toLocaleString()} units`);
+}
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="按哈希获取区块">eth_getBlockByHash</Link> - 使用区块哈希检索区块信息
+- <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="获取最新区块编号">eth_blockNumber</Link> - 返回最近区块的编号
+- <Link to="/docs/ethereum/core-methods/eth_getBlockReceipts" title="获取区块中的所有收据">eth_getBlockReceipts</Link> - 返回区块的所有交易收据
+- <Link to="/docs/ethereum/core-methods/eth_getBlockTransactionCountByNumber" title="计算区块中的交易数">eth_getBlockTransactionCountByNumber</Link> - 返回区块中的交易数量

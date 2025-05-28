@@ -1,0 +1,124 @@
+---
+title: eth_feeHistory - 获取历史 Gas 费用数据 | 以太坊 API 方法
+description: 了解如何使用 eth_feeHistory 方法从以太坊区块链获取历史 gas 费用信息。包括费用分析和百分位计算示例。
+keywords: eth_feeHistory, gas 费用, 以太坊费用, EIP-1559, 基础费用, 优先费用, gas 历史, 交易成本, 费用趋势, gas 优化
+---
+
+# eth_feeHistory
+
+`eth_feeHistory` 方法返回历史 gas 费用数据，使网络费用趋势分析成为可能，并帮助对交易 gas 价格做出明智决策。此方法在实施 EIP-1559 后变得至关重要，EIP-1559 引入了一种新的费用市场机制，包含基础费用和优先费用。
+
+## 使用场景
+
+- 优化 gas 费用以实现成本效益交易
+- 钱包应用的历史费用分析
+- 基于费用模式的交易时间优化
+- DApp 费用估算以提供更好的用户体验
+- MEV（最大可提取价值）分析和策略
+- Gas 价格预测模型和算法
+- 费用可视化工具和仪表板
+- 网络使用模式的经济分析
+
+## 方法详情
+
+此方法检索历史 gas 信息集合，包括基础费用、gas 使用率和指定百分位的优先费用（小费）。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_feeHistory',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockCount',
+			required: true,
+			type: 'string',
+			desc: '请求范围内的区块数量（1-1024）',
+			value: '0x4',
+		},
+		{
+			id: 'newestBlock',
+			required: true,
+			type: 'string',
+			desc: '范围内的最高区块号或区块标签',
+			value: 'latest',
+		},
+		{
+			id: 'rewardPercentiles',
+			required: true,
+			type: 'array',
+			desc: '用于优先费用计算的百分位列表',
+			value: [25, 75],
+		},
+	]}
+	returns={[
+		{
+			id: 'oldestBlock',
+			type: 'string',
+			desc: '范围内最旧区块的十六进制字符串',
+		},
+		{
+			id: 'baseFeePerGas',
+			type: 'array',
+			desc: '每个 gas 的基础费用数组（包括下一个区块）',
+		},
+		{
+			id: 'gasUsedRatio',
+			type: 'array',
+			desc: '区块 gas 使用率数组',
+		},
+		{
+			id: 'reward',
+			type: 'array',
+			desc: '优先费用百分位值数组',
+		},
+	]}
+	getParams={(fields) => [fields?.blockCount || null, fields?.newestBlock || null, fields?.rewardPercentiles || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"oldestBlock": "0x1B177F5",
+		"baseFeePerGas": ["0x12", "0x10", "0x11", "0xf", "0xe"],
+		"gasUsedRatio": [0.5232, 0.4521, 0.4814, 0.2891],
+		"reward": [
+			["0x12", "0x34"],
+			["0x11", "0x38"],
+			["0x15", "0x42"],
+			["0x13", "0x39"]
+		]
+	}
+}
+```
+
+### 理解响应
+
+- **oldestBlock**：历史范围的起始区块号
+- **baseFeePerGas**：范围内每个区块的基础费用（加上下一个区块的估计值）
+- **gasUsedRatio**：每个区块的填充程度（0.0-1.0），影响未来的基础费用
+- **reward**：请求百分位的优先费用值，用于确定有竞争力的小费
+
+基础费用根据网络拥塞情况变化：当区块填充超过 50% 时增加，低于 50% 时减少。理解这一机制有助于预测未来费用。
+
+### 常见用例示例
+
+```javascript
+// 从历史记录计算平均基础费用的示例
+const blockCount = 10;
+const result = await provider.send('eth_feeHistory', [blockCount, 'latest', [25, 75]]);
+const baseFees = result.baseFeePerGas.map((hex) => parseInt(hex, 16));
+const avgBaseFee = baseFees.reduce((a, b) => a + b) / baseFees.length;
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="获取当前 gas 价格">eth_gasPrice</Link> - 返回以 wei 为单位的当前 gas 价格
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="估算交易 gas">eth_estimateGas</Link> - 估算交易执行所需的 gas
+- <Link to="/docs/ethereum/core-methods/eth_maxPriorityFeePerGas" title="获取建议的优先费用">eth_maxPriorityFeePerGas</Link> - 返回建议的优先费用值

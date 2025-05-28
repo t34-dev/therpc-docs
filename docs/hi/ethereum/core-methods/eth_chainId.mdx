@@ -1,0 +1,71 @@
+---
+title: eth_chainId - Get Network Chain ID | Ethereum API Methods
+description: Learn how to use the eth_chainId method to retrieve the current network/chain ID used for replay-protected transactions. Includes examples and response format.
+keywords: eth_chainId, ethereum chain id, network id, EIP-155, replay protection, blockchain network, multichain, network detection, blockchain identifier
+---
+
+# eth_chainId
+
+The `eth_chainId` method returns the current network/chain ID, which is crucial for signing replay-protected transactions as introduced in EIP-155. This simple yet essential method helps ensure transactions are executed on the intended network and prevents transaction replay attacks.
+
+## Use Cases
+
+- Verifying the current network connection in wallets and DApps
+- Implementing transaction replay protection
+- Building network-specific logic in multichain applications
+- Cross-chain application development and switching
+- Transaction signing validation
+- Network detection for user interfaces
+- Automated network switching in web3 applications
+
+## Method Details
+
+This is a straightforward query method that returns the chain ID of the connected network in hexadecimal format. It requires no parameters and is extremely lightweight.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_chainId',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The chain ID in hexadecimal format',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x1" // Represents Ethereum Mainnet (Chain ID: 1)
+}
+```
+
+### Common Chain IDs
+
+- 0x1 (1): Ethereum Mainnet
+- 0x5 (5): Goerli Testnet
+- 0xAA36A7 (11155111): Sepolia Testnet 
+- 0x89 (137): Polygon Mainnet
+- 0xA (10): Optimism
+- 0xA4B1 (42161): Arbitrum One
+- 0x38 (56): BNB Smart Chain
+- 0xA86A (43114): Avalanche C-Chain
+
+### Understanding EIP-155
+
+EIP-155 introduced replay protection by including the chain ID in transaction signatures. Prior to this improvement, a transaction signed for one network could potentially be replayed on another network or fork. The `eth_chainId` method is essential for implementing this protection, as it allows applications to get the correct chain ID value to include in transaction signatures.
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Get detailed block information">eth_getBlockByNumber</Link> - Retrieve block information by block number
+- <Link to="/docs/ethereum/core-methods/eth_syncing" title="Check node synchronization status">eth_syncing</Link> - Check if the node is currently syncing

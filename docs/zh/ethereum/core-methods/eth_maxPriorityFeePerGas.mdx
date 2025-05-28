@@ -1,0 +1,82 @@
+---
+title: eth_maxPriorityFeePerGas - 获取优先费用估算 | 以太坊API方法
+description: 了解如何使用eth_maxPriorityFeePerGas方法获取以太坊网络上交易打包所需的当前推荐优先费用（小费）。
+keywords: eth_maxPriorityFeePerGas, 优先费用, 交易小费, EIP-1559, gas价格, 矿工小费, 交易优先级, 以太坊gas优化, 验证者小费, 区块链费用估算, gas费用计算, 交易费用, eth小费, 以太坊优先费用, 区块打包费用, gas小费, 交易定价
+---
+
+# eth_maxPriorityFeePerGas
+
+`eth_maxPriorityFeePerGas`方法返回EIP-1559交易中应包含的每单位gas的推荐优先费用（小费）。这个值代表验证者当前期望的将交易打包进区块的激励金额。
+
+## 使用场景
+
+- 区块链研究人员的费用市场分析
+- 钱包和dApps的交易费用优化
+- 应用程序中的EIP-1559交易构建
+- 高优先级操作的gas价格策略开发
+- 时间敏感交易的优先级估算
+- DApp gas价格建议以提供更好的用户体验
+- 实时监控验证者激励
+- 在网络拥堵期间优化交易成本
+- 为智能合约部署设置适当费用
+- 为钱包应用构建费用估算器
+
+## 方法详情
+
+此方法提供以wei为单位的当前推荐优先费用。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_maxPriorityFeePerGas',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '以wei为单位的推荐优先费用（十六进制）',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x3b9aca00" // 1 Gwei (1,000,000,000 wei)
+}
+```
+
+### 理解优先费用
+
+优先费用是EIP-1559费用结构的一个组成部分：
+
+- **基础费用**：算法确定，交易打包后被销毁
+- **优先费用（小费）**：给验证者的可选付款，用于交易打包
+- **最大费用**：用户愿意支付的最大金额（包括基础费用和优先费用）
+
+优先费用作为验证者将交易打包进区块的激励。较高的优先费用通常会导致交易更快被打包，尤其是在网络拥堵期间。
+
+### 重要说明
+
+- 优先费用会根据网络需求波动
+- 对于时间敏感的交易，考虑使用更高的优先费用
+- 在网络活动低的时期，最低优先费用（通常为1 Gwei）通常就足够了
+- 此方法反映节点的估算，其他节点可能有略微不同的估算
+- 此方法仅适用于支持EIP-1559的网络（伦敦硬分叉后的以太坊）
+- 即使有高优先费用，在极端拥堵期间也不能保证交易被打包
+- 在NFT发行和其他高需求事件期间，优先费用可能会显著变化
+- 不同的验证者可能有不同的交易选择策略
+- 历史费用数据（通过eth_feeHistory获取）可以为当前优先费用建议提供背景
+- 一些钱包和dApps实现了自己的费用估算算法，可能与节点的建议不同
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_feeHistory" title="获取历史费用数据以更好地估算费用">eth_feeHistory</Link> - 获取历史费用数据以进行更精确的估算
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="获取EIP-1559前交易的传统gas价格">eth_gasPrice</Link> - 获取EIP-1559前交易的传统gas价格

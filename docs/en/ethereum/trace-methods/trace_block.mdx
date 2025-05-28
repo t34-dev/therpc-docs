@@ -1,0 +1,294 @@
+---
+title: trace_block - Get All Transaction Execution Traces in a Block | Ethereum API Methods
+description: Learn how to use the trace_block method to retrieve comprehensive execution traces for all transactions in a specified Ethereum block, providing detailed insight into smart contract interactions.
+keywords: trace_block, ethereum block trace, block transactions trace, blockchain trace analysis, smart contract interaction, internal transaction, trace api ethereum, block execution trace, transaction execution flow, blockchain analysis, evm trace, block trace, trace by block number, block execution analysis, smart contract debugging, transaction debugging, block analysis, transaction flow, block transaction history, ethereum tracing
+---
+
+# trace_block
+
+The `trace_block` method returns execution traces for all transactions included in a specified block. This provides comprehensive insight into all contract interactions that occurred within a single block.
+
+## Use Cases
+
+- Analyze all contract interactions within a specific block
+- Debug complex transactions by examining execution flow
+- Extract internal transactions not visible in the standard transaction logs
+- Audit block-level execution patterns for security analysis
+- Monitor and visualize transaction execution flows across multiple contracts
+- Track and analyze MEV (Miner Extractable Value) activities
+- Research protocol interactions at specific points in blockchain history
+- Trace value flows across multiple contracts within a block
+- Analyze parallel execution of transactions in a block
+- Build comprehensive block explorer functionality
+
+## Method Details
+
+This method returns an array of traces for all transactions in the specified block.
+
+<ApiMethodBlock
+	chain="ethereum"
+	disabled={true}
+	scheme={{
+		method: 'trace_block',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockParameter',
+			required: true,
+			type: 'string',
+			desc: 'Block number (hex block number or "latest", "earliest", "pending")',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: 'Array of trace objects for all transactions in the block',
+			fields: [
+				{
+					id: 'action',
+					type: 'object',
+					desc: 'Information about the action taken',
+					fields: [
+						{
+							id: 'callType',
+							type: 'string',
+							desc: 'Call type (e.g., "call", "delegatecall", "staticcall")',
+						},
+						{
+							id: 'from',
+							type: 'string',
+							desc: 'Sender address',
+						},
+						{
+							id: 'gas',
+							type: 'string',
+							desc: 'Gas provided for this action',
+						},
+						{
+							id: 'input',
+							type: 'string',
+							desc: 'Input data',
+						},
+						{
+							id: 'to',
+							type: 'string',
+							desc: 'Recipient address',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: 'Value sent (in wei)',
+						},
+						{
+							id: 'init',
+							type: 'string',
+							desc: 'Contract initialization code (for create traces)',
+						},
+					],
+				},
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: 'Hash of the block',
+				},
+				{
+					id: 'blockNumber',
+					type: 'integer',
+					desc: 'Block number',
+				},
+				{
+					id: 'result',
+					type: 'object',
+					desc: 'Result of the call',
+					fields: [
+						{
+							id: 'gasUsed',
+							type: 'string',
+							desc: 'Amount of gas used',
+						},
+						{
+							id: 'output',
+							type: 'string',
+							desc: 'Output data',
+						},
+						{
+							id: 'address',
+							type: 'string',
+							desc: 'Created contract address (for create traces)',
+						},
+						{
+							id: 'code',
+							type: 'string',
+							desc: 'Contract code (for create traces)',
+						},
+					],
+				},
+				{
+					id: 'subtraces',
+					type: 'integer',
+					desc: 'Number of subtraces',
+				},
+				{
+					id: 'traceAddress',
+					type: 'array',
+					desc: 'Address path within the execution trace',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: 'Hash of the transaction',
+				},
+				{
+					id: 'transactionPosition',
+					type: 'integer',
+					desc: 'Index position of the transaction in the block',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: 'Trace type (e.g., "call", "create", "suicide")',
+				},
+				{
+					id: 'error',
+					type: 'string',
+					desc: 'Error message (if transaction failed)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || '0x0']}
+/>
+
+### Understanding Trace Response
+
+The response contains traces for all transactions in the block, with each transaction potentially containing multiple traces. The traces form a hierarchical structure:
+
+- Top level traces (`traceAddress: []`) represent the initial transaction
+- Each subtrace has a `traceAddress` array indicating its position in the call tree
+- The `subtraces` field shows the number of direct children a trace has
+
+Here's a simplified visual representation of how traces are structured:
+
+```
+Transaction 1
+├── Call to Contract A [traceAddress: []]
+│   ├── Call from A to B [traceAddress: [0]]
+│   └── Call from A to C [traceAddress: [1]]
+│       └── Call from C to D [traceAddress: [1, 0]]
+└── Call to Contract E [traceAddress: []]
+
+Transaction 2
+└── ... (similar structure)
+```
+
+### Trace Types
+
+The method returns different types of traces indicated by the `type` field:
+
+- **call**: A message call to an address
+- **create**: A contract creation
+- **suicide**: A contract self-destruct operation (also called SELFDESTRUCT)
+
+### Call Types
+
+For traces with `type: "call"`, the `callType` field indicates the type of call:
+
+- **call**: Standard call between addresses (most common)
+- **delegatecall**: Special call that preserves the sender's context
+- **staticcall**: Read-only call that cannot modify state (introduced in Byzantium)
+- **callcode**: Legacy call type (deprecated)
+
+### Error Handling
+
+If a transaction or subtrace failed:
+
+- The `error` field will contain the reason (e.g., "out of gas", "reverted")
+- The `result` field may be null or incomplete
+- Traces leading up to the error point are still included
+
+### Response Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    {
+      "action": {
+        "callType": "call",
+        "from": "0x8bb73bcb5d553b5a556358d27625323fd781d37",
+        "gas": "0x576e",
+        "input": "0x370158ea000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "to": "0x6090a6e47849629b7245dfa1ca21d94cd15878ef",
+        "value": "0x0"
+      },
+      "blockHash": "0x8512d367492371edf44ebcbbbd935bc434946dddc2b126cb558df5906012186c",
+      "blockNumber": 1059416,
+      "result": {
+        "gasUsed": "0x14a0",
+        "output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+      },
+      "subtraces": 0,
+      "traceAddress": [],
+      "transactionHash": "0x4c253746e8d0ab1d135df9711532c41a85ab33f069f1c733ceb0a6bf3e304503",
+      "transactionPosition": 0,
+      "type": "call"
+    },
+    {
+      "action": {
+        "callType": "call",
+        "from": "0x431957dbd818eaab7c5ed352430d1bf44dccd837",
+        "gas": "0x3d090",
+        "input": "0x4c37a69b00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001",
+        "to": "0x6090a6e47849629b7245dfa1ca21d94cd15878ef",
+        "value": "0x0"
+      },
+      "blockHash": "0x8512d367492371edf44ebcbbbd935bc434946dddc2b126cb558df5906012186c",
+      "blockNumber": 1059416,
+      "result": {
+        "gasUsed": "0x2b43",
+        "output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+      },
+      "subtraces": 0,
+      "traceAddress": [],
+      "transactionHash": "0x1eb099b3e9396b9d188b1c313261f6a13c7e13cb5c1afd3884847cc2c61289c0",
+      "transactionPosition": 1,
+      "type": "call"
+    }
+  ]
+}
+```
+
+### Performance Considerations
+
+- Tracing full blocks is resource-intensive, especially for blocks with many transactions
+- The response size can be very large for blocks with complex transactions
+- For high throughput chains or during chain congestion, blocks may contain dozens or hundreds of transactions
+- Consider using `trace_transaction` for specific transactions if you don't need the entire block
+- Setting up limits and pagination in your application is recommended when processing block traces
+
+### Important Notes
+
+- This method requires trace APIs to be enabled on the Ethereum node
+- Not all Ethereum clients support tracing (primarily Geth with `--gcmode=archive` and OpenEthereum/Nethermind)
+- Public RPC providers may limit or disable trace methods due to their resource intensity
+- Results can only be trusted for finalized blocks (best to avoid "latest", "pending")
+- The response structure may vary slightly between different Ethereum client implementations
+- For recent blocks on a non-archive node, results might be available but not for older blocks
+- The response includes failed transactions with their traces up to the point of failure
+- Trace data includes actions that aren't visible on the main chain (e.g., internal transactions)
+- For blocks with many complex transactions, responses can contain thousands of traces
+- This API endpoint places significantly more load on an Ethereum node than standard JSON-RPC calls
+- When using this in production, best practice is to run your own archive node with tracing enabled
+
+### See also
+
+- <Link to="/docs/ethereum/trace-methods/trace_transaction" title="Get detailed execution traces for a specific transaction">trace_transaction</Link> - Retrieve traces for a single transaction
+- <Link to="/docs/ethereum/trace-methods/trace_filter" title="Search for specific transaction traces across multiple blocks">trace_filter</Link> - Search for traces across multiple blocks
+- <Link to="/docs/ethereum/trace-methods/trace_call" title="Trace a call without creating a transaction on the blockchain">trace_call</Link> - Execute and trace a call without creating a transaction
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Get the receipt for a specific transaction">eth_getTransactionReceipt</Link> - Get the transaction receipt for basic transaction information
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Get information about a block by its number">eth_getBlockByNumber</Link> - Get block information without detailed traces

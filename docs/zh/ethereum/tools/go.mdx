@@ -1,0 +1,189 @@
+---
+title: 以太坊区块链开发的Go工具 | Go-Ethereum指南
+description: Go工具用于以太坊开发的综合指南，包括官方Go-Ethereum (geth)实现、智能合约集成和生产就绪的代码示例
+keywords: go以太坊, geth, 以太坊go, golang区块链, go-ethereum, golang web3, 以太坊golang, 以太坊节点go, geth客户端, go智能合约, golang dapp, 区块链golang
+---
+
+# Go工具
+
+Go通过go-ethereum (geth)提供以太坊的官方实现，使其成为以太坊开发的强大选择。
+
+<PayAttention category="Go" />
+
+## # Go-Ethereum (geth)
+
+以太坊协议的官方Go实现。
+
+```go
+package ethereum
+
+import (
+    "context"
+    "math/big"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/core/types"
+)
+
+type EthereumClient struct {
+    client *ethclient.Client
+}
+
+func NewEthereumClient(url string) (*EthereumClient, error) {
+    client, err := ethclient.Dial(url)
+    if err != nil {
+        return nil, err
+    }
+    return &EthereumClient{client: client}, nil
+}
+
+func (ec *EthereumClient) GetBalance(address string) (*big.Float, error) {
+    account := common.HexToAddress(address)
+    balance, err := ec.client.BalanceAt(context.Background(), account, nil)
+    if err != nil {
+        return nil, err
+    }
+
+    fbalance := new(big.Float)
+    fbalance.SetString(balance.String())
+    ethValue := new(big.Float).Quo(fbalance, big.NewFloat(1e18))
+
+    return ethValue, nil
+}
+
+func (ec *EthereumClient) SendTransaction(from, to common.Address, value *big.Int) (*types.Transaction, error) {
+    nonce, err := ec.client.PendingNonceAt(context.Background(), from)
+    if err != nil {
+        return nil, err
+    }
+
+    gasPrice, err := ec.client.SuggestGasPrice(context.Background())
+    if err != nil {
+        return nil, err
+    }
+
+    tx := types.NewTransaction(nonce, to, value, 21000, gasPrice, nil)
+    return tx, nil
+}
+```
+
+- **GitHub**: <Link to="https://github.com/ethereum/go-ethereum" target="_blank" absolute>go-ethereum</Link>
+- **文档**: <Link to="https://geth.ethereum.org/" target="_blank" absolute>geth.ethereum.org</Link>
+- **特性**:
+  - 完整节点实现
+  - 完整的以太坊协议
+  - 高性能
+  - 命令行工具
+  - 移动端支持
+  - 合约绑定
+
+## # 智能合约集成
+
+在Go中使用智能合约：
+
+```go
+package contracts
+
+import (
+    "github.com/ethereum/go-ethereum/accounts/abi/bind"
+    "github.com/ethereum/go-ethereum/common"
+)
+
+type SmartContractClient struct {
+    contract *bind.BoundContract
+    address  common.Address
+}
+
+func NewContract(address common.Address, client *ethclient.Client) (*SmartContractClient, error) {
+    parsed, err := abi.JSON(strings.NewReader(ContractABI))
+    if err != nil {
+        return nil, err
+    }
+
+    contract := bind.NewBoundContract(address, parsed, client, client, client)
+    return &SmartContractClient{
+        contract: contract,
+        address:  address,
+    }, nil
+}
+
+func (sc *SmartContractClient) CallMethod(method string, args ...interface{}) error {
+    opts := &bind.CallOpts{
+        Pending: false,
+        Context: context.Background(),
+    }
+
+    return sc.contract.Call(opts, method, args...)
+}
+```
+
+## # 事件监控
+
+订阅和监控以太坊事件：
+
+```go
+func (ec *EthereumClient) MonitorBlocks() (<-chan *types.Header, error) {
+    headers := make(chan *types.Header)
+    sub, err := ec.client.SubscribeNewHead(context.Background(), headers)
+    if err != nil {
+        return nil, err
+    }
+
+    go func() {
+        for {
+            select {
+            case err := <-sub.Err():
+                log.Fatal(err)
+            case header := <-headers:
+                block, err := ec.client.BlockByHash(context.Background(), header.Hash())
+                if err != nil {
+                    log.Fatal(err)
+                }
+                fmt.Println("New block:", block.Number().Uint64())
+            }
+        }
+    }()
+
+    return headers, nil
+}
+```
+
+## # 工具和帮助函数
+
+以太坊开发的实用工具：
+
+```go
+package utils
+
+import (
+    "math/big"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/common/hexutil"
+)
+
+// WeiToEther converts wei to ether
+func WeiToEther(wei *big.Int) *big.Float {
+    return new(big.Float).Quo(
+        new(big.Float).SetInt(wei),
+        new(big.Float).SetInt(big.NewInt(1e18)),
+    )
+}
+
+// EtherToWei converts ether to wei
+func EtherToWei(ether *big.Float) *big.Int {
+    truncInt, _ := new(big.Float).Mul(ether, big.NewFloat(1e18)).Int(nil)
+    return truncInt
+}
+
+// IsValidAddress checks if the address is valid
+func IsValidAddress(address string) bool {
+    return common.IsHexAddress(address)
+}
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/tools/overview" title="可用以太坊开发工具和SDK的完整概述">工具概述</Link> - 所有可用的SDK和工具
+- <Link to="/docs/ethereum/authentication" title="与以太坊节点和API服务认证的指南">认证指南</Link> - 详细认证信息
+- <Link to="/docs/ethereum/basic-operations" title="学习开发者的基本以太坊区块链操作">基本操作指南</Link> - 基础操作
+- <Link to="/docs/ethereum/all-methods" title="所有可用以太坊API方法的完整参考">可用方法</Link> - 探索API功能

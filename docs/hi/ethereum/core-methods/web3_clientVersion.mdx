@@ -1,0 +1,128 @@
+---
+title: web3_clientVersion - Get Ethereum Client Version | Ethereum API Methods
+description: Learn how to use the web3_clientVersion method to identify which Ethereum client software and version your node is running, useful for debugging and compatibility checks.
+keywords: web3_clientVersion, ethereum client, node version, client version, ethereum node, web3, geth version, erigon version, nethermind version, besu version, openethereum, client implementation, node software, ethereum software, client identification, blockchain node version
+---
+
+# web3_clientVersion
+
+The `web3_clientVersion` method returns the current version of the Ethereum client being used by the node. This method is useful for identifying the specific client implementation (such as Geth, Erigon, or Nethermind) and version for compatibility verification and debugging purposes.
+
+## Use Cases
+
+- Identifying the client implementation (Geth, OpenEthereum, Erigon, etc.)
+- Verifying client versions for specific feature support
+- Debugging version-specific issues and bugs
+- Client version analytics for ecosystem research
+- Ensuring compatibility with advanced features
+- Monitoring client updates in infrastructure
+- Node infrastructure management and planning
+- Detecting outdated clients with security vulnerabilities
+- Troubleshooting client-specific behaviors
+- Adapting application behavior to specific clients
+
+## Method Details
+
+This method requires no parameters and returns a string representing the client version.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'web3_clientVersion',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The current client version as a string',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "Geth/v1.12.0-stable-e501b3b0/linux-amd64/go1.20.2"
+}
+```
+
+### Understanding the Client Version
+
+The client version string typically follows a format that includes:
+
+1. **Client Name**: The name of the Ethereum client implementation (e.g., Geth, OpenEthereum, Erigon)
+2. **Version Number**: The semantic version of the client
+3. **Platform Details**: Information about the operating system and architecture
+4. **Additional Tags**: Build tags, commit hashes, or other identifiers
+
+### Common Client Formats
+
+#### Geth
+
+```
+Geth/v1.12.0-stable-e501b3b0/linux-amd64/go1.20.2
+```
+
+- Client: Geth
+- Version: 1.12.0
+- Build: stable-e501b3b0 (commit hash)
+- Platform: linux-amd64
+- Go version: 1.20.2
+
+#### OpenEthereum
+
+```
+OpenEthereum/v3.3.4-stable-12f36a38a-20210612/x86_64-linux-gnu/rustc1.52.1
+```
+
+- Client: OpenEthereum
+- Version: 3.3.4
+- Build: stable-12f36a38a (commit hash)
+- Build date: 20210612
+- Platform: x86_64-linux-gnu
+- Rust version: 1.52.1
+
+#### Erigon
+
+```
+erigon/v2.39.0-stable-a38ae579/linux-amd64/go1.19.6
+```
+
+- Client: Erigon
+- Version: 2.39.0
+- Build: stable-a38ae579 (commit hash)
+- Platform: linux-amd64
+- Go version: 1.19.6
+
+#### Nethermind
+
+```
+Nethermind/v1.15.2/Linux/dotnet7.0.5
+```
+
+- Client: Nethermind
+- Version: 1.15.2
+- Platform: Linux
+- .NET version: 7.0.5
+
+### Important Notes
+
+- This method is supported by all Ethereum client implementations
+- The exact format of the version string varies between client implementations
+- The response can help identify feature compatibility and potential differences in behavior
+- This method can be used to verify that you're connected to the expected node type
+- The method is lightweight and has minimal impact on node performance
+- Client version does not necessarily correspond to Ethereum protocol version
+- For some managed services, the client version might be customized or modified
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/net_version" title="Identify which Ethereum network your node is connected to">net_version</Link> - Returns the current network ID
+- <Link to="/docs/ethereum/core-methods/eth_protocolVersion" title="Get the Ethereum protocol version supported by your node">eth_protocolVersion</Link> - Returns the current Ethereum protocol version

@@ -1,0 +1,125 @@
+---
+title: eth_newPendingTransactionFilter - 监控待处理交易 | 以太坊API方法
+description: 学习如何使用eth_newPendingTransactionFilter实时监控以太坊内存池 - 这对于交易跟踪、gas价格优化和市场分析至关重要。
+keywords: eth_newPendingTransactionFilter, 以太坊内存池, 待处理交易, 交易监控, 内存池分析, 交易跟踪, gas价格优化, 以太坊交易池, 未确认交易, 区块链队列, 交易监控, 交易内存池, gas费用分析, 待处理交易, 以太坊待处理交易, 区块链监控, 交易等待池
+---
+
+# eth_newPendingTransactionFilter
+
+`eth_newPendingTransactionFilter`方法在节点中创建一个过滤器，用于在内存池中接收新的待处理交易时发出通知。这使应用程序能够监控交易内存池而无需持续轮询，帮助您在交易被打包进区块之前跟踪它们。
+
+## 使用场景
+
+- 用于研究的内存池监控和分析
+- 交易应用程序中的抢先交易检测
+- 交易提交的gas价格优化
+- 钱包中的交易确认跟踪
+- 交易策略的市场情绪分析
+- DEX交易监控以获取套利机会
+- 网络拥堵监控以估算gas费用
+- MEV（矿工可提取价值）研究和利用
+- 在确认前检测大额代币转移
+- 实时监控智能合约交互
+
+## 方法详情
+
+此方法不接受参数，并返回一个过滤器ID，可与`eth_getFilterChanges`一起使用来轮询新的待处理交易。
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_newPendingTransactionFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[]}
+  returns={[
+    {
+      id: 'result',
+      type: 'string',
+      desc: "用于通过eth_getFilterChanges轮询的过滤器ID（十六进制字符串）"
+    }
+  ]}
+  getParams={() => []}
+/>
+
+### 响应示例
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x4b8a92d14d798e3be84ffa20c5d5b2e2"
+}
+```
+
+### 待处理交易过滤器的工作原理
+
+1. 当您创建待处理交易过滤器时，以太坊节点会为其分配一个唯一ID
+2. 节点会跟踪已经向您的过滤器报告过的交易
+3. 当您使用`eth_getFilterChanges`进行轮询时，它会返回自上次轮询以来任何新待处理交易的交易哈希
+4. 如果没有收到新交易，它会返回一个空数组
+
+### 返回值格式
+
+使用`eth_getFilterChanges`进行轮询时，此过滤器会返回一个交易哈希数组：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    "0xc2f1070ef9d620c0cb1a90656a1a4a6c7d74fb99cb2a000f935e8f99d1ca3351",
+    "0x924a1f97deed4a9e1d76429139d7c2a41c8fabe3c96f2818ad3591a5c5ecf2cd",
+    "0x6611d7717c853b7548215f5cb3a04956ea6578b756e4b3d62c2f1a397e3429cc"
+  ]
+}
+```
+
+### 交易数据检索
+
+过滤器只返回交易哈希。要获取完整的交易数据，您必须使用以下方法进行额外调用：
+
+- `eth_getTransactionByHash` - 使用交易哈希获取交易详情
+
+### 重要考虑因素
+
+1. **高交易量**：以太坊内存池可能非常活跃，每分钟产生数百个交易
+2. **过滤器过期**：过滤器在一段时间不活动后会过期（通常约为5分钟）
+3. **速率限制**：由于交易量高，轮询过于频繁可能导致速率限制
+4. **交易丢失**：非常短暂的待处理交易可能在轮询之间被遗漏
+5. **资源密集型**：此过滤器对客户端和节点都可能是资源密集型的
+6. **不适合生产环境**：许多生产应用程序应该使用WebSocket订阅代替
+7. **交易状态**：待处理交易可能永远不会被挖掘或可能被替换
+8. **节点实现**：某些节点可能限制它们跟踪的待处理交易数量
+9. **数据量**：在高活动期间，此过滤器可能每次轮询返回数百个交易
+10. **交易隐私**：某些节点可能不会揭示其内存池中的所有待处理交易
+
+### 内存池分析应用
+
+监控待处理交易可以揭示有价值的见解：
+
+1. **Gas价格趋势**：分析交易费用的当前市场价格
+2. **网络拥堵**：评估当前网络负载
+3. **代币移动**：在确认前检测大额代币转移
+4. **智能合约交互**：监控与特定合约的交互
+5. **套利机会**：检测交易所之间的价格差异
+6. **市场情绪**：衡量市场波动期间的市场活动
+7. **抢先交易保护**：监控可能抢先于您的交易的交易
+
+### 与其他通知方法的比较
+
+| 方法                           | 目的                                   | 结果                        | 最适合                                 |
+|----------------------------------|-----------------------------------------|--------------------------------|------------------------------------------|
+| `eth_newPendingTransactionFilter`| 通知待处理交易      | 交易哈希数组    | 内存池监控                       |
+| `eth_newBlockFilter`             | 通知新区块                | 区块哈希数组          | 区块级监控                   |
+| `eth_newFilter`                  | 通知特定日志事件       | 日志对象数组           | 基于事件的应用程序                 |
+| WebSocket `eth_subscribe`        | 推送通知（无轮询）          | 因订阅类型而异    | 实时应用程序                   |
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="轮询自上次检查以来的新待处理交易">eth_getFilterChanges</Link> - 获取自上次轮询以来的新交易哈希
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="不再需要时清理过滤器">eth_uninstallFilter</Link> - 不再需要时移除过滤器
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="使用哈希获取详细交易信息">eth_getTransactionByHash</Link> - 通过哈希获取交易详情
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="为智能合约事件创建过滤器">eth_newFilter</Link> - 为事件日志创建过滤器
+- <Link to="/docs/ethereum/core-methods/eth_newBlockFilter" title="监控区块链中的新区块">eth_newBlockFilter</Link> - 为新区块创建过滤器

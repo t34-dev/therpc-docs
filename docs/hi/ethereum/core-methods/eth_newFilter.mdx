@@ -1,0 +1,178 @@
+---
+title: eth_newFilter - Create Event Log Filters for Smart Contracts | Ethereum API Methods
+description: Learn how to use eth_newFilter to create filters for Ethereum event logs - the key to monitoring smart contract events, tracking token transfers, and building real-time blockchain applications.
+keywords: eth_newFilter, ethereum event filter, blockchain event monitoring, smart contract events, event log filter, ethereum logs, filter creation, dApp development, indexed parameters, event tracking, blockchain notifications, web3 events, ERC20 events, transaction events, blockchain data indexing, token transfer events, contract state changes, ethereum event listener
+---
+
+# eth_newFilter
+
+The `eth_newFilter` method creates a filter object to notify when new logs (events) matching the given filter criteria are included in the blockchain. This method is crucial for monitoring smart contract events and is one of the fundamental building blocks for reactive dApp architectures.
+
+## Use Cases
+
+- Monitoring smart contract events in real-time applications
+- Tracking token transfers (ERC-20, ERC-721, ERC-1155) for wallets
+- Detecting state changes in DeFi protocols and liquidity pools
+- Building event-driven blockchain applications with high responsiveness
+- Implementing real-time notifications for user activities
+- Historical data aggregation from contract events for analytics
+- Automatic UI updates based on blockchain events in dApps
+- Monitoring NFT marketplace activities (listings, sales, bids)
+- Tracking governance votes and proposal executions
+- Creating activity feeds for blockchain applications
+
+## Method Details
+
+This method takes a filter object as a parameter and returns a filter ID that can be used with `eth_getFilterChanges` and `eth_getFilterLogs`.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_newFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterObject',
+      required: true,
+      type: 'object',
+      desc: "Filter options object",
+      fields: [
+        {
+          id: 'fromBlock',
+          type: 'string',
+          desc: "Block number/tag to start filtering from (e.g., \"0x1\" or \"latest\")",
+          value: "0x1"
+        },
+        {
+          id: 'toBlock',
+          type: 'string',
+          desc: "Block number/tag to filter to (e.g., \"0x1000\" or \"latest\")",
+          value: "latest"
+        },
+        {
+          id: 'address',
+          type: 'string',
+          desc: "Contract address(es) to filter logs",
+          value: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        },
+        {
+          id: 'topics',
+          type: 'array',
+          desc: "Topics to filter by, in order, with null for wildcard matching",
+          value: [
+            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+            null,
+            "0x00000000000000000000000023a6b9c321aba35d18ca26e66824e917778d9d2b"
+          ]
+        }
+      ]
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'string',
+      desc: "Filter ID (hex string) used for polling with eth_getFilterChanges"
+    }
+  ]}
+  getParams={(fields) => {
+    const filterObject = {};
+
+    if (fields?.filterObject?.fromBlock)
+      filterObject.fromBlock = fields.filterObject.fromBlock;
+
+    if (fields?.filterObject?.toBlock)
+      filterObject.toBlock = fields.filterObject.toBlock;
+
+    if (fields?.filterObject?.address)
+      filterObject.address = fields.filterObject.address;
+
+    if (fields?.filterObject?.topics && fields.filterObject.topics.length > 0)
+      filterObject.topics = fields.filterObject.topics;
+
+    return [filterObject];
+  }}
+/>
+
+### Response Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x1a4b0d22dbb7284cf485c969d2857ab3"
+}
+```
+
+### Understanding Topics and Event Signatures
+
+The `topics` array is one of the most powerful features of Ethereum log filtering. It allows you to match specific indexed event parameters:
+
+1. **Topic[0]**: Usually the event signature hash (keccak256 of the event name and parameter types)
+2. **Topic[1]**: First indexed parameter
+3. **Topic[2]**: Second indexed parameter
+4. **Topic[3]**: Third indexed parameter
+
+#### How Event Signatures Work
+
+Event signatures are created by taking the keccak256 hash of the event name and its parameter types:
+
+```solidity
+// Solidity event definition
+event Transfer(address indexed from, address indexed to, uint256 value);
+
+// Event signature is calculated as:
+keccak256("Transfer(address,address,uint256)")
+// Which equals:
+// 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+```
+
+Ethereum events can have up to 4 topics (1 event signature + 3 indexed parameters).
+
+#### Topic Matching Rules:
+
+- **Null**: Matches any value in that position
+- **String**: Matches exact value in that position
+- **Array of strings**: Matches any value in the array (logical OR)
+
+### Common Event Signatures
+
+| Event Type | Event Signature | Event Format |
+|------------|-----------------|--------------|
+| ERC-20 Transfer | `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` | `Transfer(address,address,uint256)` |
+| ERC-20 Approval | `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925` | `Approval(address,address,uint256)` |
+| ERC-721 Transfer | `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` | `Transfer(address,address,uint256)` |
+| Uniswap V2 Swap | `0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822` | `Swap(address,uint256,uint256,uint256,uint256,address)` |
+| PairCreated | `0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9` | `PairCreated(address,address,address,uint256)` |
+
+### Using the Filter ID
+
+After creating a filter, you'll receive a filter ID that can be used with:
+
+1. `eth_getFilterChanges` - To poll for new logs since the last poll
+2. `eth_getFilterLogs` - To get all logs matching the filter criteria
+3. `eth_uninstallFilter` - To remove the filter when no longer needed
+
+### Important Notes and Best Practices
+
+1. **Filter Expiration**: Filters expire after a period of inactivity (typically around 5 minutes)
+2. **Topic Padding**: Address topics must be padded to 32 bytes (zero-padded on the left)
+3. **Performance**: Wide filters (e.g., many addresses or blocks) can be resource-intensive
+4. **Rate Limits**: Excessive polling can lead to rate limiting from RPC providers
+5. **Block Range**: Very large block ranges may cause timeouts or be rejected
+6. **Filter Limits**: Some providers limit the number of active filters per connection
+7. **Alternative**: Consider using WebSocket subscriptions for real-time events when available
+8. **Indexed vs Non-indexed**: Only indexed parameters appear in topics; non-indexed are in data field
+9. **Data Field**: For complex events, the data field needs ABI decoding to extract values
+10. **Topic Order**: Topic order is critical and must match the order of indexed parameters
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Poll for new events since last check">eth_getFilterChanges</Link> - Retrieve new logs since last poll
+- <Link to="/docs/ethereum/core-methods/eth_getFilterLogs" title="Get all logs for a filter">eth_getFilterLogs</Link> - Get all logs matching filter criteria
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Remove an active filter">eth_uninstallFilter</Link> - Remove a filter when no longer needed
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Query historical logs without creating a filter">eth_getLogs</Link> - Query logs without filter persistence
+- <Link to="/docs/ethereum/core-methods/eth_newBlockFilter" title="Create filter for new blocks">eth_newBlockFilter</Link> - Create filter for new blocks
+- <Link to="/docs/ethereum/core-methods/eth_newPendingTransactionFilter" title="Create filter for pending transactions">eth_newPendingTransactionFilter</Link> - Create filter for pending transactions

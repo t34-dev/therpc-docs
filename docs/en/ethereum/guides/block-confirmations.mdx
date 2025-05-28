@@ -1,0 +1,48 @@
+---
+title: Block Confirmations Guide | Transaction Finality in Ethereum
+description: Comprehensive guide to understanding Ethereum block confirmations, implementing secure transaction verification, and ensuring transaction finality across different network conditions.
+keywords: block confirmations, transaction finality, ethereum security, blockchain confirmations, ethereum finality, confirm transactions, block verification, transaction security, ethereum transactions, finality guarantees
+---
+
+# Block Confirmations Guide
+
+Block confirmations are crucial for ensuring transaction finality in Ethereum. This guide explains how confirmations work and how to implement them in your applications.
+
+## Understanding Confirmations
+
+- What are block confirmations
+- Why confirmations matter
+- Recommended confirmation counts
+- Finality in different networks (mainnet vs testnets)
+
+## Implementation Examples
+
+```javascript
+// Check number of confirmations
+const getConfirmations = async (txHash) => {
+	const tx = await web3.eth.getTransaction(txHash);
+	const currentBlock = await web3.eth.getBlockNumber();
+	return tx.blockNumber ? currentBlock - tx.blockNumber : 0;
+};
+
+// Wait for specific number of confirmations
+const waitForConfirmations = async (txHash, confirmations = 6) => {
+	while ((await getConfirmations(txHash)) < confirmations) {
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+	}
+	return true;
+};
+```
+
+## Security Considerations
+
+1. Different confirmation requirements for different transaction values
+2. Handling chain reorganizations
+3. Network-specific considerations
+4. Monitoring confirmation progress
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="API method to retrieve transaction confirmation status">eth_getTransactionReceipt</Link> - Get transaction confirmation status
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="Learn fundamental techniques for working with Ethereum blocks">Working with Blocks</Link> - General block handling
+- <Link to="/docs/ethereum/guides/chain-reorganization" title="Learn how to handle blockchain reorganizations in Ethereum">Chain Reorganization Guide</Link> - Handling blockchain reorganizations

@@ -1,0 +1,217 @@
+---
+title: Basic Ethereum Operations | Blockchain API Methods Guide
+description: Comprehensive guide to common Ethereum blockchain operations using TheRPC API, including balance retrieval, transaction operations, block information, contract interactions, and gas management
+keywords: ethereum basics, blockchain operations, web3 basics, ethereum api tutorial, basic blockchain operations, ethereum balance check, transaction status, ethereum block info, smart contract interaction, ethereum gas, blockchain query
+---
+
+# Basic Operations
+
+This guide covers the most common operations you'll perform with the Ethereum blockchain using TheRPC API.
+
+## # Retrieving Basic Information
+
+### Get Latest Block Number
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_blockNumber",
+  "params": [],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Get the current block number in Ethereum">eth_blockNumber</Link> for more details.
+
+### Check Account Balance
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBalance",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Get the Ether balance for an Ethereum address">eth_getBalance</Link> for more details.
+
+## # Transaction Operations
+
+### Get Transaction Status
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionByHash",
+  "params": [
+    "0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"
+  ],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Get transaction details by its hash">eth_getTransactionByHash</Link> for more details.
+
+### Check Transaction Receipt
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionReceipt",
+  "params": [
+    "0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"
+  ],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Get transaction receipt and confirmation status">eth_getTransactionReceipt</Link> for more details.
+
+## # Block Information
+
+### Get Block by Number
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBlockByNumber",
+  "params": [
+    "0xE81224",
+    false
+  ],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Get block information by its number">eth_getBlockByNumber</Link> for more details.
+
+### Get Block by Hash
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBlockByHash",
+  "params": [
+    "0xdc0818cf78f21a8e70579cb46a43643f78291264dda342ae31049421c82d21ae",
+    false
+  ],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Get block information by its hash">eth_getBlockByHash</Link> for more details.
+
+## # Smart Contract Interactions
+
+### Call Contract Method
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_call",
+  "params": [
+    {
+      "to": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+      "data": "0x70a08231000000000000000000000000742d35Cc6634C0532925a3b844Bc454e4438f44e"
+    },
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_call" title="Execute smart contract view function without transaction">eth_call</Link> for more details.
+
+### Get Contract Code
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getCode",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_getCode" title="Get the deployed bytecode at an address">eth_getCode</Link> for more details.
+
+## # Network Status
+
+### Get Network Version
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "net_version",
+  "params": [],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/net_version" title="Get the current network ID">net_version</Link> for more details.
+
+### Check Node Sync Status
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_syncing",
+  "params": [],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_syncing" title="Check if the node is syncing and sync progress">eth_syncing</Link> for more details.
+
+## # Gas and Nonce
+
+### Get Gas Price
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_gasPrice",
+  "params": [],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="Get current gas price in wei">eth_gasPrice</Link> for more details.
+
+### Get Transaction Count (Nonce)
+
+```javascript
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getTransactionCount",
+  "params": [
+    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "latest"
+  ],
+  "id": 1
+}
+```
+
+See <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="Get transaction count (nonce) for an address">eth_getTransactionCount</Link> for more details.
+
+## Implementation Examples
+
+For language-specific implementations, check our SDKs:
+
+- <Link to="/docs/ethereum/tools/javascript-typescript" title="JavaScript and TypeScript tools for Ethereum development">JavaScript/TypeScript</Link>
+- <Link to="/docs/ethereum/tools/python" title="Python libraries for Ethereum blockchain development">Python</Link>
+- <Link to="/docs/ethereum/tools/java-kotlin" title="Java and Kotlin tools for Ethereum development">Java/Kotlin</Link>
+- View all in <Link to="/docs/ethereum/tools/overview" title="Complete overview of all available Ethereum development tools">Tools & SDKs</Link>
+
+### See also
+
+- <Link to="/docs/ethereum/all-methods" title="Complete list of all available Ethereum API methods">All Available Methods</Link> - Complete API reference
+- <Link to="/docs/ethereum/authentication" title="Guide to securing your API access">Authentication Guide</Link> - Secure your API access
+- <Link to="/docs/ethereum/faq" title="Frequently asked questions about Ethereum API usage">FAQ</Link> - Common questions and answers

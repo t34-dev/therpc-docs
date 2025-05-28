@@ -1,0 +1,50 @@
+---
+title: Guía de Gestión de Gas en Bloques | Optimización de Tarifas de Transacción en Ethereum
+description: Guía completa para gestionar eficazmente el uso de gas a nivel de bloque, optimizar costos de transacción, implementar estrategias de tarifas EIP-1559 y desarrollar aplicaciones eficientes en gas.
+keywords: gas ethereum, límite de gas de bloque, optimización de gas, tarifas de transacción, eip-1559, tarifas ethereum, precio de gas, estimación de gas, gas óptimo, mercado de tarifas, tarifa base, costos de transacción ethereum
+---
+
+# Guía de Gestión de Gas en Bloques
+
+Entender y gestionar el consumo de gas a nivel de bloque es crucial para optimizar los costos de transacción y garantizar el funcionamiento fiable de las aplicaciones Ethereum.
+
+## Fundamentos del Gas
+
+- Límites de gas por bloque
+- Dinámica de precios de gas
+- Mecanismo de tarifas EIP-1559
+- Estrategias de estimación de gas
+
+## Estrategias de Implementación
+
+```javascript
+// Obtener límite de gas del bloque
+const getBlockGasLimit = async () => {
+	const block = await web3.eth.getBlock('latest');
+	return block.gasLimit;
+};
+
+// Estimar precio óptimo de gas
+const getOptimalGasPrice = async () => {
+	const blockCount = 10;
+	const latest = await web3.eth.getBlockNumber();
+	const blocks = await Promise.all([...Array(blockCount)].map((_, i) => web3.eth.getBlock(latest - i)));
+
+	const gasPrices = blocks.map((block) => block.baseFeePerGas);
+	return Math.floor(gasPrices.reduce((a, b) => a + b) / blockCount);
+};
+```
+
+## Técnicas de Optimización
+
+1. Ajuste dinámico del precio de gas
+2. Agrupación de transacciones
+3. Ejecución en horas de menor actividad
+4. Optimización del límite de gas
+5. Estrategias de tarifas EIP-1559
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="Método API para obtener el precio actual del gas">eth_gasPrice</Link> - Obtener precio actual del gas
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="Método API para estimar el costo de gas para una transacción">eth_estimateGas</Link> - Estimar costo de gas para transacción
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="Aprende técnicas fundamentales para trabajar con bloques de Ethereum">Trabajando con Bloques</Link> - Manejo general de bloques

@@ -1,0 +1,149 @@
+---
+title: Java & Kotlin Tools for Ethereum Development | Web3j Framework Guide
+description: Comprehensive guide to Web3j library for Java and Kotlin Ethereum development with code examples, smart contract integration, and Android implementation patterns
+keywords: java ethereum, kotlin ethereum, web3j, ethereum jvm, android ethereum, kotlin blockchain, java web3, android blockchain, kotlin smart contracts, java dapp, ethereum android development, kotlin coroutines ethereum
+---
+
+# Java & Kotlin Tools
+
+The JVM ecosystem provides robust tools for Ethereum development, primarily through the Web3j library which works with both Java and Kotlin.
+
+<PayAttention category="Java/Kotlin" />
+
+## # Web3j
+
+Comprehensive Java and Kotlin library for Ethereum.
+
+### Java Example
+
+```java
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.utils.Convert;
+import java.math.BigDecimal;
+
+public class EthereumClient {
+    private final Web3j web3j;
+
+    public EthereumClient(String nodeUrl) {
+        this.web3j = Web3j.build(new HttpService(nodeUrl));
+    }
+
+    public BigDecimal getBalance(String address) throws Exception {
+        BigInteger balanceWei = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
+            .send()
+            .getBalance();
+        return Convert.fromWei(balanceWei.toString(), Convert.Unit.ETHER);
+    }
+
+    public String sendTransaction(Credentials credentials, String toAddress, BigDecimal ethAmount) {
+        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+        BigInteger value = Convert.toWei(ethAmount, Convert.Unit.ETHER).toBigInteger();
+
+        RawTransaction rawTransaction = RawTransaction.createEtherTransaction(
+            nonce, gasPrice, GAS_LIMIT, toAddress, value);
+
+        byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+        String hexValue = Numeric.toHexString(signedMessage);
+
+        return web3j.ethSendRawTransaction(hexValue).send().getTransactionHash();
+    }
+}
+```
+
+### Kotlin Example
+
+```kotlin
+import org.web3j.protocol.Web3j
+import org.web3j.protocol.http.HttpService
+import org.web3j.utils.Convert
+import java.math.BigDecimal
+
+class EthereumClient(nodeUrl: String) {
+    private val web3j = Web3j.build(HttpService(nodeUrl))
+
+    suspend fun getBalance(address: String): BigDecimal {
+        val balanceWei = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
+            .send()
+            .balance
+        return Convert.fromWei(balanceWei.toString(), Convert.Unit.ETHER)
+    }
+
+    suspend fun sendTransaction(
+        credentials: Credentials,
+        toAddress: String,
+        ethAmount: BigDecimal
+    ): String {
+        val gasPrice = web3j.ethGasPrice().send().gasPrice
+        val value = Convert.toWei(ethAmount, Convert.Unit.ETHER).toBigInteger()
+
+        val rawTransaction = RawTransaction.createEtherTransaction(
+            nonce, gasPrice, GAS_LIMIT, toAddress, value)
+
+        val signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials)
+        val hexValue = Numeric.toHexString(signedMessage)
+
+        return web3j.ethSendRawTransaction(hexValue).send().transactionHash
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/web3j/web3j" target="_blank" absolute>web3j</Link>
+- **Documentation**: <Link to="https://docs.web3j.io" target="_blank" absolute>docs.web3j.io</Link>
+- **Features**:
+  - Java 8+ support
+  - Kotlin coroutines support
+  - Android compatibility
+  - Smart contract wrappers
+  - Command line tools
+  - Wallet support
+
+## # Android Support
+
+Web3j provides specific features for Android development:
+
+```kotlin
+// Android example
+class EthereumViewModel : ViewModel() {
+    private val web3j = Web3j.build(HttpService("YOUR_ETHEREUM_NODE_URL"))
+
+    fun getBalance(address: String) = viewModelScope.launch {
+        withContext(Dispatchers.IO) {
+            val balance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
+                .send()
+                .balance
+            // Update UI
+        }
+    }
+}
+```
+
+## # Smart Contract Integration
+
+Generate contract wrappers from Solidity:
+
+```bash
+web3j solidity generate /path/to/contract.sol -o /path/to/output -p com.your.package
+```
+
+Then use in your code:
+
+```kotlin
+val contract = YourContract.load(
+    contractAddress,
+    web3j,
+    credentials,
+    gasPrice,
+    gasLimit
+)
+
+// Call contract method
+val result = contract.someMethod().send()
+```
+
+### See also
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">Tools Overview</Link> - All Available SDKs and Tools
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">Authentication Guide</Link> - Detailed Authentication Information
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">Basic Operations Guide</Link> - Fundamental Operations
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">Available Methods</Link> - Explore API Capabilities

@@ -1,0 +1,69 @@
+---
+title: net_listening - 检查网络监听状态 | 以太坊 API 方法
+description: 学习如何使用 net_listening 方法检查您的以太坊节点是否正在主动监听网络连接，并排除连接问题。
+keywords: net_listening, ethereum network, p2p connections, network status, node status, ethereum client, blockchain connectivity, node health check, ethereum network listening, peer connections, node online status, network diagnostics, ethereum node monitoring, blockchain network status, node availability, ethereum connection check
+---
+
+# net_listening
+
+`net_listening` 方法返回一个布尔值，表示客户端是否正在主动监听网络连接。这个简单的检查有助于验证以太坊节点的网络连接状态，对基本的节点监控非常有用。
+
+## 使用场景
+
+- 区块链基础设施中的节点健康监控
+- 去中心化应用程序的网络状态验证
+- 交易失败时的连接故障排除
+- 自动监控系统和警报
+- 关键操作前的客户端可用性检查
+- 设置过程中的节点同步诊断
+
+## 方法详情
+
+此方法不需要参数，并返回一个简单的布尔响应。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'net_listening',
+		id: 67,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'boolean',
+			desc: '如果客户端正在主动监听网络连接则为 true，否则为 false',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 67,
+	"result": true
+}
+```
+
+### 响应值
+
+- **true**：客户端正在主动监听网络连接
+- **false**：客户端当前不在监听网络连接
+
+### 重要注意事项
+
+- 值为 `true` 表示客户端正在接受传入的 P2P 连接
+- 值为 `false` 可能表示网络连接问题或特定的节点配置
+- 此方法仅检查客户端是否在监听，而不是它是否有活动连接
+- 要检查活动连接，请使用 `net_peerCount`
+- 监听状态可能受到网络配置的影响，例如防火墙
+- 一些私有或特殊配置的节点可能显示 `false`，但仍然可以正常处理 RPC 请求
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/net_peerCount" title="检查有多少对等节点连接到您的节点">net_peerCount</Link> - 返回已连接的对等节点数量
+- <Link to="/docs/ethereum/core-methods/net_version" title="识别您的以太坊节点连接的网络">net_version</Link> - 返回当前网络 ID

@@ -1,0 +1,192 @@
+---
+title: 以太坊开发的PHP工具 | Web3.php集成指南
+description: PHP库用于以太坊区块链开发的综合指南，包括Web3.php框架、Laravel集成、智能合约交互和生产示例
+keywords: php以太坊, web3.php, 以太坊php, php区块链, web3 php, laravel以太坊, php智能合约, 区块链php, 以太坊api php, php dapp, web3 laravel, 区块链web开发
+---
+
+# PHP工具
+
+PHP开发者可以使用Web3.php库进行以太坊开发，实现与Web应用程序的集成。
+
+<PayAttention category="PHP" />
+
+## # Web3.php
+
+用于与以太坊节点交互的PHP接口。
+
+```php
+<?php
+
+use Web3\Web3;
+use Web3\Providers\HttpProvider;
+use Web3\RequestManagers\HttpRequestManager;
+
+class EthereumService
+{
+    private $web3;
+
+    public function __construct(string $nodeUrl)
+    {
+        $this->web3 = new Web3(new HttpProvider(new HttpRequestManager($nodeUrl)));
+    }
+
+    public function getBalance(string $address): string
+    {
+        $balance = null;
+        $this->web3->eth->getBalance($address, 'latest', function ($err, $result) use (&$balance) {
+            if ($err !== null) {
+                throw new Exception($err->getMessage());
+            }
+            $balance = $result;
+        });
+
+        return $this->web3->utils->fromWei($balance, 'ether');
+    }
+
+    public function sendTransaction(array $transaction): string
+    {
+        $hash = null;
+        $this->web3->eth->sendTransaction($transaction, function ($err, $result) use (&$hash) {
+            if ($err !== null) {
+                throw new Exception($err->getMessage());
+            }
+            $hash = $result;
+        });
+
+        return $hash;
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/web3p/web3.php" target="_blank" absolute>web3.php</Link>
+- **Packagist**: <Link to="https://packagist.org/packages/web3p/web3.php" target="_blank" absolute>web3.php包</Link>
+- **特性**:
+  - JSON-RPC支持
+  - 合约交互
+  - 交易处理
+  - ETH单位转换
+  - ABI编码/解码
+
+## # Laravel集成
+
+Laravel集成示例：
+
+```php
+<?php
+
+namespace App\Services;
+
+use Web3\Web3;
+use Illuminate\Support\Facades\Cache;
+
+class EthereumService
+{
+    private $web3;
+
+    public function __construct()
+    {
+        $this->web3 = new Web3(config('services.ethereum.node_url'));
+    }
+
+    public function getCachedBalance(string $address): string
+    {
+        return Cache::remember("eth_balance_{$address}", 300, function () use ($address) {
+            return $this->getBalance($address);
+        });
+    }
+
+    public function getTransactionCount(string $address): int
+    {
+        $count = null;
+        $this->web3->eth->getTransactionCount($address, 'latest', function ($err, $result) use (&$count) {
+            if ($err !== null) {
+                throw new Exception($err->getMessage());
+            }
+            $count = hexdec($result);
+        });
+
+        return $count;
+    }
+}
+```
+
+## # 智能合约集成
+
+在PHP中使用智能合约：
+
+```php
+<?php
+
+use Web3\Contract;
+
+class SmartContractService
+{
+    private $contract;
+
+    public function __construct(string $nodeUrl, string $abi, string $contractAddress)
+    {
+        $web3 = new Web3(new HttpProvider(new HttpRequestManager($nodeUrl)));
+        $this->contract = new Contract($web3->provider, $abi);
+        $this->contract->at($contractAddress);
+    }
+
+    public function callMethod(string $method, array $params = [])
+    {
+        $result = null;
+        $this->contract->call($method, $params, function ($err, $response) use (&$result) {
+            if ($err !== null) {
+                throw new Exception($err->getMessage());
+            }
+            $result = $response;
+        });
+
+        return $result;
+    }
+}
+```
+
+## # 错误处理
+
+PHP中的适当错误处理：
+
+```php
+<?php
+
+class EthereumException extends Exception
+{
+    private $ethError;
+
+    public function __construct(string $message, $ethError = null)
+    {
+        parent::__construct($message);
+        $this->ethError = $ethError;
+    }
+
+    public function getEthError()
+    {
+        return $this->ethError;
+    }
+}
+
+class SafeEthereumService
+{
+    public function safeGetBalance(string $address): string
+    {
+        try {
+            return $this->getBalance($address);
+        } catch (Exception $e) {
+            throw new EthereumException(
+                "Failed to get balance for address: {$address}",
+                $e
+            );
+        }
+    }
+}
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/tools/overview" title="可用以太坊开发工具和SDK的完整概述">工具概述</Link> - 所有可用的SDK和工具
+- <Link to="/docs/ethereum/authentication" title="与以太坊节点和API服务认证的指南">认证指南</Link> - 详细认证信息
+- <Link to="/docs/ethereum/basic-operations" title="学习开发者的基本以太坊区块链操作">基本操作指南</Link> - 基础操作
+- <Link to="/docs/ethereum/all-methods" title="所有可用以太坊API方法的完整参考">可用方法</Link> - 探索API功能

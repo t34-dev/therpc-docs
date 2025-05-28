@@ -1,0 +1,216 @@
+---
+title: eth_getTransactionCount - 获取账户 Nonce | 以太坊 API 方法
+description: 学习如何使用 eth_getTransactionCount 方法获取从以太坊地址发送的交易数量，也称为 nonce。
+keywords: eth_getTransactionCount, 交易计数, nonce, 账户 nonce, 以太坊账户, 交易序列, 待处理交易
+---
+
+# eth_getTransactionCount
+
+`eth_getTransactionCount` 方法返回从指定地址发送的交易数量，也称为"nonce"。这个值对于创建新交易至关重要，因为每个来自账户的交易必须使用比前一个交易恰好高出一个的 nonce 值。
+
+## 使用场景
+
+- 交易创建和签名
+- 交易序列的 nonce 管理
+- 账户活动分析
+- 识别卡住的交易
+- 地址验证（EOA 与合约）
+- 钱包同步
+- 交易重放防止
+- 交易队列管理
+
+## 方法详情
+
+此方法返回地址的当前 nonce 值，代表从该地址发送的交易数量。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getTransactionCount',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: '要检查交易计数的地址',
+			value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', // vitalik.eth
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '十六进制格式的区块号或区块标签',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '从该地址发送的交易数量（十六进制）',
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.blockNumber || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x4b9" // 十进制为 1209
+}
+```
+
+### 区块标签含义
+
+`blockNumber` 参数接受几个特殊值：
+
+- `latest`：所有待处理交易执行后的当前状态
+- `pending`：当前状态加上内存池中的待处理交易
+- `earliest`：创世区块状态
+- `safe`：网络认为安全的最新区块
+- `finalized`：已达到最终确定性的最新区块
+
+在连续发送多个交易时，使用 `pending` 对 nonce 管理尤为重要。
+
+### 实用示例
+
+```javascript
+// 示例：创建并签名连续多个交易
+async function sendTransactionBatch(privateKey, toAddress, values) {
+	const wallet = new ethers.Wallet(privateKey, provider);
+	const fromAddress = wallet.address;
+
+	// 获取当前 nonce
+	const nonce = await provider.send('eth_getTransactionCount', [fromAddress, 'pending']);
+	const currentNonce = parseInt(nonce, 16);
+
+	console.log(`起始 nonce: ${currentNonce}`);
+
+	// 创建并发送多个交易
+	const txPromises = values.map((value, index) => {
+		const txNonce = currentNonce + index;
+		console.log(`准备 nonce 为 ${txNonce} 的交易`);
+
+		const tx = {
+			from: fromAddress,
+			to: toAddress,
+			value: ethers.utils.parseEther(value.toString()),
+			nonce: txNonce,
+			gasLimit: 21000,
+			gasPrice: ethers.utils.parseUnits('50', 'gwei'),
+		};
+
+		return wallet.sendTransaction(tx);
+	});
+
+	return Promise.all(txPromises);
+}
+
+// 使用方法
+const recipientAddress = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
+const valueArray = [0.01, 0.02, 0.03]; // 要发送的 ETH 值
+sendTransactionBatch(privateKey, recipientAddress, valueArray)
+	.then((results) => console.log(`发送了 ${results.length} 笔交易`))
+	.catch((error) => console.error('交易失败:', error));
+```
+
+### Nonce 管理策略
+
+```javascript
+// 示例：分析和修复 nonce 间隙
+async function analyzeNonceGaps(address) {
+	// 获取已确认的 nonce
+	const confirmedNonceHex = await provider.send('eth_getTransactionCount', [address, 'latest']);
+
+	// 获取待处理的 nonce（包括内存池中的交易）
+	const pendingNonceHex = await provider.send('eth_getTransactionCount', [address, 'pending']);
+
+	const confirmedNonce = parseInt(confirmedNonceHex, 16);
+	const pendingNonce = parseInt(pendingNonceHex, 16);
+
+	console.log(`地址: ${address}`);
+	console.log(`已确认 nonce: ${confirmedNonce}`);
+	console.log(`待处理 nonce: ${pendingNonce}`);
+
+	if (pendingNonce > confirmedNonce) {
+		console.log(`有 ${pendingNonce - confirmedNonce} 笔待处理交易`);
+
+		// 获取待处理交易进行分析
+		// 注意：这通常需要专门的 RPC 方法或服务
+		// 因为标准以太坊节点不提供列出地址待处理交易的方法
+	}
+
+	return {
+		address,
+		confirmedNonce,
+		pendingNonce,
+		pendingCount: pendingNonce - confirmedNonce,
+	};
+}
+
+// 示例：通过更高的燃料价格替换卡住的交易
+async function replaceStuckTransaction(wallet, originalNonce, newGasPrice) {
+	// 创建一个具有相同 nonce 但更高燃料价格的"替换"交易
+	const tx = {
+		from: wallet.address,
+		to: wallet.address, // 发送给自己
+		value: 0, // 零值（只支付燃料费）
+		nonce: originalNonce,
+		gasLimit: 21000,
+		gasPrice: newGasPrice, // 必须至少比原始价格高 10%
+	};
+
+	// 签名并发送替换交易
+	return wallet.sendTransaction(tx);
+}
+```
+
+### 高级：账户活动分析
+
+```javascript
+// 示例：分析账户随时间的活动
+async function analyzeAccountActivity(address, startBlock, endBlock, interval = 1000) {
+	const result = [];
+
+	// 分批处理以避免使节点过载
+	for (let blockNum = startBlock; blockNum <= endBlock; blockNum += interval) {
+		const blockHex = `0x${blockNum.toString(16)}`;
+		const count = await provider.send('eth_getTransactionCount', [address, blockHex]);
+
+		result.push({
+			blockNumber: blockNum,
+			nonce: parseInt(count, 16),
+		});
+	}
+
+	// 计算每个间隔的活动
+	for (let i = 1; i < result.length; i++) {
+		const txCount = result[i].nonce - result[i - 1].nonce;
+		result[i].newTransactions = txCount;
+
+		const blockSpan = result[i].blockNumber - result[i - 1].blockNumber;
+		result[i].txPerBlock = txCount / blockSpan;
+	}
+
+	return result;
+}
+```
+
+### 重要说明
+
+1. 新账户的第一笔交易必须使用 nonce 0
+2. 每个后续交易必须将 nonce 恰好递增 1
+3. 具有高于预期 nonce 的交易将保持待处理状态，直到处理完所有较低的 nonce
+4. 如果特定 nonce 的交易被丢弃，您可以重新提交具有相同 nonce 的新交易
+5. 在连续创建多个交易时，使用 `pending` 标签至关重要
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_sendRawTransaction" title="向网络发送已签名的交易">eth_sendRawTransaction</Link> - 向以太坊网络提交原始已签名交易
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="查询交易详情">eth_getTransactionByHash</Link> - 使用交易哈希检索有关交易的详细信息

@@ -1,0 +1,69 @@
+---
+title: net_listening - Check Network Listening Status | Ethereum API Methods
+description: Learn how to use the net_listening method to check whether your Ethereum node is actively listening for network connections and troubleshoot connectivity issues.
+keywords: net_listening, ethereum network, p2p connections, network status, node status, ethereum client, blockchain connectivity, node health check, ethereum network listening, peer connections, node online status, network diagnostics, ethereum node monitoring, blockchain network status, node availability, ethereum connection check
+---
+
+# net_listening
+
+The `net_listening` method returns a boolean indicating whether the client is actively listening for network connections. This simple check helps verify the network connectivity status of an Ethereum node and is useful for basic node monitoring.
+
+## Use Cases
+
+- Node health monitoring in blockchain infrastructure
+- Network status verification for dApps
+- Connection troubleshooting when transactions fail
+- Automated monitoring systems and alerting
+- Client availability checks before critical operations
+- Node synchronization diagnosis during setup
+
+## Method Details
+
+This method requires no parameters and returns a simple boolean response.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'net_listening',
+		id: 67,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'boolean',
+			desc: 'True if the client is actively listening for network connections, otherwise false',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 67,
+	"result": true
+}
+```
+
+### Response Values
+
+- **true**: The client is actively listening for network connections
+- **false**: The client is not currently listening for network connections
+
+### Important Notes
+
+- A value of `true` indicates the client is accepting incoming P2P connections
+- A value of `false` might indicate network connectivity issues or specific node configuration
+- This method only checks if the client is listening, not if it has active connections
+- For checking active connections, use `net_peerCount`
+- The listening status might be affected by network configuration, such as firewalls
+- Some private or specifically configured nodes might show `false` but still function properly for RPC requests
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/net_peerCount" title="Check how many peers are connected to your node">net_peerCount</Link> - Returns the number of connected peers
+- <Link to="/docs/ethereum/core-methods/net_version" title="Identify which network your Ethereum node is connected to">net_version</Link> - Returns the current network ID

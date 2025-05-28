@@ -1,0 +1,228 @@
+---
+title: eth_getProof - 生成默克尔证明 | 以太坊 API 方法
+description: 学习如何使用 eth_getProof 方法检索以太坊区块链上账户和存储数据的加密证明。包含验证示例。
+keywords: eth_getProof, 默克尔证明, 状态证明, 存储证明, 账户验证, 以太坊验证, 状态字典树
+---
+
+# eth_getProof
+
+`eth_getProof` 方法返回特定地址的账户和存储值，包括加密默克尔证明。这些证明可以验证数据是否正确地包含在状态字典树中，而无需信任数据提供者。
+
+## 使用场景
+
+- 需要状态验证的 L2 解决方案
+- 跨链桥接和验证
+- 无信任区块链数据验证
+- 轻客户端实现
+- 无状态客户端开发
+- 零知识证明系统
+- 欺诈证明构建
+- 安全审计和验证
+
+## 方法详情
+
+此方法检索指定存储键的账户证明和存储证明。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getProof',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: '获取证明的账户地址',
+			value: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI 代币合约
+		},
+		{
+			id: 'storageKeys',
+			required: true,
+			type: 'array',
+			desc: '为其生成证明的存储键数组',
+			value: [
+				'0x0000000000000000000000000000000000000000000000000000000000000002', // totalSupply
+				'0x29ae811400000000000000000000000000000000000000000000000000000000', // 另一个存储槽位
+			],
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '区块号或区块标签',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: '带有默克尔证明的账户信息',
+			fields: [
+				{
+					id: 'address',
+					type: 'string',
+					desc: '账户地址',
+				},
+				{
+					id: 'accountProof',
+					type: 'array',
+					desc: '从状态根到账户叶节点的 RLP 序列化默克尔树节点数组',
+				},
+				{
+					id: 'balance',
+					type: 'string',
+					desc: '账户余额（以 wei 为单位，十六进制）',
+				},
+				{
+					id: 'codeHash',
+					type: 'string',
+					desc: '账户代码的哈希（十六进制）',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: '账户的 nonce（十六进制）',
+				},
+				{
+					id: 'storageHash',
+					type: 'string',
+					desc: '账户存储字典树根的哈希（十六进制）',
+				},
+				{
+					id: 'storageProof',
+					type: 'array',
+					desc: '请求键的存储证明数组',
+					fields: [
+						{
+							id: 'key',
+							type: 'string',
+							desc: '请求的存储键',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: '存储值（十六进制）',
+						},
+						{
+							id: 'proof',
+							type: 'array',
+							desc: '从存储哈希到存储值的 RLP 序列化默克尔树节点数组',
+						},
+					],
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.storageKeys || [], fields?.blockNumber || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+		"accountProof": [
+			"0xf90211a0...",
+			"0xf90211a0...",
+			"0xf90211a0...",
+			"0xf90211a0...",
+			"0xf90211a0...",
+			"0xf90211a0...",
+			"0xf90131a0..."
+		],
+		"balance": "0x0",
+		"codeHash": "0x34eb8290afdbf2cea95f7afaefe0e2e8071e0b9a3ee4f106c8f3b6a45663e05d",
+		"nonce": "0x1",
+		"storageHash": "0x9588589599c2d368b2c109def4942d664838b3b681e80898fae7d2d140fe6a4c",
+		"storageProof": [
+			{
+				"key": "0x0000000000000000000000000000000000000000000000000000000000000002",
+				"value": "0x000000000000000000000000000000000000000001cc3c3beb2aa7ced800000",
+				"proof": ["0xf90211a0...", "0xf90211a0...", "0xf90211a0...", "0xf90211a0..."]
+			},
+			{
+				"key": "0x29ae811400000000000000000000000000000000000000000000000000000000",
+				"value": "0x0000000000000000000000000000000000000000000000000000000000000001",
+				"proof": ["0xf90211a0...", "0xf90211a0...", "0xf90211a0...", "0xf90211a0..."]
+			}
+		]
+	}
+}
+```
+
+### 理解默克尔证明
+
+默克尔证明允许在不拥有整棵树的情况下验证一段数据是否属于默克尔树的一部分。在以太坊中：
+
+1. 状态字典树根是存储在每个区块中的 32 字节哈希
+2. 账户数据存储在状态字典树中，以账户地址作为键
+3. 账户存储保存在单独的存储字典树中，以存储键作为键
+4. 证明由一组节点组成，允许从根哈希到目标数据进行验证
+
+### 实用示例
+
+```javascript
+// 示例：使用证明验证 DAI 代币的总供应量
+const ethers = require('ethers');
+const RLP = require('rlp');
+const { keccak256 } = ethers.utils;
+
+async function verifyTokenSupply(tokenAddress) {
+	// DAI 代币的 totalSupply 存储在存储槽位 2
+	const totalSupplySlot = '0x0000000000000000000000000000000000000000000000000000000000000002';
+
+	// 获取最新区块哈希作为参考
+	const blockData = await provider.send('eth_getBlockByNumber', ['latest', false]);
+	const blockHash = blockData.hash;
+
+	// 获取证明
+	const proof = await provider.send('eth_getProof', [tokenAddress, [totalSupplySlot], 'latest']);
+
+	console.log(`区块哈希: ${blockHash}`);
+	console.log(`状态根: ${blockData.stateRoot}`);
+	console.log(`存储哈希: ${proof.storageHash}`);
+
+	// 从证明中提取总供应量
+	const totalSupplyHex = proof.storageProof[0].value;
+	const totalSupply = BigInt(totalSupplyHex);
+	const totalSupplyDecimal = totalSupply / 10n ** 18n; // DAI 有 18 位小数
+
+	console.log(`已验证的总供应量: ${totalSupplyDecimal.toString()} DAI`);
+
+	// 要真正在加密层面验证证明，我们需要：
+	// 1. 验证从 stateRoot 到 storageHash 的账户证明
+	// 2. 验证从 storageHash 到 totalSupply 值的存储证明
+	// 这需要实现默克尔-帕特里夏字典树验证
+
+	return {
+		blockHash,
+		stateRoot: blockData.stateRoot,
+		storageHash: proof.storageHash,
+		totalSupply: totalSupplyDecimal.toString(),
+	};
+}
+
+// 使用方法
+const daiProof = await verifyTokenSupply('0x6B175474E89094C44Da98b954EedeAC495271d0F');
+```
+
+### 查找存储槽位
+
+对于 Solidity 合约，存储槽位可以按以下方式确定：
+
+1. **简单变量**：从槽位 0 开始按顺序存储
+2. **映射**：`keccak256(abi.encode(key, slot))`，其中 `slot` 是映射声明的位置
+3. **动态数组**：`keccak256(slot) + index`
+4. **ERC20 余额**：通常在映射中，例如 `keccak256(abi.encode(userAddress, 3))`
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getStorageAt" title="访问原始合约存储数据">eth_getStorageAt</Link> - 访问合约中特定位置的原始存储值
+- <Link to="/docs/ethereum/core-methods/eth_getCode" title="检索合约字节码">eth_getCode</Link> - 获取智能合约的已部署字节码

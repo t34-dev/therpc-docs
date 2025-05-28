@@ -1,0 +1,319 @@
+---
+title: debug_traceTransaction - Reproducir y Analizar la Ejecución de Transacciones en Detalle | Métodos API de Ethereum
+description: Aprende a usar el método debug_traceTransaction para obtener detalles de ejecución a nivel de opcode para cualquier transacción histórica, con reproducción exacta del estado original de la blockchain para depuración y análisis precisos.
+keywords: debug_traceTransaction, depuración de transacciones ethereum, trazado de transacciones históricas, análisis a nivel de opcode, reproducción de transacciones, trazado de ejecución evm, depuración de transacciones, análisis de contratos inteligentes, flujo de transacciones, análisis forense de blockchain, análisis de gas, trazado de pila, instantánea de ejecución, trazado de transacciones, ejecución de opcode, depuración evm, investigación de transacciones, análisis de transacciones fallidas, solución de problemas de contratos inteligentes, causa de reversión de transacciones, análisis de trazado de ejecución, visualización de árbol de llamadas, perfilado de gas, auditoría de seguridad, inspección de estado de transacciones, análisis de ruta de ejecución, estado evm, uso de gas en transacciones, interacción de contratos, introspección de transacciones, llamadas internas, operaciones de memoria, operaciones de pila, cambios de almacenamiento, contexto de ejecución
+---
+
+# debug_traceTransaction
+
+El método `debug_traceTransaction` recrea el estado exacto de ejecución de una transacción histórica, proporcionando información detallada de trazado a nivel de opcode. Reproduce el estado original en el bloque específico donde se ejecutó la transacción, permitiendo un análisis completo del flujo de ejecución de la transacción, operaciones de pila, cambios de memoria, modificaciones de almacenamiento y consumo de gas.
+
+A diferencia de otros métodos de recuperación de transacciones que solo proporcionan datos básicos, `debug_traceTransaction` ofrece introspección en la ejecución interna de la EVM durante el procesamiento de la transacción.
+
+## Casos de Uso
+
+- **Análisis de Transacciones Fallidas**: Determinar exactamente por qué falló una transacción examinando la instrucción precisa que causó la reversión y el estado de la EVM en ese punto
+- **Depuración de Contratos Inteligentes**: Investigar comportamientos inesperados en la ejecución del contrato examinando la ruta de ejecución completa y los cambios de estado
+- **Optimización del Uso de Gas**: Identificar operaciones costosas y patrones de código ineficientes analizando el consumo de gas por opcode
+- **Auditoría de Seguridad**: Detectar vulnerabilidades potenciales analizando el flujo exacto de ejecución y las transiciones de estado durante el procesamiento de la transacción
+- **Verificación de Transacciones**: Confirmar que un contrato se comportó según lo esperado para una transacción específica revisando todas las operaciones realizadas
+- **Inspección del Estado del Contrato**: Ver los cambios exactos realizados en el almacenamiento del contrato durante la ejecución de la transacción
+- **Investigación Forense**: Reconstruir la ejecución de transacciones para investigar incidentes de seguridad o analizar eventos históricos
+- **Análisis de Gráfico de Llamadas**: Visualizar el flujo de ejecución entre contratos, incluyendo llamadas a funciones internas y valores de mensaje
+- **Encontrar Inconsistencias de Estado**: Identificar cambios de estado inesperados durante interacciones complejas de contratos
+- **Recreación del Contexto de Ejecución**: Reproducir el entorno exacto de blockchain que existía cuando se ejecutó la transacción
+
+## Detalles del Método
+
+Este método traza la transacción identificada por su hash, proporcionando detalles de ejecución a nivel de opcode.
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    "method": "debug_traceTransaction",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'transactionHash',
+      required: true,
+      type: 'string',
+      desc: "Hash de la transacción a trazar",
+      value: "0xcd718a69d478340dc28fdf6bf8056374a52dc95841b44083163ced8dfe29310c"
+    },
+    {
+      id: 'options',
+      type: 'object',
+      desc: "Opciones de trazado",
+      fields: [
+        {
+          id: 'disableStorage',
+          type: 'boolean',
+          desc: "Configurar como true desactiva la captura de almacenamiento",
+          value: false
+        },
+        {
+          id: 'disableMemory',
+          type: 'boolean',
+          desc: "Configurar como true desactiva la captura de memoria",
+          value: false
+        },
+        {
+          id: 'disableStack',
+          type: 'boolean',
+          desc: "Configurar como true desactiva la captura de pila",
+          value: false
+        },
+        {
+          id: 'tracer',
+          type: 'string',
+          desc: "Usar un trazador personalizado (disponibles: callTracer, prestateTracer, etc.)",
+          value: "callTracer"
+        },
+        {
+          id: 'timeout',
+          type: 'string',
+          desc: "Anula el tiempo de espera predeterminado de 5 segundos para el trazado basado en JavaScript",
+          value: "10s"
+        }
+      ]
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'object',
+      desc: "El resultado del trazado con detalles de ejecución",
+      fields: [
+        {
+          id: 'gas',
+          type: 'integer',
+          desc: "Gas utilizado por la transacción"
+        },
+        {
+          id: 'failed',
+          type: 'boolean',
+          desc: "Si la transacción falló"
+        },
+        {
+          id: 'returnValue',
+          type: 'string',
+          desc: "El valor de retorno de la transacción"
+        },
+        {
+          id: 'structLogs',
+          type: 'array',
+          desc: "Array de registros estructurados de operaciones EVM",
+          fields: [
+            {
+              id: 'pc',
+              type: 'integer',
+              desc: "Posición del contador de programa"
+            },
+            {
+              id: 'op',
+              type: 'string',
+              desc: "El opcode ejecutado"
+            },
+            {
+              id: 'gas',
+              type: 'integer',
+              desc: "Gas restante"
+            },
+            {
+              id: 'gasCost',
+              type: 'integer',
+              desc: "Costo de gas para esta operación"
+            },
+            {
+              id: 'depth',
+              type: 'integer',
+              desc: "Profundidad de llamada"
+            },
+            {
+              id: 'memory',
+              type: 'array',
+              desc: "Contenido de memoria EVM (si no está desactivado)"
+            },
+            {
+              id: 'stack',
+              type: 'array',
+              desc: "Contenido de pila EVM (si no está desactivado)"
+            },
+            {
+              id: 'storage',
+              type: 'object',
+              desc: "Cambios de almacenamiento (si no está desactivado)"
+            }
+          ]
+        }
+      ]
+    }
+  ]}
+  getParams={(fields) => {
+    const params = [
+      fields?.transactionHash || null
+    ];
+
+    const options = {};
+
+    if (fields?.options?.disableStorage !== undefined) {
+      options.disableStorage = fields.options.disableStorage;
+    }
+
+    if (fields?.options?.disableMemory !== undefined) {
+      options.disableMemory = fields.options.disableMemory;
+    }
+
+    if (fields?.options?.disableStack !== undefined) {
+      options.disableStack = fields.options.disableStack;
+    }
+
+    if (fields?.options?.tracer) {
+      options.tracer = fields.options.tracer;
+    }
+
+    if (fields?.options?.timeout) {
+      options.timeout = fields.options.timeout;
+    }
+
+    if (Object.keys(options).length > 0) {
+      params.push(options);
+    } else {
+      params.push(null);
+    }
+
+    return params;
+
+}}
+/>
+
+### Ejemplo de Respuesta (Trazador Predeterminado)
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"gas": 21000,
+		"failed": false,
+		"returnValue": "",
+		"structLogs": [
+			{
+				"pc": 0,
+				"op": "PUSH1",
+				"gas": 4677951,
+				"gasCost": 3,
+				"depth": 1,
+				"stack": [],
+				"memory": [],
+				"storage": {}
+			},
+			{
+				"pc": 2,
+				"op": "MSTORE",
+				"gas": 4677948,
+				"gasCost": 12,
+				"depth": 1,
+				"stack": ["0x60", "0x40"],
+				"memory": [
+					"0000000000000000000000000000000000000000000000000000000000000000",
+					"0000000000000000000000000000000000000000000000000000000000000000"
+				],
+				"storage": {}
+			}
+			// Muchos más registros de opcode...
+		]
+	}
+}
+```
+
+### Ejemplo de Respuesta (callTracer)
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "from": "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
+    "gas": "0x2d48c",
+    "gasUsed": "0x594c",
+    "to": "0x55d398326f99059ff775485246999027b3197955",
+    "input": "0xa9059cbb000000000000000000000000b5cfcb4b073ebcda22f57097dbd0e0be5731ca5c00000000000000000000000000000000000000000000000011c37937e08000",
+    "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "calls": [
+      {
+        "type": "CALL",
+        "from": "0x55d398326f99059ff775485246999027b3197955",
+        "to": "0xb5cfcb4b073ebcda22f57097dbd0e0be5731ca5c",
+        "gas": "0x1e25b",
+        "gasUsed": "0x30b",
+        "input": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "output": "0x"
+      }
+    ],
+    "value": "0x0"
+  }
+}
+```
+
+## Problemas Comunes Identificados Mediante Trazado
+
+- Errores por falta de gas
+- Subdesbordamientos o desbordamientos de pila
+- Ejecución de opcode inválido
+- Afirmaciones fallidas o condiciones require
+- Reversiones inesperadas
+- Problemas de asignación de memoria
+- Estado de contrato inesperado
+- Fallos de transferencia
+- Problemas de control de acceso
+- Errores lógicos
+
+## Trazadores Disponibles
+
+1. **Trazador Predeterminado**: Devuelve registros estructurados para cada opcode
+2. **callTracer**: Muestra el gráfico de llamadas entre contratos
+3. **prestateTracer**: Muestra el estado antes de la ejecución de la transacción
+4. **4byteTracer**: Recopila selectores de funciones
+5. **noopTracer**: Descarta toda la información
+6. **Trazadores JavaScript Personalizados**: Crea tu propia lógica de trazado
+
+## Opciones de Trazado
+
+Puedes ajustar el rendimiento y la salida configurando estas opciones:
+
+- Desactivar la captura de pila, memoria o almacenamiento para una ejecución más rápida
+- Usar tiempo de espera personalizado para transacciones complejas
+- Aplicar configuraciones de trazador personalizadas para necesidades específicas de análisis
+
+## Consideraciones de Rendimiento
+
+- El trazado de transacciones complejas puede consumir muchos recursos y ser lento
+- Los contratos grandes con muchas operaciones pueden producir cargas de respuesta muy grandes
+- Usar opciones para desactivar ciertas capturas (memoria, almacenamiento, pila) puede mejorar el rendimiento
+- Considera usar un trazador personalizado específico para análisis dirigido en lugar de capturar todo
+- El trazado de transacciones que crean contratos con código de inicialización grande puede ser particularmente intensivo
+- Las transacciones con muchas llamadas internas o alta profundidad de llamada requieren más recursos para trazar
+
+## Notas Importantes
+
+- Este método requiere que las APIs de depuración estén habilitadas en el nodo (generalmente con la bandera `--http.api=debug`)
+- `debug_traceTransaction` proporciona información más detallada que `trace_transaction`
+- Para resultados precisos, necesitas acceso al estado histórico en el bloque donde ocurrió la transacción
+- Se requieren nodos de archivo para trazar transacciones más antiguas
+- Algunos clientes pueden no soportar todos los tipos de trazadores
+- Los trazadores JavaScript personalizados solo están disponibles en Geth y algunos clientes compatibles con Geth
+- Este método reproducirá la transacción exactamente como ocurrió, incluyendo cualquier efecto secundario
+- El trazado no incluye eventos/logs (estos deben consultarse por separado)
+- Algunas operaciones como `BLOCKHASH` tienen sus resultados de la ejecución original en caché y se reutilizan
+- Usar este método en transacciones en bloques muy antiguos puede resultar en inconsistencias de estado en algunos nodos
+
+## Ver también
+
+- [debug_traceCall](/docs/es/ethereum/debug-methods/debug_traceCall "Ejecutar una llamada sin generar una transacción y devolver los datos de trazado") - Ejecutar una llamada sin generar una transacción y devolver los datos de trazado
+- [debug_traceCallMany](/docs/es/ethereum/debug-methods/debug_traceCallMany "Ejecutar múltiples llamadas sin generar transacciones y devolver datos de trazado") - Ejecutar múltiples llamadas sin generar transacciones y devolver datos de trazado
+- [trace_transaction](/docs/es/ethereum/trace-methods/trace_transaction "Devolver datos de trazado para una transacción específica") - Devolver datos de trazado para una transacción específica
+- [eth_getTransactionByHash](/docs/es/ethereum/json-rpc-methods/eth_getTransactionByHash "Recuperar información básica de transacción por hash") - Recuperar información básica de transacción por hash
+- [eth_getTransactionReceipt](/docs/es/ethereum/json-rpc-methods/eth_getTransactionReceipt "Obtener información de recibo de transacción por hash") - Obtener información de recibo de transacción por hash

@@ -1,0 +1,116 @@
+---
+title: web3_sha3 - Calcular Hash Keccak-256 | Métodos API de Ethereum
+description: Aprende a usar el método web3_sha3 para generar hashes Keccak-256 para diversas operaciones en Ethereum, incluyendo firmas de funciones, tópicos de eventos y verificación de datos blockchain.
+keywords: web3_sha3, keccak256, sha3, hash ethereum, ethereum keccak, web3, hash criptográfico, selector de función, firma de evento, cálculo de hash, criptografía ethereum, hash blockchain, hash de contrato inteligente, hash de transacción, firma ethereum, verificación de datos
+---
+
+# web3_sha3
+
+El método `web3_sha3` calcula el hash Keccak-256 de los datos proporcionados. A pesar del nombre, este método devuelve el hash Keccak-256, no el hash SHA3-256 estandarizado. Keccak-256 es el algoritmo de hash utilizado ampliamente en Ethereum para diversas operaciones criptográficas.
+
+## Casos de Uso
+
+- Generación de hashes deterministas de datos arbitrarios
+- Creación de firmas de funciones para llamadas a contratos inteligentes
+- Cálculo de tópicos de eventos para filtrado de logs
+- Verificación de integridad de datos dentro y fuera de la cadena
+- Implementación de primitivas criptográficas en aplicaciones
+- Cálculo de firmas de eventos para análisis de logs
+- Pruebas de generación de hashes para desarrollo de contratos inteligentes
+- Generación de resúmenes de mensajes para operaciones de firma
+- Creación de identificadores únicos a partir de datos de entrada
+- Cálculo de direcciones deterministas para contratos
+
+## Detalles del Método
+
+Este método toma un parámetro, los datos a hashear, y devuelve el hash Keccak-256 de esos datos.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'web3_sha3',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'data',
+			required: true,
+			type: 'string',
+			desc: 'Los datos en formato hexadecimal a ser hasheados',
+			value: '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'El hash Keccak-256 de los datos proporcionados como una cadena hexadecimal',
+		},
+	]}
+	getParams={(fields) => [fields?.data || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x21276a0c70e3fde6a5a3627d2d2748bc945b7cfc86dbd4cf60f425ad5058d9b0"
+}
+```
+
+### Formato de Datos de Entrada
+
+Los datos de entrada deben proporcionarse como una cadena hexadecimal con el prefijo `0x`. La entrada puede ser cualquier dato arbitrario, incluyendo direcciones Ethereum, datos de transacción o bytes sin procesar.
+
+Por ejemplo, para hashear una dirección Ethereum:
+
+1. Toma la dirección en formato hex: `0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed`
+2. Pasa esta cadena hex al método
+
+### Keccak-256 vs SHA3-256
+
+Es importante notar que este método devuelve el hash Keccak-256, no el hash SHA3-256 estandarizado:
+
+- **Keccak-256**: La propuesta original para la competencia NIST SHA3
+- **SHA3-256**: El estándar NIST finalizado que incluye algunas modificaciones a Keccak
+
+Ethereum adoptó Keccak-256 antes de que la estandarización NIST estuviera completa, por lo que continuó usando el algoritmo Keccak original en lugar de cambiar al SHA3 estandarizado.
+
+### Aplicaciones Comunes en Ethereum
+
+La función hash Keccak-256 se utiliza ampliamente en Ethereum:
+
+1. **Firmas de Funciones**: Los primeros 4 bytes del hash Keccak-256 de la firma de función `transfer(address,uint256)` identifican la llamada a la función en los datos de transacción
+2. **Tópicos de Eventos**: El hash Keccak-256 de las firmas de eventos se utiliza como tópicos en los logs de eventos
+3. **Direcciones de Contratos**: Las direcciones de contratos se derivan en parte utilizando la función hash Keccak-256
+4. **Hashes de Transacciones**: El identificador único para una transacción se deriva usando Keccak-256
+5. **Hashes de Bloques**: Los bloques se identifican por su hash Keccak-256
+6. **Árboles de Merkle**: Para almacenamiento eficiente y verificación de datos
+
+### Ejemplos de Conversiones
+
+| Tipo de Entrada    | Entrada (hex)                             | Hash Keccak-256                                                   |
+| ------------------ | ------------------------------------------ | ------------------------------------------------------------------ |
+| Dirección Ethereum | 0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed | 0x21276a0c70e3fde6a5a3627d2d2748bc945b7cfc86dbd4cf60f425ad5058d9b0 |
+| Firma de Función   | 0x095ea7b3                                 | 0xf2c0a300acb0c93fb0fdeceeac9b2c9b7f6c1413629bc2a8483bc3ca775e17ce |
+| Cadena Vacía       | 0x                                         | 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 |
+
+### Notas Importantes
+
+- Este método trabaja con bytes crudos, no con representaciones de cadenas
+- La entrada debe estar correctamente codificada en hexadecimal con un prefijo `0x`
+- El hash devuelto siempre es de 32 bytes (64 caracteres hex) más el prefijo `0x`
+- Muchas bibliotecas de programación implementan Keccak-256 como "SHA3" a pesar de la diferencia técnica
+- El método es puramente computacional y no afecta el estado de la blockchain
+- La misma entrada siempre producirá la misma salida
+- Este método es soportado por todas las implementaciones de clientes Ethereum
+- La entrada de longitud cero es válida y produce un valor de hash específico
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_sign" title="Crear una firma criptográfica usando una cuenta Ethereum">eth_sign</Link> - Firmar un mensaje con una cuenta Ethereum
+- <Link to="/docs/ethereum/core-methods/personal_sign" title="Firmar un mensaje personal de manera amigable">personal_sign</Link> - Firmar un mensaje personal con una cuenta
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Ejecutar un método de contrato inteligente sin crear una transacción">eth_call</Link> - Ejecutar una llamada a método de contrato inteligente

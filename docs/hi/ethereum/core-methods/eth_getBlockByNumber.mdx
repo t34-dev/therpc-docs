@@ -1,0 +1,280 @@
+---
+title: eth_getBlockByNumber - Get Block Data by Height | Ethereum API Methods
+description: Learn how to use the eth_getBlockByNumber method to access detailed Ethereum block information using block numbers or special tags like 'latest'. Includes examples and field explanations.
+keywords: eth_getBlockByNumber, ethereum block, block height, block number, blockchain data, block information, latest block, block details, block header, block transactions
+---
+
+# eth_getBlockByNumber
+
+The `eth_getBlockByNumber` method retrieves detailed information about a block by its number or using special block identifiers such as "latest". This essential method provides complete access to block data including transactions, gas usage, timestamps, and other crucial blockchain metrics, making it a fundamental tool for blockchain applications.
+
+## Use Cases
+
+- Real-time blockchain monitoring and data feeds
+- Transaction verification and confirmation tracking
+- Block explorers and analytics dashboards
+- Gas optimization research and fee analysis
+- Historical data analysis and time-series research
+- Network status evaluation and health metrics
+- Syncing verification and chain validation
+- Smart contract deployment confirmation
+- MEV (Maximal Extractable Value) research
+
+## Method Details
+
+This method allows you to query blocks by their height in the chain or using predefined tags, with options to include full transaction objects or just hashes.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBlockByNumber',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Block number in hex format or tags: latest, earliest, pending, safe, finalized',
+			value: '0x112A880', // Block 18,000,000
+		},
+		{
+			id: 'transaction_detail_flag',
+			required: true,
+			type: 'boolean',
+			desc: 'If true, returns full transaction objects; if false, returns only transaction hashes',
+			value: false,
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'A block object, or null if no block was found',
+			fields: [
+				{
+					id: 'baseFeePerGas',
+					type: 'string',
+					desc: 'Base fee per gas in hexadecimal (post EIP-1559)',
+				},
+				{
+					id: 'difficulty',
+					type: 'string',
+					desc: 'The difficulty for this block in hexadecimal',
+				},
+				{
+					id: 'extraData',
+					type: 'string',
+					desc: 'Extra data field of this block',
+				},
+				{
+					id: 'gasLimit',
+					type: 'string',
+					desc: 'Maximum gas allowed in this block in hexadecimal',
+				},
+				{
+					id: 'gasUsed',
+					type: 'string',
+					desc: 'Total gas used by all transactions in hexadecimal',
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: 'Hash of the block, null if pending',
+				},
+				{
+					id: 'logsBloom',
+					type: 'string',
+					desc: 'Bloom filter for the logs, null if pending',
+				},
+				{
+					id: 'miner',
+					type: 'string',
+					desc: 'Address of the miner/validator',
+				},
+				{
+					id: 'mixHash',
+					type: 'string',
+					desc: '256-bit hash in hexadecimal',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'Hash of the proof-of-work, null if pending',
+				},
+				{
+					id: 'number',
+					type: 'string',
+					desc: 'Block number in hexadecimal, null if pending',
+				},
+				{
+					id: 'parentHash',
+					type: 'string',
+					desc: 'Hash of the parent block',
+				},
+				{
+					id: 'receiptsRoot',
+					type: 'string',
+					desc: 'Root of the receipts trie',
+				},
+				{
+					id: 'sha3Uncles',
+					type: 'string',
+					desc: 'SHA3 of the uncles data',
+				},
+				{
+					id: 'size',
+					type: 'string',
+					desc: 'Size of this block in bytes (hexadecimal)',
+				},
+				{
+					id: 'stateRoot',
+					type: 'string',
+					desc: 'Root of the final state trie',
+				},
+				{
+					id: 'timestamp',
+					type: 'string',
+					desc: 'Unix timestamp when the block was collated',
+				},
+				{
+					id: 'totalDifficulty',
+					type: 'string',
+					desc: 'Total difficulty of the chain until this block',
+				},
+				{
+					id: 'transactions',
+					type: 'array',
+					desc: 'Array of transaction objects or hashes',
+				},
+				{
+					id: 'transactionsRoot',
+					type: 'string',
+					desc: 'Root of the transaction trie',
+				},
+				{
+					id: 'uncles',
+					type: 'array',
+					desc: 'Array of uncle hashes',
+				},
+				{
+					id: 'withdrawals',
+					type: 'array',
+					desc: 'Array of validator withdrawals (post EIP-4895)',
+				},
+				{
+					id: 'withdrawalsRoot',
+					type: 'string',
+					desc: 'Merkle root of withdrawals (post EIP-4895)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [
+		fields?.blockNumber,
+		['1', 'true', 'TRUE'].includes(fields?.transaction_detail_flag) ? true : false,
+	]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"baseFeePerGas": "0x41a2b3591",
+		"difficulty": "0x0",
+		"extraData": "0x556e697377617020426c6f636b20231242353045",
+		"gasLimit": "0x1c9c380",
+		"gasUsed": "0x189b1f1",
+		"hash": "0x4f32106f6ac5b44248aeda10c3e718f1048ddc274629cd1897a0ff1f7926c41e",
+		"logsBloom": "0xe54b0921498ad482b83...[truncated]",
+		"miner": "0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990",
+		"mixHash": "0x51c1b337d7ec2023e7bfd47907a1ee256668e46fb9feb0007c62f9bc2a8a19a7",
+		"nonce": "0x0000000000000000",
+		"number": "0x112a880",
+		"parentHash": "0xeea8dce30e2d7c2a7ffe35b6fc2c60782f59a123ff2812e85bf4a49839c6d5a2",
+		"receiptsRoot": "0x14a87619e588c1ef9f8c69fd8e3dff2a49b2c73f19871a74a7e1d97d67d00416",
+		"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+		"size": "0x1284d",
+		"stateRoot": "0xb87823a3aea0dd94ffe84481962c8f988e3c2ffac98a9af2b81c1c3e4fcc6dc0",
+		"timestamp": "0x65f0d46e",
+		"totalDifficulty": "0xc70d815d562d3cfa955",
+		"transactions": [
+			"0x5a8b22ab3e70ee6ee4b15b48b1c88d8c01806a677ab8938c68dc4323cf51ae7a",
+			"0x8d2fcaa1aef4f4f19aa35bf9d91b34e24902efcaf670953a0bf7e0a6dc585e53"
+			// ... additional transaction hashes
+		],
+		"transactionsRoot": "0x39f9c7a211b008becd35bfbceaf186d564fcb737a9c026f8af7b5d89a8989143",
+		"uncles": [],
+		"withdrawals": [
+			{
+				"index": "0x57ca86",
+				"validatorIndex": "0x17384",
+				"address": "0xb9d7934878b5fb9610b3fe8a5e441e8fad7e293f",
+				"amount": "0x12a05f200"
+			}
+			// ... additional withdrawals
+		],
+		"withdrawalsRoot": "0x36a75a6993b676f8196354ed14e3c77167b9ae823211706b30aa125c3a5dac28"
+	}
+}
+```
+
+### Block Tag Meanings
+
+- `latest`: The most recently mined block (most common usage)
+- `earliest`: Genesis block (block 0)
+- `pending`: Currently pending block (transactions in the mempool)
+- `safe`: Latest block considered safe by network (finality in progress)
+- `finalized`: Latest block that has achieved finality (post-Merge)
+
+### Transaction Detail Flag
+
+The second parameter determines how transaction data is returned:
+- `false`: Only transaction hashes are returned (more efficient for block scanning)
+- `true`: Complete transaction objects are returned (useful for detailed transaction analysis)
+
+### Key Block Fields Explained
+
+- **number**: The block number (height) in the chain
+- **timestamp**: Unix timestamp when the block was created (seconds since Jan 1, 1970)
+- **gasUsed/gasLimit**: Actual gas consumed vs. maximum allowed in this block
+- **baseFeePerGas**: Base fee per gas unit introduced in EIP-1559
+- **difficulty**: Always 0 after The Merge to proof-of-stake
+- **miner**: Address that received the block reward (validator in PoS)
+- **withdrawals**: Validator withdrawals available post-Shanghai upgrade
+
+### Practical Example
+
+```javascript
+// Example of tracking block times and transaction volumes
+async function analyzeNetworkActivity() {
+	const latestBlock = await provider.send('eth_getBlockByNumber', ['latest', false]);
+	const prevBlockNum = (parseInt(latestBlock.number, 16) - 100).toString(16);
+	const prevBlock = await provider.send('eth_getBlockByNumber', [`0x${prevBlockNum}`, false]);
+
+	// Calculate time between blocks
+	const latestTime = parseInt(latestBlock.timestamp, 16);
+	const prevTime = parseInt(prevBlock.timestamp, 16);
+	const timespan = latestTime - prevTime;
+	const avgBlockTime = timespan / 100;
+
+	// Transaction volume
+	const txCount = latestBlock.transactions.length;
+	const gasUsed = parseInt(latestBlock.gasUsed, 16);
+
+	console.log(`Average block time: ${avgBlockTime.toFixed(2)} seconds`);
+	console.log(`Latest block transactions: ${txCount}`);
+	console.log(`Gas used: ${gasUsed.toLocaleString()} units`);
+}
+```
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Get block by hash">eth_getBlockByHash</Link> - Retrieve block information using the block hash
+- <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Get latest block number">eth_blockNumber</Link> - Returns the number of the most recent block
+- <Link to="/docs/ethereum/core-methods/eth_getBlockReceipts" title="Get all receipts in a block">eth_getBlockReceipts</Link> - Returns all transaction receipts for a block
+- <Link to="/docs/ethereum/core-methods/eth_getBlockTransactionCountByNumber" title="Count transactions in block">eth_getBlockTransactionCountByNumber</Link> - Returns the number of transactions in a block

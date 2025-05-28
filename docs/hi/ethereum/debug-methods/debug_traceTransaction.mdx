@@ -1,0 +1,319 @@
+---
+title: debug_traceTransaction - Replay and Analyze Transaction Execution in Detail | Ethereum API Methods
+description: Learn how to use the debug_traceTransaction method to get opcode-level execution details for any historical transaction, with exact reproduction of the original blockchain state for accurate debugging and analysis.
+keywords: debug_traceTransaction, ethereum transaction debugging, historical transaction trace, opcode-level analysis, transaction replay, evm execution trace, transaction debugging, smart contract analysis, transaction flow, blockchain forensics, gas analysis, stack trace, execution snapshot, transaction trace, opcode execution, evm debugging, transaction investigation, failed transaction analysis, smart contract troubleshooting, transaction reversal cause, execution trace analysis, call tree visualization, gas profiling, security audit, transaction state inspection, execution path analysis, evm state, transaction gas usage, contract interaction, transaction introspection, internal calls, memory operations, stack operations, storage changes, execution context
+---
+
+# debug_traceTransaction
+
+The `debug_traceTransaction` method recreates the exact execution state of a historical transaction, providing detailed opcode-level trace information. It reproduces the original state at the specific block where the transaction was executed, allowing for complete analysis of transaction execution flow, stack operations, memory changes, storage modifications, and gas consumption.
+
+Unlike other transaction retrieval methods that only provide basic transaction data, `debug_traceTransaction` offers introspection into the internal execution of the EVM during transaction processing.
+
+## Use Cases
+
+- **Failed Transaction Analysis**: Determine exactly why a transaction failed by examining the precise instruction that caused the revert and the EVM state at that point
+- **Smart Contract Debugging**: Investigate unexpected behavior in contract execution by examining the complete execution pathway and state changes
+- **Gas Usage Optimization**: Identify expensive operations and inefficient code patterns by analyzing gas consumption per opcode
+- **Security Auditing**: Detect potential vulnerabilities by analyzing the exact execution flow and state transitions during transaction processing
+- **Transaction Verification**: Confirm that a contract behaved as expected for a specific transaction by reviewing all operations performed
+- **Contract State Inspection**: View the exact changes made to contract storage during transaction execution
+- **Forensic Investigation**: Reconstruct transaction execution for investigating security incidents or analyzing historical events
+- **Call Graph Analysis**: Visualize the execution flow between contracts including internal function calls and message values
+- **Finding State Inconsistencies**: Identify unexpected state changes during complex contract interactions
+- **Recreating Execution Context**: Reproduce the exact blockchain environment that existed when the transaction executed
+
+## Method Details
+
+This method traces the transaction identified by its hash, providing opcode-level execution details.
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    "method": "debug_traceTransaction",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'transactionHash',
+      required: true,
+      type: 'string',
+      desc: "Hash of the transaction to trace",
+      value: "0xcd718a69d478340dc28fdf6bf8056374a52dc95841b44083163ced8dfe29310c"
+    },
+    {
+      id: 'options',
+      type: 'object',
+      desc: "Trace options",
+      fields: [
+        {
+          id: 'disableStorage',
+          type: 'boolean',
+          desc: "Setting this to true disables storage capture",
+          value: false
+        },
+        {
+          id: 'disableMemory',
+          type: 'boolean',
+          desc: "Setting this to true disables memory capture",
+          value: false
+        },
+        {
+          id: 'disableStack',
+          type: 'boolean',
+          desc: "Setting this to true disables stack capture",
+          value: false
+        },
+        {
+          id: 'tracer',
+          type: 'string',
+          desc: "Use a custom tracer (available: callTracer, prestateTracer, etc.)",
+          value: "callTracer"
+        },
+        {
+          id: 'timeout',
+          type: 'string',
+          desc: "Overrides the default timeout of 5 seconds for JavaScript-based tracing",
+          value: "10s"
+        }
+      ]
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'object',
+      desc: "The trace result with execution details",
+      fields: [
+        {
+          id: 'gas',
+          type: 'integer',
+          desc: "Gas used by the transaction"
+        },
+        {
+          id: 'failed',
+          type: 'boolean',
+          desc: "Whether the transaction failed"
+        },
+        {
+          id: 'returnValue',
+          type: 'string',
+          desc: "The return value of the transaction"
+        },
+        {
+          id: 'structLogs',
+          type: 'array',
+          desc: "Array of structured EVM operation logs",
+          fields: [
+            {
+              id: 'pc',
+              type: 'integer',
+              desc: "Program counter position"
+            },
+            {
+              id: 'op',
+              type: 'string',
+              desc: "The executed opcode"
+            },
+            {
+              id: 'gas',
+              type: 'integer',
+              desc: "Remaining gas"
+            },
+            {
+              id: 'gasCost',
+              type: 'integer',
+              desc: "Gas cost for this operation"
+            },
+            {
+              id: 'depth',
+              type: 'integer',
+              desc: "Call depth"
+            },
+            {
+              id: 'memory',
+              type: 'array',
+              desc: "EVM memory contents (if not disabled)"
+            },
+            {
+              id: 'stack',
+              type: 'array',
+              desc: "EVM stack contents (if not disabled)"
+            },
+            {
+              id: 'storage',
+              type: 'object',
+              desc: "Storage changes (if not disabled)"
+            }
+          ]
+        }
+      ]
+    }
+  ]}
+  getParams={(fields) => {
+    const params = [
+      fields?.transactionHash || null
+    ];
+
+    const options = {};
+
+    if (fields?.options?.disableStorage !== undefined) {
+      options.disableStorage = fields.options.disableStorage;
+    }
+
+    if (fields?.options?.disableMemory !== undefined) {
+      options.disableMemory = fields.options.disableMemory;
+    }
+
+    if (fields?.options?.disableStack !== undefined) {
+      options.disableStack = fields.options.disableStack;
+    }
+
+    if (fields?.options?.tracer) {
+      options.tracer = fields.options.tracer;
+    }
+
+    if (fields?.options?.timeout) {
+      options.timeout = fields.options.timeout;
+    }
+
+    if (Object.keys(options).length > 0) {
+      params.push(options);
+    } else {
+      params.push(null);
+    }
+
+    return params;
+
+}}
+/>
+
+### Response Example (Default Tracer)
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"gas": 21000,
+		"failed": false,
+		"returnValue": "",
+		"structLogs": [
+			{
+				"pc": 0,
+				"op": "PUSH1",
+				"gas": 4677951,
+				"gasCost": 3,
+				"depth": 1,
+				"stack": [],
+				"memory": [],
+				"storage": {}
+			},
+			{
+				"pc": 2,
+				"op": "MSTORE",
+				"gas": 4677948,
+				"gasCost": 12,
+				"depth": 1,
+				"stack": ["0x60", "0x40"],
+				"memory": [
+					"0000000000000000000000000000000000000000000000000000000000000000",
+					"0000000000000000000000000000000000000000000000000000000000000000"
+				],
+				"storage": {}
+			}
+			// Many more opcode logs...
+		]
+	}
+}
+```
+
+### Response Example (callTracer)
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "from": "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
+    "gas": "0x2d48c",
+    "gasUsed": "0x594c",
+    "to": "0x55d398326f99059ff775485246999027b3197955",
+    "input": "0xa9059cbb000000000000000000000000b5cfcb4b073ebcda22f57097dbd0e0be5731ca5c00000000000000000000000000000000000000000000000011c37937e08000",
+    "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "calls": [
+      {
+        "type": "CALL",
+        "from": "0x55d398326f99059ff775485246999027b3197955",
+        "to": "0xb5cfcb4b073ebcda22f57097dbd0e0be5731ca5c",
+        "gas": "0x1e25b",
+        "gasUsed": "0x30b",
+        "input": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "output": "0x"
+      }
+    ],
+    "value": "0x0"
+  }
+}
+```
+
+## Common Issues Identified Through Tracing
+
+- Out of gas errors
+- Stack underflows or overflows
+- Invalid opcode execution
+- Failed assertions or require conditions
+- Unexpected reverts
+- Memory allocation issues
+- Unexpected contract state
+- Transfer failures
+- Access control issues
+- Logic errors
+
+## Available Tracers
+
+1. **Default Tracer**: Returns structured logs for each opcode
+2. **callTracer**: Shows call graph between contracts
+3. **prestateTracer**: Shows state before transaction execution
+4. **4byteTracer**: Collects function selectors
+5. **noopTracer**: Discards all information
+6. **Custom JavaScript Tracers**: Create your own tracer logic
+
+## Trace Options
+
+You can tune performance and output by configuring these options:
+
+- Disable stack, memory, or storage capturing for faster execution
+- Use custom timeout for complex transactions
+- Apply custom tracer configurations for specific analysis needs
+
+## Performance Considerations
+
+- Tracing complex transactions can be resource-intensive and slow
+- Large contracts with many operations may produce very large response payloads
+- Using options to disable certain captures (memory, storage, stack) can improve performance
+- Consider using a specific custom tracer for targeted analysis rather than capturing everything
+- Tracing transactions that create contracts with large initialization code can be particularly intensive
+- Transactions with many internal calls or high call depth require more resources to trace
+
+## Important Notes
+
+- This method requires debug APIs to be enabled on the node (usually with `--http.api=debug` flag)
+- `debug_traceTransaction` provides more detailed information than `trace_transaction`
+- For accurate results, you need access to the historical state at the block where the transaction occurred
+- Archive nodes are required for tracing older transactions
+- Some clients may not support all tracer types
+- Custom JavaScript tracers are only available on Geth and some Geth-compatible clients
+- This method will replay the transaction exactly as it occurred, including any side effects
+- The trace does not include events/logs (these must be queried separately)
+- Some operations like `BLOCKHASH` have their results from the original execution cached and reused
+- Using this method on transactions in very old blocks may result in state inconsistencies on some nodes
+
+## See also
+
+- [debug_traceCall](/docs/en/ethereum/debug-methods/debug_traceCall "Execute a call without generating a transaction and return the trace data") - Execute a call without generating a transaction and return the trace data
+- [debug_traceCallMany](/docs/en/ethereum/debug-methods/debug_traceCallMany "Execute multiple calls without generating transactions and return trace data") - Execute multiple calls without generating transactions and return trace data
+- [trace_transaction](/docs/en/ethereum/trace-methods/trace_transaction "Return trace data for a specific transaction") - Return trace data for a specific transaction
+- [eth_getTransactionByHash](/docs/en/ethereum/json-rpc-methods/eth_getTransactionByHash "Retrieve basic transaction information by hash") - Retrieve basic transaction information by hash
+- [eth_getTransactionReceipt](/docs/en/ethereum/json-rpc-methods/eth_getTransactionReceipt "Get transaction receipt information by hash") - Get transaction receipt information by hash

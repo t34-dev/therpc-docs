@@ -1,0 +1,133 @@
+---
+title: Ethereum ब्लॉकचेन विकास के लिए Python टूल्स | Web3.py और Eth-brownie गाइड
+description: विस्तृत कोड उदाहरण, स्मार्ट कॉन्ट्रैक्ट एकीकरण और असिंक्रोनस पैटर्न के साथ Web3.py और Eth-brownie सहित Ethereum विकास के लिए Python लाइब्रेरीज का व्यापक गाइड
+keywords: python ethereum, web3.py, eth-brownie, ethereum python, python blockchain, python web3, python dapp, ethereum async python, smart contracts python, blockchain python, python testing ethereum, python type hints web3
+---
+
+# Python टूल्स
+
+Python, Ethereum विकास के लिए मजबूत लाइब्रेरीज प्रदान करता है, जो सरल स्क्रिप्ट और जटिल अनुप्रयोगों दोनों के लिए उपयुक्त हैं।
+
+<PayAttention category="Python" />
+
+## # Web3.py
+
+आधिकारिक Python Ethereum लाइब्रेरी।
+
+```python
+from web3 import Web3
+from eth_account import Account
+import json
+
+# Initialize web3
+web3 = Web3(Web3.HTTPProvider('YOUR_ETHEREUM_NODE_URL'))
+
+# Get balance
+def get_balance(address):
+    balance_wei = web3.eth.get_balance(address)
+    balance_eth = web3.from_wei(balance_wei, 'ether')
+    return balance_eth
+
+# Send transaction
+def send_transaction(private_key, to_address, value_eth):
+    account = Account.from_key(private_key)
+    transaction = {
+        'nonce': web3.eth.get_transaction_count(account.address),
+        'to': to_address,
+        'value': web3.to_wei(value_eth, 'ether'),
+        'gas': 21000,
+        'gasPrice': web3.eth.gas_price
+    }
+    signed_txn = account.sign_transaction(transaction)
+    tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
+    return web3.eth.wait_for_transaction_receipt(tx_hash)
+```
+
+- **GitHub**: <Link to="https://github.com/ethereum/web3.py" target="_blank" absolute>web3.py</Link>
+- **दस्तावेज़ीकरण**: <Link to="https://web3py.readthedocs.io/" target="_blank" absolute>web3py.readthedocs.io</Link>
+- **विशेषताएँ**:
+  - पूर्ण Ethereum API समर्थन
+  - सिंक और एसिंक इंटरफेस
+  - टाइप हिंट्स
+  - मिडलवेयर समर्थन
+  - ENS समर्थन
+
+## # Eth-brownie
+
+Ethereum विकास के लिए Python फ्रेमवर्क।
+
+```python
+from brownie import *
+
+# Deploy contract
+def deploy_contract():
+    account = accounts[0]
+    return MyContract.deploy({'from': account})
+
+# Interact with contract
+def interact_with_contract(contract_address):
+    contract = MyContract.at(contract_address)
+    return contract.myFunction({'from': accounts[0]})
+
+# Test contract
+def test_contract(Contract):
+    account = accounts[0]
+    contract = account.deploy(Contract)
+    assert contract.myFunction() == expected_value
+```
+
+- **GitHub**: <Link to="https://github.com/eth-brownie/brownie" target="_blank" absolute>eth-brownie</Link>
+- **दस्तावेज़ीकरण**: <Link to="https://eth-brownie.readthedocs.io/" target="_blank" absolute>eth-brownie.readthedocs.io</Link>
+- **विशेषताएँ**:
+  - कॉन्ट्रैक्ट टेस्टिंग फ्रेमवर्क
+  - डिप्लॉयमेंट प्रबंधन
+  - इंटरेक्टिव कंसोल
+  - नेटवर्क प्रबंधन
+  - Python REPL
+
+## # Async समर्थन
+
+Web3.py बेहतर प्रदर्शन के लिए एसिंक समर्थन प्रदान करता है:
+
+```python
+from web3.auto import w3
+import asyncio
+
+async def get_latest_blocks(count):
+    latest = await w3.eth.get_block_number()
+    blocks = []
+    for i in range(count):
+        block = await w3.eth.get_block(latest - i)
+        blocks.append(block)
+    return blocks
+
+# Usage
+blocks = asyncio.run(get_latest_blocks(10))
+```
+
+## # टाइप हिंट्स
+
+Web3.py में बेहतर IDE समर्थन के लिए व्यापक टाइप हिंट्स शामिल हैं:
+
+```python
+from web3.types import TxParams, Wei, Address
+from typing import Optional
+
+def prepare_transaction(
+    to: Address,
+    value: Wei,
+    gas_price: Optional[Wei] = None
+) -> TxParams:
+    return {
+        'to': to,
+        'value': value,
+        'gasPrice': gas_price or web3.eth.gas_price
+    }
+```
+
+### यह भी देखें
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">टूल्स अवलोकन</Link> - सभी उपलब्ध SDK और टूल्स
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">प्रमाणीकरण गाइड</Link> - विस्तृत प्रमाणीकरण जानकारी
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">मूल संचालन गाइड</Link> - मूलभूत संचालन
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">उपलब्ध विधियां</Link> - API क्षमताओं का अन्वेषण करें

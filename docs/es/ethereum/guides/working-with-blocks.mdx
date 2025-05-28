@@ -1,0 +1,47 @@
+---
+title: Trabajando con Bloques | Guía Fundamental de Desarrollo en Ethereum
+description: Guía completa para trabajar eficazmente con bloques de Ethereum, incluyendo estructura de bloques, métodos de recuperación, técnicas de monitoreo, manejo de confirmaciones y mejores prácticas de implementación.
+keywords: bloques ethereum, recuperación de bloques, monitoreo de bloques, desarrollo ethereum, transacción ethereum, estructura de bloques, datos blockchain, api ethereum, finalidad de bloques, propiedades de bloques
+---
+
+# Trabajando con Bloques
+
+Entender cómo trabajar con bloques es fundamental para el desarrollo en Ethereum. Esta guía cubre conceptos esenciales e implementaciones prácticas para el manejo de bloques.
+
+## Conceptos Fundamentales
+
+- Estructura y propiedades de bloques
+- Métodos de recuperación de bloques
+- Monitoreo de bloques y manejo de eventos
+- Conteo de confirmaciones
+- Finalidad de bloques
+
+## Recuperación de Bloques
+
+Los métodos más comunes para recuperar datos de bloques son:
+
+```javascript
+// Obtener número del último bloque
+const blockNumber = await web3.eth.getBlockNumber();
+
+// Obtener bloque por número
+const block = await web3.eth.getBlock(blockNumber);
+
+// Obtener bloque con detalles completos de transacciones
+const blockWithTx = await web3.eth.getBlock(blockNumber, true);
+```
+
+## Mejores Prácticas
+
+1. Siempre manejar retrasos y tiempos de espera de red
+2. Implementar manejo adecuado de errores
+3. Considerar reorganizaciones de bloques
+4. Almacenar en caché datos de bloques cuando sea apropiado
+5. Monitorear precios de gas y espacio en bloques
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Método API para obtener el número del último bloque">eth_blockNumber</Link> - Obtener el número del último bloque
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Método API para recuperar información de bloque por número">eth_getBlockByNumber</Link> - Recuperar información de bloque por número
+- <Link to="/docs/ethereum/guides/block-confirmations" title="Entendiendo la finalidad de transacciones y requisitos de confirmación">Guía de Confirmaciones de Bloques</Link> - Entendiendo la finalidad de transacciones
+- <Link to="/docs/ethereum/guides/syncing-strategies" title="Aprende sobre métodos de sincronización de blockchain">Estrategias de Sincronización</Link> - Métodos de sincronización de blockchain

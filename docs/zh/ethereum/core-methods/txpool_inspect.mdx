@@ -1,0 +1,125 @@
+---
+title: txpool_inspect - 获取交易池摘要 | 以太坊API方法
+description: 学习如何使用txpool_inspect方法获取以太坊节点内存池中待处理和排队交易的可读概览，用于监控和诊断。
+keywords: txpool_inspect, 交易池, 待处理交易, 排队交易, 内存池, 以太坊txpool, geth, 交易摘要, 以太坊内存池, 交易检查, 区块链交易, 内存池概览, 待处理交易分析, 交易队列, gas价格监控, nonce跟踪, 以太坊交易检查
+---
+
+# txpool_inspect
+
+`txpool_inspect`方法返回交易池中所有待处理和排队交易的文本摘要。此方法主要由Geth客户端支持，提供等待被打包进区块的交易的可读概览，而不包含完整的交易详情。
+
+## 使用场景
+
+- 监控交易池状态以进行节点健康检查
+- 调试钱包和应用程序中的卡住交易
+- Gas价格分析以优化交易提交
+- 网络拥堵监控和可视化
+- 交易替换验证（检查加速是否有效）
+- MEV（矿工可提取价值）研究和分析
+- 基础设施配置中的节点操作诊断
+- 识别高网络活动期间的交易模式
+- 监控特定地址的交易池
+- 观察可能阻止交易确认的nonce间隔
+
+## 方法详情
+
+此方法不需要参数，并返回交易池的结构化摘要。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'txpool_inspect',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	disabled={true}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: '包含待处理和排队交易摘要的对象',
+			fields: [
+				{
+					id: 'pending',
+					type: 'object',
+					desc: '按发送者地址和nonce分组的待处理交易映射',
+				},
+				{
+					id: 'queued',
+					type: 'object',
+					desc: '按发送者地址和nonce分组的排队交易映射',
+				},
+			],
+		},
+	]}
+	getParams={() => []}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"pending": {
+			"0x0216d5032f356960cd3749c31ab34eeff21b3395": {
+				"806": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984: 0 wei + 21000 gas × 8000000000 wei"
+			},
+			"0x0239769a1adf4def9f1b1e5e2ab4d89c3cc5ba59": {
+				"4": "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2: 0 wei + 400000 gas × 10000000000 wei"
+			}
+		},
+		"queued": {
+			"0x00e4d0b50e4294f9b9eb2381b0ef33745f5a0a69": {
+				"7": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2: 0 wei + 21000 gas × 24200000000 wei"
+			},
+			"0x0216d5032f356960cd3749c31ab34eeff21b3395": {
+				"807": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D: 0 wei + 189000 gas × 3000000000 wei"
+			}
+		}
+	}
+}
+```
+
+### 理解响应
+
+响应的结构如下：
+
+1. **待处理交易**：准备被包含在下一个区块中的交易。
+
+- 按发送者地址和nonce组织
+- 每个条目显示：`接收者地址: 价值 + gasLimit × gasPrice`
+
+2. **排队交易**：尚未能执行的交易（例如，因为nonce间隔）。
+
+- 与待处理交易结构相同
+- 通常具有未来的nonce或其他执行限制
+
+### 交易状态类别
+
+- **待处理**：有资格被包含在下一个区块中的交易
+- 具有有效的nonce（等于发送者的当前nonce）
+- 满足所有其他有效性标准
+
+- **排队**：尚未有资格执行的交易
+- 可能有未来的nonce（高于发送者的当前nonce + 待处理计数）
+- 可能正在等待来自同一发送者的其他交易
+- 可能有其他限制导致无法立即执行
+
+### 重要说明
+
+- 此方法主要由Geth客户端支持
+- 并非所有以太坊客户端实现都支持txpool命名空间
+- 在网络高度拥堵期间，响应可能非常大
+- 文本格式设计用于人类可读性，而非程序处理
+- 要获取更详细的交易数据，请考虑使用`txpool_content`
+- 尽管有效，待处理交易可能不会立即包含在区块中
+- 交易池是动态的，随着每个新区块和传入交易而变化
+- 某些客户端可能会限制响应中显示的交易数量
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/txpool_status" title="获取内存池中的交易计数">txpool_status</Link> - 返回池中的交易数量
+- <Link to="/docs/ethereum/core-methods/txpool_content" title="获取内存池中所有交易的详细信息">txpool_content</Link> - 返回池中的完整交易数据

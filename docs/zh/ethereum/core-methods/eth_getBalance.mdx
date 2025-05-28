@@ -1,0 +1,107 @@
+---
+title: eth_getBalance - 检查账户余额 | 以太坊 API 方法
+description: 学习如何使用 eth_getBalance 方法从以太坊区块链检索账户余额。包括示例和最佳实践。
+keywords: eth_getBalance, 以太坊余额, 账户余额, wei 余额, ETH 余额, 钱包余额, 加密货币余额, 以太坊地址余额, 区块链余额
+---
+
+# eth_getBalance
+
+`eth_getBalance` 方法以 wei 为单位返回指定以太坊地址的余额。这个基本方法是钱包应用程序、财务仪表板和任何需要显示或处理用户账户余额的 DApp 的基础。
+
+## 使用场景
+
+- 钱包余额监控和通知
+- 支付验证和确认
+- 账户分析和投资组合跟踪
+- DApp 余额显示和交互式 UI
+- 提交前的交易验证
+- 财务报告和税务计算
+- 特定区块的历史余额分析
+- 智能合约余额监控
+
+## 方法详情
+
+该方法查询特定区块时指定以太坊地址的余额，允许检查当前和历史余额。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBalance',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: '要检查余额的地址',
+			value: '0xF977814e90dA44bFA03b6295A0616a897441aceC', // Binance 8 Hot Wallet
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '区块号或区块标签',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '以 wei 为单位的账户余额（十六进制）',
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.blockNumber || null]}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x1B1AE4D6E2EF500000" // 500 ETH 以 wei 为单位
+}
+```
+
+### 理解结果
+
+余额以 wei（以太的最小单位）返回，格式为十六进制字符串。要转换为以太币：
+
+1. 将十六进制转换为十进制：`parseInt("0x1B1AE4D6E2EF500000", 16)` = 500000000000000000000
+2. 除以 10^18：`500000000000000000000 / 1e18` = 500 ETH
+
+对于用户界面，始终以可读格式（ETH）显示余额，而不是原始的 wei 值。
+
+### 区块标签选项
+
+`blockNumber` 参数接受以下特殊标签：
+- `latest`：最近挖出的区块（当前余额）
+- `earliest`：创世区块（初始状态）
+- `pending`：待处理状态/交易
+- `safe`：最新的"安全"头区块（仅以太坊）
+- `finalized`：最新的"最终确定"区块（仅以太坊）
+
+### 常见用例示例
+
+```javascript
+// 检查多个账户余额的示例
+const addresses = [
+	'0xF977814e90dA44bFA03b6295A0616a897441aceC', // Binance 热钱包
+	'0x42cC527cD31Eb1479ae27Cb4A5eec6a023Cd2E', // 示例地址
+];
+
+for (const address of addresses) {
+	const balance = await provider.send('eth_getBalance', [address, 'latest']);
+	console.log(`Balance of ${address}: ${parseInt(balance, 16) / 1e18} ETH`);
+}
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getCode" title="检查地址是否为合约">eth_getCode</Link> - 返回存储在特定地址的代码
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="获取账户交易计数">eth_getTransactionCount</Link> - 返回从一个地址发送的交易数量
+- <Link to="/docs/ethereum/core-methods/eth_call" title="调用合约函数">eth_call</Link> - 执行调用以获取代币余额或其他信息
+- <Link to="/docs/ethereum/core-methods/eth_getStorageAt" title="访问合约存储">eth_getStorageAt</Link> - 返回合约存储中的值

@@ -1,0 +1,141 @@
+---
+title: FAQ - अक्सर पूछे जाने वाले प्रश्न | Ethereum API समस्या निवारण
+description: TheRPC Ethereum API उपयोग के बारे में सामान्य प्रश्नों का व्यापक गाइड, जिसमें प्रमाणीकरण, दर सीमाओं, त्रुटि हैंडलिंग, प्रदर्शन अनुकूलन और सर्वोत्तम कार्यान्वयन प्रथाओं का उत्तर शामिल है
+keywords: therpc faq, api प्रश्न, ब्लॉकचेन api faq, ethereum api सहायता, json rpc समस्या निवारण, ethereum विकास प्रश्न, ब्लॉकचेन api त्रुटियां, ethereum api प्रदर्शन, web3 सर्वोत्तम प्रथाएँ, स्मार्ट कॉन्ट्रैक्ट इंटरैक्शन
+---
+
+# अक्सर पूछे जाने वाले प्रश्न
+
+## # प्रमाणीकरण और पहुंच
+
+- #### मैं API कुंजी कैसे प्राप्त करूं?
+
+  TheRPC.io पर साइन अप करें और अपनी API कुंजी जनरेट करने के लिए डैशबोर्ड पर नेविगेट करें। प्रत्येक कुंजी की अपनी दर सीमाएँ और अनुमतियां होती हैं।
+
+- #### क्या मैं कई API कुंजियों का उपयोग कर सकता हूं?
+
+  हां, आप विभिन्न अनुप्रयोगों या पर्यावरणों के लिए कई API कुंजियां बना सकते हैं। यह उपयोग की निगरानी और सुरक्षा बनाए रखने में मदद करता है।
+
+- #### यदि मेरी API कुंजी समझौता कर ली जाती है तो क्या होगा?
+  तुरंत अपने डैशबोर्ड से समझौता की गई कुंजी को रद्द करें और एक नई जनरेट करें। आपकी पुरानी कुंजी तुरंत काम करना बंद कर देगी।
+
+## # API उपयोग
+
+### HTTP और WebSocket एंडपॉइंट के बीच क्या अंतर है?
+
+- **HTTP**: एकल अनुरोधों और सरल एकीकरणों के लिए सबसे अच्छा है। <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Method to get the current block number">eth_blockNumber</Link> या <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Method to retrieve an account's ETH balance">eth_getBalance</Link> जैसे मेथड्स का उपयोग करें
+- **WebSocket**: <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Method to subscribe to real-time blockchain events">eth_subscribe</Link> जैसे रीयल-टाइम डेटा और इवेंट्स के लिए सदस्यताओं के लिए आदर्श है
+
+### मैं दर सीमाओं को कैसे संभालूं?
+
+जब आपको दर सीमा त्रुटियां मिलती हैं तो एक्सपोनेंशियल बैकऑफ लागू करें। यदि आप लगातार सीमाओं से टकराते हैं तो अपनी योजना को अपग्रेड करने पर विचार करें।
+
+### अनुशंसित टाइमआउट सेटिंग्स क्या हैं?
+
+हम अनुशंसा करते हैं:
+
+- HTTP अनुरोध: 30-सेकंड टाइमआउट
+- WebSocket कनेक्शन: 60-सेकंड पिंग/पोंग अंतराल
+- सदस्यता संचालन: 30-सेकंड टाइमआउट
+
+## # त्रुटि हैंडलिंग
+
+### सामान्य त्रुटि कोड
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32601,
+		"message": "Method not found"
+	},
+	"id": 1
+}
+```
+
+- `-32700`: पार्स त्रुटि
+- `-32600`: अमान्य अनुरोध
+- `-32601`: मेथड नहीं मिला
+- `-32602`: अमान्य पैरामीटर्स
+- `-32603`: आंतरिक त्रुटि
+- `-32000 से -32099`: सर्वर त्रुटि
+
+### त्रुटि हैंडलिंग के लिए सर्वोत्तम प्रथाएँ
+
+1. हमेशा प्रतिक्रिया में `error` फ़ील्ड की जांच करें
+2. बैकऑफ के साथ उचित पुनर्प्रयास लॉजिक लागू करें
+3. डीबगिंग के लिए विस्तृत त्रुटि जानकारी लॉग करें
+4. नेटवर्क टाइमआउट को उचित रूप से संभालें
+
+## # तकनीकी प्रश्न
+
+### मैं लंबित लेनदेन को कैसे ट्रैक करूं?
+
+लेनदेन स्थिति के लिए पोल करने के लिए <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Method to get transaction receipt and confirmation status">eth_getTransactionReceipt</Link> का उपयोग करें। रीयल-टाइम अपडेट के लिए, WebSocket के माध्यम से <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Method to subscribe to real-time blockchain events">eth_subscribe</Link> का उपयोग करके लंबित लेनदेन की सदस्यता लें।
+
+```javascript
+// Example of transaction tracking
+const receipt = await web3.eth.getTransactionReceipt(txHash);
+if (receipt) {
+	console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
+}
+```
+
+### मैं यह कैसे सुनिश्चित कर सकता हूं कि मेरे अनुरोध क्रम में संसाधित किए जाते हैं?
+
+लेनदेन के लिए `nonce` पैरामीटर का उपयोग करें और क्रमिक प्रसंस्करण के लिए अपने अनुप्रयोग में एक कतार बनाए रखें। आप <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="Method to get the transaction count (nonce) for an account">eth_getTransactionCount</Link> का उपयोग करके वर्तमान नोंस प्राप्त कर सकते हैं।
+
+### चेन पुनर्गठन को संभालने का अनुशंसित तरीका क्या है?
+
+1. <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Method to get the current block number">eth_blockNumber</Link> का उपयोग करके पर्याप्त ब्लॉक पुष्टिकरण के लिए प्रतीक्षा करें
+2. <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Method to subscribe to real-time blockchain events">eth_subscribe</Link> के माध्यम से `newHeads` इवेंट्स सुनें
+3. <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Method to get block information by block number">eth_getBlockByNumber</Link> का उपयोग करके लेनदेन अंतिमता सत्यापित करें
+
+## # प्रदर्शन
+
+### मैं अपने API उपयोग का अनुकूलन कैसे कर सकता हूं?
+
+1. जब संभव हो संबंधित अनुरोधों को बैच करें
+2. रीयल-टाइम डेटा के लिए <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Method to subscribe to real-time blockchain events">eth_subscribe</Link> के माध्यम से WebSocket का उपयोग करें
+3. उचित कैशिंग लागू करें
+4. उपयुक्त पोलिंग अंतराल चुनें
+
+### उच्च-थ्रूपुट अनुप्रयोगों के लिए सर्वोत्तम प्रथाएँ क्या हैं?
+
+1. कनेक्शन पूलिंग का उपयोग करें
+2. अनुरोध कतार लागू करें
+3. दर सीमाओं की निगरानी करें
+4. समर्पित इंफ्रास्ट्रक्चर पर विचार करें
+
+## # नेटवर्क विशिष्ट
+
+### मैं नेटवर्क के बीच कैसे स्विच करूं?
+
+बस उसी API कुंजी और अनुरोध प्रारूप को बनाए रखते हुए प्रत्येक नेटवर्क के लिए उपयुक्त एंडपॉइंट का उपयोग करें। आप <Link to="/docs/ethereum/core-methods/net_version" title="Method to get the current network ID">net_version</Link> का उपयोग करके नेटवर्क को सत्यापित कर सकते हैं।
+
+### क्या मैं विभिन्न नेटवर्क के लिए एक ही कोड का उपयोग कर सकता हूं?
+
+हां, हमारा API नेटवर्क में लगातार इंटरफेस प्रदान करता है। बस विभिन्न नेटवर्क के लिए एंडपॉइंट URL अपडेट करें। आप <Link to="/docs/ethereum/core-methods/eth_chainId" title="Method to get the current chain ID">eth_chainId</Link> का उपयोग करके चेन आईडी की जांच कर सकते हैं।
+
+## # विकास और एकीकरण
+
+### मुझे कौन सी Web3 लाइब्रेरी का उपयोग करना चाहिए?
+
+- **JavaScript**: web3.js या ethers.js
+- **Python**: web3.py
+- **Java**: web3j
+- **अन्य भाषाएँ**: हमारे <Link to="/docs/tools/overview" title="Overview of tools for different programming languages">टूल्स और SDK</Link> अनुभाग देखें
+
+### मैं अपने एकीकरण का परीक्षण कैसे करूं?
+
+1. टेस्टनेट एंडपॉइंट के साथ शुरू करें
+2. हमारी टेस्ट API कुंजियों का उपयोग करें
+3. उचित त्रुटि हैंडलिंग लागू करें
+4. <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Method to get the current block number">eth_blockNumber</Link> जैसे मेथड्स का उपयोग करके प्रतिक्रियाओं को मान्य करें
+5. प्रदर्शन की निगरानी करें
+
+### अन्य संदर्भ
+
+- <Link to="/docs/ethereum/quick-start" title="Get started quickly with the Ethereum API">त्वरित आरंभ गाइड</Link> - जल्दी शुरू करें
+- <Link to="/docs/ethereum/authentication" title="Guide to securing your API access">प्रमाणीकरण गाइड</Link> - विस्तृत प्रमाणीकरण जानकारी
+- <Link to="/docs/ethereum/rate-limits" title="Information about API usage limits and quotas">दर सीमाएँ</Link> - उपयोग सीमाओं को समझें

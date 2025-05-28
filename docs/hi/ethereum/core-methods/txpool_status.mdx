@@ -1,0 +1,122 @@
+---
+title: txpool_status - Get Transaction Pool Count | Ethereum API Methods
+description: Learn how to use the txpool_status method to monitor pending and queued transactions in your Ethereum node's mempool, check network congestion, and optimize gas price strategies.
+keywords: txpool_status, transaction pool, pending transactions, queued transactions, mempool, ethereum txpool, geth, transaction queue, ethereum mempool, pending tx count, network congestion, gas price optimization, blockchain backlog, transaction monitoring, node transaction pool, ethereum transaction status
+---
+
+# txpool_status
+
+The `txpool_status` method returns the number of transactions in the pending and queued states in the transaction pool. This method provides a quick overview of the transaction pool size and network congestion without retrieving detailed transaction data.
+
+## Use Cases
+
+- Monitoring transaction pool size for network health checks
+- Detecting network congestion to adjust gas prices
+- Node performance monitoring in infrastructure setups
+- Transaction backlog assessment for timing critical operations
+- Estimating transaction inclusion time for user feedback
+- Mempool analytics for research and optimization
+- Gas price strategy optimization for faster confirmations
+- Visualizing network activity in dashboards
+- Detecting unusual transaction patterns
+- Building gas price recommendation engines
+
+## Method Details
+
+This method requires no parameters and returns a count of transactions in each state.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'txpool_status',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'Object containing counts of pending and queued transactions',
+			fields: [
+				{
+					id: 'pending',
+					type: 'string',
+					desc: 'Number of pending transactions (hexadecimal)',
+				},
+				{
+					id: 'queued',
+					type: 'string',
+					desc: 'Number of queued transactions (hexadecimal)',
+				},
+			],
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"pending": "0x21c",
+		"queued": "0xa5"
+	}
+}
+```
+
+### Understanding the Response
+
+The response contains two hexadecimal values:
+
+- **pending**: Number of pending transactions (e.g., `"0x21c"` = 540 transactions)
+- **queued**: Number of queued transactions (e.g., `"0xa5"` = 165 transactions)
+
+To convert hexadecimal to decimal:
+
+- `"0x21c"` → 540 (pending transactions)
+- `"0xa5"` → 165 (queued transactions)
+
+### Transaction States
+
+- **Pending**: Transactions eligible for inclusion in the next block
+- Have valid nonces (equal to the sender's current nonce)
+- Meet all other validity criteria
+- Ready to be mined
+
+- **Queued**: Transactions not yet eligible for execution
+- May have future nonces (higher than sender's current nonce + pending count)
+- May have other constraints preventing immediate execution
+- Waiting for prerequisites to be met
+
+### Network Congestion Indicators
+
+The transaction pool counts can indicate network congestion:
+
+| Pending Count | Queued Count | Network Status     |
+| ------------- | ------------ | ------------------ |
+| < 100         | < 50         | Low activity       |
+| 100-500       | < 100        | Normal activity    |
+| 500-2000      | 100-500      | High activity      |
+| > 2000        | > 500        | Network congestion |
+
+_Note: These are approximate ranges and can vary based on network conditions._
+
+### Important Notes
+
+- This method is primarily supported by Geth clients
+- Not all Ethereum client implementations support the txpool namespace
+- The counts are returned as hexadecimal strings, not decimal numbers
+- A high pending count might indicate network congestion or low gas prices
+- A high queued count might indicate many future transactions or improper nonce sequencing
+- These counts can change rapidly with each new block and incoming transaction
+- During periods of high activity, these numbers can spike significantly
+- Zero values for both indicate an empty transaction pool or a newly synced node
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/txpool_inspect" title="Get a human-readable summary of transactions in the mempool">txpool_inspect</Link> - Returns a text summary of the transaction pool
+- <Link to="/docs/ethereum/core-methods/txpool_content" title="Get detailed information about all transactions in the mempool">txpool_content</Link> - Returns detailed information about all transactions in the pool

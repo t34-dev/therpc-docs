@@ -1,0 +1,186 @@
+---
+title: Rate Limits & Quotas | Ethereum API Usage Management
+description: Comprehensive guide to TheRPC API rate limits, quotas, implementation strategies for optimal API usage, including error handling, caching, batching, and best practices for high-throughput applications
+keywords: api rate limits, request quotas, api throttling, rate limiting, api usage limits, ethereum api optimization, blockchain api performance, web3 rate limits, api quota management, request batching, api error handling
+---
+
+# Rate Limits & Quotas
+
+This guide explains TheRPC's rate limiting system and provides best practices for managing your API usage.
+
+## # Request Limits
+
+Rate limits are applied at several levels:
+
+- Requests per second
+- Requests per minute
+- Requests per day
+- Concurrent connections
+
+Specific limits depend on your subscription plan. Check your dashboard for current limits.
+
+## # Error Responses
+
+When you exceed rate limits, you'll receive:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32029,
+		"message": "Rate limit exceeded"
+	},
+	"id": 1
+}
+```
+
+HTTP response will include headers:
+
+```bash
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1628696400
+```
+
+## # Best Practices
+
+### Implement Retries
+
+```javascript
+async function callWithRetry(method, params, maxRetries = 3) {
+	for (let i = 0; i < maxRetries; i++) {
+		try {
+			const response = await makeRequest(method, params);
+			return response;
+		} catch (error) {
+			if (error.code === -32029) {
+				// Rate limit exceeded
+				const backoffTime = Math.pow(2, i) * 1000;
+				await new Promise((resolve) => setTimeout(resolve, backoffTime));
+				continue;
+			}
+			throw error;
+		}
+	}
+	throw new Error('Max retries exceeded');
+}
+```
+
+### Batch Requests
+
+Combine multiple calls into a single request:
+
+```json
+[
+	{
+		"jsonrpc": "2.0",
+		"method": "eth_getBalance",
+		"params": ["0x742d35Cc6634C0532925a3b844Bc454e4438f44e", "latest"],
+		"id": 1
+	},
+	{
+		"jsonrpc": "2.0",
+		"method": "eth_blockNumber",
+		"params": [],
+		"id": 2
+	}
+]
+```
+
+### Use WebSocket Subscriptions
+
+For real-time data, use <Link to="/docs/ethereum/core-methods/eth_subscribe">eth_subscribe</Link> instead of polling.
+
+## # Monitoring
+
+Monitor your usage through:
+
+- Dashboard metrics
+- Rate limit headers
+- Usage alerts
+
+## # Quota Management
+
+### Track Usage
+
+```javascript
+function trackApiUsage(response) {
+	const limits = {
+		limit: response.headers['X-RateLimit-Limit'],
+		remaining: response.headers['X-RateLimit-Remaining'],
+		reset: response.headers['X-RateLimit-Reset'],
+	};
+
+	// Log or monitor usage
+	console.log(`API calls remaining: ${limits.remaining}/${limits.limit}`);
+}
+```
+
+### Implement Caching
+
+```javascript
+const cache = new Map();
+
+async function getCachedBlockNumber(cacheTime = 5000) {
+	const cached = cache.get('blockNumber');
+	if (cached && Date.now() - cached.timestamp < cacheTime) {
+		return cached.value;
+	}
+
+	const newValue = await web3.eth.getBlockNumber();
+	cache.set('blockNumber', {
+		value: newValue,
+		timestamp: Date.now(),
+	});
+
+	return newValue;
+}
+```
+
+## # Plan Limits
+
+Different subscription plans have different limits:
+
+### Base Limits
+
+- Request rate
+- Daily quota
+- WebSocket connections
+- Subscription limits
+
+### Additional Features
+
+- Archive data access
+- Debug methods
+- Trace API
+
+Check the pricing page for detailed plan comparisons.
+
+## # Upgrade Options
+
+If you regularly hit rate limits, consider:
+
+1. Optimizing your requests
+2. Implementing caching
+3. Using WebSocket subscriptions
+4. Upgrading your plan
+
+## # Error Prevention
+
+### Monitor Usage
+
+- Track request counts
+- Set up alerts
+- Review usage patterns
+
+### Optimize Requests
+
+- Batch when possible
+- Cache responses
+- Use appropriate polling intervals
+
+### See also
+
+- <Link to="/docs/ethereum/authentication" title="Guide to securing your API access with authentication">Authentication Guide</Link> - API Key Management
+- <Link to="/docs/ethereum/basic-operations" title="Guide to common Ethereum blockchain operations">Basic Operations</Link> - Optimal Request Patterns
+- <Link to="/docs/ethereum/faq" title="Frequently asked questions about Ethereum API usage">FAQ</Link> - Common Questions and Answers

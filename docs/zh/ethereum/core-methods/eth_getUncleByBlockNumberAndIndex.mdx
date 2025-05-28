@@ -1,0 +1,256 @@
+---
+title: eth_getUncleByBlockNumberAndIndex - 通过区块号和索引获取叔块 | 以太坊 API 方法
+description: 了解如何使用 eth_getUncleByBlockNumberAndIndex 方法通过区块号和叔块索引检索叔块（ommer）信息。
+keywords: eth_getUncleByBlockNumberAndIndex, uncle 区块, ommer 区块, 以太坊 uncle, 区块奖励, 网络安全, 区块号
+---
+
+# eth_getUncleByBlockNumberAndIndex
+
+`eth_getUncleByBlockNumberAndIndex` 方法通过区块号和叔块索引位置返回有关叔块（ommer）的信息。
+
+## 使用场景
+
+- 分析区块链网络健康状况
+- 验证叔块奖励分配
+- 研究挖矿/验证竞争
+- 研究区块链吞吐量和延迟
+- 通过叔块率了解网络安全性
+- 历史区块链研究
+- 区块确认验证
+- 网络拥堵分析
+
+## 方法详情
+
+通过区块号和叔块索引位置返回有关叔块（ommer）的信息。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getUncleByBlockNumberAndIndex',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '十六进制格式的区块号或标签: latest, earliest, pending, safe, finalized',
+			value: '0x1000000', // 示例区块号 (16,777,216)
+		},
+		{
+			id: 'uncleIndex',
+			required: true,
+			type: 'string',
+			desc: '叔块的索引位置（十六进制）',
+			value: '0x0',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: '叔块对象，如果未找到则为null',
+			fields: [
+				{
+					id: 'number',
+					type: 'string',
+					desc: "叔块的区块号（十六进制）",
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: '叔块的哈希',
+				},
+				{
+					id: 'parentHash',
+					type: 'string',
+					desc: '父区块的哈希',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: '区块挖矿/验证中使用的随机数（仅限PoW区块）',
+				},
+				{
+					id: 'sha3Uncles',
+					type: 'string',
+					desc: '区块中叔块数据的SHA3哈希',
+				},
+				{
+					id: 'logsBloom',
+					type: 'string',
+					desc: '供轻客户端快速检索相关日志的布隆过滤器',
+				},
+				{
+					id: 'transactionsRoot',
+					type: 'string',
+					desc: '此区块的交易树根',
+				},
+				{
+					id: 'stateRoot',
+					type: 'string',
+					desc: '此区块的状态树根',
+				},
+				{
+					id: 'receiptsRoot',
+					type: 'string',
+					desc: '此区块的收据树根',
+				},
+				{
+					id: 'miner',
+					type: 'string',
+					desc: '接收挖矿奖励的地址',
+				},
+				{
+					id: 'difficulty',
+					type: 'string',
+					desc: '此区块的难度目标（十六进制）',
+				},
+				{
+					id: 'totalDifficulty',
+					type: 'string',
+					desc: '截至此区块的链总难度（十六进制）',
+				},
+				{
+					id: 'extraData',
+					type: 'string',
+					desc: '矿工在区块中包含的额外数据',
+				},
+				{
+					id: 'size',
+					type: 'string',
+					desc: '区块大小，以字节为单位（十六进制）',
+				},
+				{
+					id: 'gasLimit',
+					type: 'string',
+					desc: '此区块允许的最大gas（十六进制）',
+				},
+				{
+					id: 'gasUsed',
+					type: 'string',
+					desc: '此区块中所有交易使用的总gas（十六进制）',
+				},
+				{
+					id: 'timestamp',
+					type: 'string',
+					desc: '区块整理时的Unix时间戳（十六进制）',
+				},
+				{
+					id: 'uncles',
+					type: 'array',
+					desc: '叔块哈希数组（对于叔块，此数组将为空）',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null, fields?.uncleIndex || null]}
+/>
+
+### 区块号参数选项
+
+`blockNumber` 参数接受：
+
+- 区块号的十六进制字符串
+- `"earliest"` 表示创世区块
+- `"latest"` 表示最近挖出的区块
+- `"pending"` 表示待处理状态/交易
+- `"safe"` 表示最近的防重组安全区块
+- `"finalized"` 表示最近的最终确定区块
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"difficulty": "0x57f17a09378",
+		"extraData": "0x476574682f76312e302e302f6c696e75782f676f312e342e32",
+		"gasLimit": "0x1388",
+		"gasUsed": "0x0",
+		"hash": "0x932bdf904546a2287a2c9b2ede37925f698a7657484b172d4e5184f80bdd464d",
+		"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+		"miner": "0xbb7b8287f3f0a933474a79eae42cbca977791171",
+		"mixHash": "0x4500aa4ee2b3044a155252e35273770edeb2ab6f8cb19ca8e732771484462169",
+		"nonce": "0x24732773618271bc",
+		"number": "0x299",
+		"parentHash": "0xa779859b1ee558258b7008bbabff272280136c5dd3eb3ea3bfa8f6ae03bf91e5",
+		"receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+		"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+		"size": "0x21d",
+		"stateRoot": "0x2604fbf5183f5360da249b51f1b9f1e0f315d2ff3ffa1a4143ff221ad9ca1fec",
+		"timestamp": "0x55ba4827",
+		"totalDifficulty": null,
+		"transactionsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+		"uncles": []
+	}
+}
+```
+
+## 理解叔块
+
+叔块（也称为ommer）是有效的区块，它们被成功挖出但未被包含在主区块链中。当两个矿工几乎同时找到有效区块时，这种情况就会发生，但主链中只能接受其中一个。
+
+### 为什么叔块很重要
+
+- **网络安全**：高叔块率可能表明网络延迟或高强度的挖矿竞争
+- **奖励**：叔块的矿工获得部分奖励（EIP-1559之前为区块奖励的2/32）
+- **区块包含**：叔块在常规区块中被引用（每个区块最多2个）
+- **链确认**：尽管叔块不在主链中，但它们对区块链安全有所贡献
+
+### eth_getUncleByBlockNumberAndIndex 和 eth_getUncleByBlockHashAndIndex 的区别
+
+这两种方法检索相同的叔块数据，但使用不同的引用方式：
+
+- `eth_getUncleByBlockNumberAndIndex` - 使用区块号（或"latest"之类的命名标签）来识别包含叔块的区块
+- `eth_getUncleByBlockHashAndIndex` - 使用区块哈希来识别包含叔块的区块
+
+区块号参数通常更方便，因为它允许使用"latest"之类的区块标签，并且在顺序处理时更容易使用，而基于哈希的查找提供了绝对引用确定性。
+
+### 历史意义
+
+以太坊中的叔块率历来是重要的指标：
+
+- 早期以太坊的叔块率在7-10%左右
+- 拜占庭和君士坦丁堡等网络升级调整了叔块奖励
+- 合并后（PoS过渡），叔块不再存在，因为验证者在确定的时隙中产生区块
+
+## 使用示例
+
+```javascript
+// 获取最新的叔块
+async function getLatestUncle() {
+  // 首先，找到一个包含叔块的最近区块
+  let blockNumber = "latest";
+  let uncleCount = 0;
+
+  while (uncleCount === 0) {
+    // 获取区块
+    const block = await provider.send("eth_getBlockByNumber", [blockNumber, false]);
+
+    // 检查叔块数量
+    uncleCount = block.uncles.length;
+
+    // 如果没有叔块，检查前一个区块
+    if (uncleCount === 0) {
+      blockNumber = "0x" + (parseInt(block.number, 16) - 1).toString(16);
+    }
+  }
+
+  // 一旦找到包含叔块的区块，获取第一个叔块
+  const uncleBlock = await provider.send("eth_getUncleByBlockNumberAndIndex", [
+    blockNumber,
+    "0x0"
+  ]);
+
+  return uncleBlock;
+}
+```
+
+## 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockHashAndIndex" title="使用区块哈希检索叔块">eth_getUncleByBlockHashAndIndex</Link> - 使用区块哈希和叔块索引获取叔块数据
+- <Link to="/docs/ethereum/core-methods/eth_getUncleCountByBlockNumber" title="计算特定区块中的叔块数量">eth_getUncleCountByBlockNumber</Link> - 使用区块号计算区块中的叔块数量
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="通过区块号获取完整区块详情">eth_getBlockByNumber</Link> - 获取包括叔块引用在内的完整区块信息

@@ -1,0 +1,87 @@
+---
+title: net_peerCount - 获取已连接对等节点数量 | 以太坊 API 方法
+description: 学习如何使用 net_peerCount 方法检查有多少对等节点连接到您的以太坊节点，监控网络健康状况，并诊断连接问题。
+keywords: net_peerCount, peer connections, ethereum network, node peers, p2p connections, network size, blockchain connectivity, node health check, ethereum connections, peer monitoring, network diagnostics, connection count, node network status, blockchain peers, ethereum node health, network connections
+---
+
+# net_peerCount
+
+`net_peerCount` 方法返回当前连接到客户端的对等节点数量。此方法提供了节点在以太坊网络中连接性的基本洞察，并有助于诊断网络问题。
+
+## 使用场景
+
+- 区块链应用程序的网络健康监控
+- 设置和维护期间的节点连接验证
+- 当区块未更新时的同步状态故障排除
+- 研究目的的网络规模估计
+- 节点性能分析和优化
+- 关键操作前的连接质量评估
+- 识别可能错过交易的孤立节点
+- 验证正确的网络配置
+- 在生产环境中监控节点健康
+- 在自动化系统中检测连接问题
+
+## 方法详情
+
+此方法不需要参数，并返回一个十六进制编码的整数。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'net_peerCount',
+		id: 67,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '已连接的对等节点数量（十六进制）',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 67,
+	"result": "0x1a" // 26 个已连接的对等节点
+}
+```
+
+### 理解结果
+
+响应是已连接对等节点数量的十六进制字符串表示。例如：
+
+- `"0x0"` = 0 个对等节点
+- `"0xa"` = 10 个对等节点
+- `"0x1a"` = 26 个对等节点
+- `"0x64"` = 100 个对等节点
+
+### 对等节点数量的意义
+
+对等节点的数量可以表明您节点的几个特点：
+
+- **0 个对等节点**：节点完全与网络隔离
+- **1-5 个对等节点**：节点连接性最小
+- **10-30 个对等节点**：大多数以太坊节点的正常范围
+- **30+ 个对等节点**：高连接性，公共节点或验证者的典型特征
+
+### 重要注意事项
+
+- 较低的对等节点数量可能表示网络连接问题
+- 一些私有节点可能有意限制对等节点连接
+- 公共节点通常维持更多的对等节点连接
+- 随着节点加入和离开网络，对等节点数量不断变化
+- 报告的数量仅包括直接对等节点连接
+- 对于托管节点，对等节点数量可能反映提供商的网络，而不是您的特定实例
+- 高对等节点数量并不一定意味着更好的性能
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/net_listening" title="检查您的节点是否正在主动监听连接">net_listening</Link> - 返回客户端是否正在主动联网
+- <Link to="/docs/ethereum/core-methods/net_version" title="识别您的节点连接到哪个以太坊网络">net_version</Link> - 返回当前网络 ID

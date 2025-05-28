@@ -1,0 +1,186 @@
+---
+title: 速率限制和配额 | 以太坊 API 使用管理
+description: 全面指南，介绍 TheRPC API 速率限制、配额和优化 API 使用的实施策略，包括错误处理、缓存、批处理以及高吞吐量应用程序的最佳实践
+keywords: api 速率限制, 请求配额, api 限流, 速率限制, api 使用限制, 以太坊 api 优化, 区块链 api 性能, web3 速率限制, api 配额管理, 请求批处理, api 错误处理
+---
+
+# 速率限制和配额
+
+本指南解释了 TheRPC 的速率限制系统，并提供管理 API 使用的最佳实践。
+
+## # 请求限制
+
+速率限制应用于多个层面：
+
+- 每秒请求数
+- 每分钟请求数
+- 每天请求数
+- 并发连接数
+
+具体限制取决于您的订阅计划。查看您的控制面板了解当前限制。
+
+## # 错误响应
+
+当您超出速率限制时，您将收到：
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32029,
+		"message": "Rate limit exceeded"
+	},
+	"id": 1
+}
+```
+
+HTTP 响应将包含以下头信息：
+
+```bash
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1628696400
+```
+
+## # 最佳实践
+
+### 实施重试
+
+```javascript
+async function callWithRetry(method, params, maxRetries = 3) {
+	for (let i = 0; i < maxRetries; i++) {
+		try {
+			const response = await makeRequest(method, params);
+			return response;
+		} catch (error) {
+			if (error.code === -32029) {
+				// 超出速率限制
+				const backoffTime = Math.pow(2, i) * 1000;
+				await new Promise((resolve) => setTimeout(resolve, backoffTime));
+				continue;
+			}
+			throw error;
+		}
+	}
+	throw new Error('Max retries exceeded');
+}
+```
+
+### 批量请求
+
+将多个调用合并为单个请求：
+
+```json
+[
+	{
+		"jsonrpc": "2.0",
+		"method": "eth_getBalance",
+		"params": ["0x742d35Cc6634C0532925a3b844Bc454e4438f44e", "latest"],
+		"id": 1
+	},
+	{
+		"jsonrpc": "2.0",
+		"method": "eth_blockNumber",
+		"params": [],
+		"id": 2
+	}
+]
+```
+
+### 使用 WebSocket 订阅
+
+对于实时数据，使用 <Link to="/docs/ethereum/core-methods/eth_subscribe">eth_subscribe</Link> 而不是轮询。
+
+## # 监控
+
+通过以下方式监控您的使用情况：
+
+- 控制面板指标
+- 速率限制头信息
+- 使用警报
+
+## # 配额管理
+
+### 跟踪使用情况
+
+```javascript
+function trackApiUsage(response) {
+	const limits = {
+		limit: response.headers['X-RateLimit-Limit'],
+		remaining: response.headers['X-RateLimit-Remaining'],
+		reset: response.headers['X-RateLimit-Reset'],
+	};
+
+	// 记录或监控使用情况
+	console.log(`API 调用剩余: ${limits.remaining}/${limits.limit}`);
+}
+```
+
+### 实施缓存
+
+```javascript
+const cache = new Map();
+
+async function getCachedBlockNumber(cacheTime = 5000) {
+	const cached = cache.get('blockNumber');
+	if (cached && Date.now() - cached.timestamp < cacheTime) {
+		return cached.value;
+	}
+
+	const newValue = await web3.eth.getBlockNumber();
+	cache.set('blockNumber', {
+		value: newValue,
+		timestamp: Date.now(),
+	});
+
+	return newValue;
+}
+```
+
+## # 计划限制
+
+不同的订阅计划有不同的限制：
+
+### 基本限制
+
+- 请求速率
+- 每日配额
+- WebSocket 连接数
+- 订阅限制
+
+### 附加功能
+
+- 档案数据访问
+- 调试方法
+- 跟踪 API
+
+查看定价页面以获取详细的计划比较。
+
+## # 升级选项
+
+如果您经常达到速率限制，请考虑：
+
+1. 优化您的请求
+2. 实施缓存
+3. 使用 WebSocket 订阅
+4. 升级您的计划
+
+## # 错误预防
+
+### 监控使用情况
+
+- 跟踪请求计数
+- 设置警报
+- 审查使用模式
+
+### 优化请求
+
+- 尽可能批处理
+- 缓存响应
+- 使用适当的轮询间隔
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/authentication" title="保护 API 访问的身份验证指南">身份验证指南</Link> - API 密钥管理
+- <Link to="/docs/ethereum/basic-operations" title="常见以太坊区块链操作指南">基本操作</Link> - 最佳请求模式
+- <Link to="/docs/ethereum/faq" title="关于以太坊 API 使用的常见问题">常见问题解答</Link> - 常见问题和答案

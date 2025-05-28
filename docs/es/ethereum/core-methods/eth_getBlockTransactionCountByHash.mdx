@@ -1,0 +1,140 @@
+---
+title: eth_getBlockTransactionCountByHash - Contar Transacciones en Bloque | Métodos de API de Ethereum
+description: Aprenda a usar el método eth_getBlockTransactionCountByHash para recuperar el número de transacciones en un bloque de Ethereum identificado por su hash.
+keywords: eth_getBlockTransactionCountByHash, recuento de transacciones, recuento de transacciones de bloque, hash de bloque ethereum, transacciones blockchain, tamaño de bloque, recuento de tx, volumen de transacciones
+---
+
+# eth_getBlockTransactionCountByHash
+
+El método `eth_getBlockTransactionCountByHash` devuelve el número de transacciones en un bloque, identificado por el hash del bloque. Este método ligero proporciona una forma rápida de verificar el volumen de transacciones sin recuperar los datos completos del bloque, haciéndolo útil para exploradores de bloques y herramientas de análisis de red.
+
+## Casos de Uso
+
+- Funcionalidades de explorador de bloques y listados de transacciones
+- Monitoreo de actividad de red y análisis de volumen
+- Análisis de volumen de transacciones y seguimiento histórico
+- Estimación de tamaño de bloque y predicción de uso de gas
+- Detección y validación de reorganización de cadena
+- Verificación de sincronización entre nodos
+- Medición de rendimiento de transacciones
+- Análisis de blockchain y métricas de uso
+- Verificaciones de validación y verificación de bloques
+- Investigación de MEV (Valor Máximo Extraíble)
+
+## Detalles del Método
+
+Este método acepta un hash de bloque y devuelve el número de transacciones en ese bloque, proporcionando una forma simple pero eficiente de medir la actividad del bloque.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBlockTransactionCountByHash',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'hash',
+			required: true,
+			type: 'string',
+			desc: 'El hash (32 bytes) del bloque',
+			value: '0xdc0818cf78f21a8e70579cb46a43643f78291264dda342ae31049421c82d21ae',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'El número de transacciones en el bloque especificado (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.hash || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x134" // 308 transacciones en decimal
+}
+```
+
+### Entendiendo la Respuesta
+
+La respuesta es una cadena hexadecimal que representa el número de transacciones en el bloque:
+- `"0x0"` significa que el bloque no tiene transacciones (bloque vacío)
+- `"0x1"` significa que hay solo una transacción
+- `"0x134"` (como se muestra arriba) se convierte a 308 en decimal, indicando 308 transacciones
+
+Para convertir la respuesta hexadecimal a decimal en JavaScript:
+```javascript
+const txCount = parseInt("0x134", 16); // 308
+```
+
+### Hash de Bloque vs. Número de Bloque
+
+Este método utiliza un hash de bloque como identificador, que tiene estas características:
+- **Unicidad**: Incluso en caso de reorganizaciones de cadena, el hash del bloque identifica de manera única un bloque específico
+- **Inmutabilidad**: El hash del bloque nunca cambia, a diferencia de los números de bloque que pueden ser reasignados
+- **Verificabilidad**: El hash puede ser verificado independientemente ya que se deriva del contenido del bloque
+
+Si tienes un número de bloque en lugar de un hash, usa `eth_getBlockTransactionCountByNumber` en su lugar.
+
+### Ejemplo Práctico
+
+```javascript
+// Ejemplo: Encontrar bloques con recuentos altos de transacciones
+const significantBlockHashes = [
+	'0xba9ded5ca1ec9adb9451bf053b33cbf5bd60f2a7ea39256278db165de9a88e5c', // Ejemplo de bloque de alta actividad
+	'0xb37a9f99b47975acc1ea43bd2e02e0567566bd3dad8f034ab676b4a94d1bac9a', // Otro bloque para verificar
+	'0x98c3125c2993d90b396f638115821ba17b9852e4001869061b800d32f96cdd2b', // Otro bloque más
+];
+
+async function findHighActivityBlocks(blockHashes, threshold = 100) {
+	const results = [];
+
+	for (const hash of blockHashes) {
+		const count = await provider.send('eth_getBlockTransactionCountByHash', [hash]);
+		const txCount = parseInt(count, 16);
+
+		if (txCount > threshold) {
+			results.push({
+				blockHash: hash,
+				transactionCount: txCount,
+			});
+		}
+	}
+
+	return results.sort((a, b) => b.transactionCount - a.transactionCount);
+}
+
+// Uso
+const highActivityBlocks = await findHighActivityBlocks(significantBlockHashes);
+console.log('Blocks with high transaction counts:', highActivityBlocks);
+```
+
+### Contexto Histórico
+
+Los recuentos de transacciones por bloque han evolucionado significativamente a lo largo de la historia de Ethereum:
+
+- Primeros días de Ethereum (2015-2016): 0-50 transacciones por bloque
+- Boom de ICO 2017: 70-150 transacciones por bloque
+- Verano DeFi 2020: 150-250 transacciones por bloque
+- Post-actualización London (EIP-1559): 200-300+ transacciones por bloque
+- Post-Merge (2022+): 200-400+ transacciones por bloque dependiendo de la demanda de la red
+
+Los recuentos altos de transacciones típicamente se correlacionan con:
+- Precios de gas más altos debido al aumento de la demanda
+- Congestión de red durante horas pico de uso
+- Movimientos importantes del mercado o eventos significativos
+- Acuñaciones populares de NFT o lanzamientos de tokens
+- Oportunidades de yield farming en DeFi
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockTransactionCountByNumber" title="Contar transacciones por número de bloque">eth_getBlockTransactionCountByNumber</Link> - Devuelve el número de transacciones en un bloque por número de bloque
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Obtener detalles de bloque por hash">eth_getBlockByHash</Link> - Devuelve información detallada sobre un bloque por hash
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockHashAndIndex" title="Obtener transacción por posición">eth_getTransactionByBlockHashAndIndex</Link> - Devuelve información de transacción por hash de bloque y posición de índice
+- <Link to="/docs/ethereum/core-methods/eth_getBlockReceipts" title="Obtener todos los recibos en un bloque">eth_getBlockReceipts</Link> - Devuelve todos los recibos de transacción para un bloque especificado

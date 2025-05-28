@@ -1,0 +1,165 @@
+---
+title: Quick Start Guide | Ethereum API Integration Tutorial
+description: Comprehensive guide to getting started with TheRPC blockchain API. Learn how to quickly integrate our API into your project with step-by-step instructions and code examples for multiple programming languages.
+keywords: quick start, api integration, blockchain api tutorial, therpc guide, json rpc tutorial, ethereum api setup, web3 integration, blockchain development, ethereum json-rpc, ethereum api examples
+---
+
+# Quick Start Guide
+
+This guide will help you quickly integrate TheRPC into your project. Follow these steps to start making blockchain API calls.
+
+## Step 1: Get an API Key
+
+To use TheRPC, you'll need an API key:
+
+1. Sign up at TheRPC.io
+2. Navigate to the dashboard
+3. Create or retrieve your API key
+
+## Step 2: Choose Your Network
+
+TheRPC supports multiple networks. Configure your environment with your API endpoint and key:
+
+```bash
+API_ENDPOINT="YOUR_API_ENDPOINT"
+API_KEY="YOUR_API_KEY"
+```
+
+## Step 3: Make Your First Call
+
+Here are basic examples for different programming languages. For more comprehensive examples and language-specific features, check out our <Link to="/docs/ethereum/tools/overview" title="Complete overview of all available Ethereum development tools">Tools & SDKs Overview</Link>.
+
+### Using Curl
+
+```bash
+curl --request POST ${API_ENDPOINT} \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer ${API_KEY}' \
+  --data '{
+    "jsonrpc": "2.0",
+    "method": "eth_blockNumber",
+    "params": [],
+    "id": 1
+  }'
+```
+
+### Using JavaScript
+
+```javascript
+const axios = require('axios');
+
+const config = {
+	url: 'YOUR_API_ENDPOINT',
+	apiKey: 'YOUR_API_KEY',
+};
+
+async function getBlockNumber() {
+	const response = await axios.post(
+		config.url,
+		{
+			jsonrpc: '2.0',
+			method: 'eth_blockNumber',
+			params: [],
+			id: 1,
+		},
+		{
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${config.apiKey}`,
+			},
+		},
+	);
+
+	console.log('Latest Block Number:', response.data.result);
+}
+```
+
+### Using Python
+
+```python
+import requests
+
+config = {
+    'url': 'YOUR_API_ENDPOINT',
+    'api_key': 'YOUR_API_KEY'
+}
+
+def get_block_number():
+    response = requests.post(
+        config['url'],
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': f"Bearer {config['api_key']}"
+        },
+        json={
+            'jsonrpc': '2.0',
+            'method': 'eth_blockNumber',
+            'params': [],
+            'id': 1
+        }
+    )
+    return response.json()['result']
+```
+
+## Step 4: Using Web3 Libraries
+
+For more complex interactions, we recommend using Web3 libraries. You can find detailed examples for all supported languages and frameworks in our <Link to="/docs/ethereum/tools/overview" title="Complete overview of all available Ethereum development tools">Tools & SDKs documentation</Link>.
+
+### Web3.js (JavaScript)
+
+```javascript
+const Web3 = require('web3');
+const web3 = new Web3('YOUR_API_ENDPOINT');
+
+// Add API key to requests
+web3.setHeader('Authorization', 'Bearer YOUR_API_KEY');
+
+async function getBalance(address) {
+	const balance = await web3.eth.getBalance(address);
+	return web3.utils.fromWei(balance, 'ether');
+}
+```
+
+### Web3.py (Python)
+
+```python
+from web3 import Web3
+from web3.middleware import http_retry_request_middleware
+
+w3 = Web3(Web3.HTTPProvider(
+    'YOUR_API_ENDPOINT',
+    request_kwargs={
+        'headers': {'Authorization': 'Bearer YOUR_API_KEY'}
+    }
+))
+
+# Add retry middleware
+w3.middleware_onion.add(http_retry_request_middleware)
+```
+
+## Available Methods
+
+All supported API methods with examples in different programming languages can be found in our <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">Ethereum Methods documentation</Link>. This includes:
+
+- Detailed method descriptions
+- Request and response formats
+- Language-specific code examples
+- Common use cases
+
+## Network Selection
+
+When using TheRPC, you'll receive specific API endpoints for each network you want to access. Simply replace `YOUR_API_ENDPOINT` with the appropriate endpoint for your chosen network.
+
+## Next Steps
+
+1. Browse our <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">Ethereum Methods</Link> documentation for all available API methods
+2. Check out <Link to="/docs/ethereum/tools/overview" title="Complete overview of all available Ethereum development tools">Tools & SDKs</Link> for language-specific guides
+3. Learn about <Link to="/docs/ethereum/authentication" title="Guide to securing your API access with authentication">Authentication</Link>
+4. Review <Link to="/docs/ethereum/rate-limits" title="Information about API usage limits and quotas">Rate Limits</Link>
+5. Explore <Link to="/docs/ethereum/basic-operations" title="Guide to common Ethereum blockchain operations">Basic Operations</Link>
+
+### See also
+
+- <Link to="/docs/ethereum/authentication" title="Guide to securing your API access with authentication">Authentication Guide</Link> - Secure Your API Access
+- <Link to="/docs/ethereum/tools/overview" title="Overview of Ethereum development libraries and tools">Development Tools</Link> - Explore Available SDKs
+- <Link to="/docs/ethereum/faq" title="Frequently asked questions about Ethereum API usage">FAQ</Link> - Common Questions and Answers

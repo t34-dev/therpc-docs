@@ -1,0 +1,165 @@
+---
+title: 快速入门指南 | 以太坊 API 集成教程
+description: 关于开始使用 TheRPC 区块链 API 的综合指南。通过多种编程语言的分步说明和代码示例，学习如何快速将我们的 API 集成到您的项目中。
+keywords: 快速入门, api 集成, 区块链 api 教程, therpc 指南, json rpc 教程, 以太坊 api 设置, web3 集成, 区块链开发, 以太坊 json-rpc, 以太坊 api 示例
+---
+
+# 快速入门指南
+
+本指南将帮助您快速将 TheRPC 集成到您的项目中。按照以下步骤开始进行区块链 API 调用。
+
+## 步骤 1：获取 API 密钥
+
+要使用 TheRPC，您需要一个 API 密钥：
+
+1. 在 TheRPC.io 注册
+2. 导航到控制面板
+3. 创建或检索您的 API 密钥
+
+## 步骤 2：选择您的网络
+
+TheRPC 支持多个网络。使用您的 API 端点和密钥配置环境：
+
+```bash
+API_ENDPOINT="YOUR_API_ENDPOINT"
+API_KEY="YOUR_API_KEY"
+```
+
+## 步骤 3：进行您的第一次调用
+
+以下是不同编程语言的基本示例。有关更全面的示例和特定语言功能，请查看我们的 <Link to="/docs/ethereum/tools/overview" title="所有可用以太坊开发工具的完整概述">工具和 SDK 概述</Link>。
+
+### 使用 Curl
+
+```bash
+curl --request POST ${API_ENDPOINT} \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer ${API_KEY}' \
+  --data '{
+    "jsonrpc": "2.0",
+    "method": "eth_blockNumber",
+    "params": [],
+    "id": 1
+  }'
+```
+
+### 使用 JavaScript
+
+```javascript
+const axios = require('axios');
+
+const config = {
+	url: 'YOUR_API_ENDPOINT',
+	apiKey: 'YOUR_API_KEY',
+};
+
+async function getBlockNumber() {
+	const response = await axios.post(
+		config.url,
+		{
+			jsonrpc: '2.0',
+			method: 'eth_blockNumber',
+			params: [],
+			id: 1,
+		},
+		{
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${config.apiKey}`,
+			},
+		},
+	);
+
+	console.log('Latest Block Number:', response.data.result);
+}
+```
+
+### 使用 Python
+
+```python
+import requests
+
+config = {
+    'url': 'YOUR_API_ENDPOINT',
+    'api_key': 'YOUR_API_KEY'
+}
+
+def get_block_number():
+    response = requests.post(
+        config['url'],
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': f"Bearer {config['api_key']}"
+        },
+        json={
+            'jsonrpc': '2.0',
+            'method': 'eth_blockNumber',
+            'params': [],
+            'id': 1
+        }
+    )
+    return response.json()['result']
+```
+
+## 步骤 4：使用 Web3 库
+
+对于更复杂的交互，我们建议使用 Web3 库。您可以在我们的 <Link to="/docs/ethereum/tools/overview" title="所有可用以太坊开发工具的完整概述">工具和 SDK 文档</Link> 中找到所有支持语言和框架的详细示例。
+
+### Web3.js (JavaScript)
+
+```javascript
+const Web3 = require('web3');
+const web3 = new Web3('YOUR_API_ENDPOINT');
+
+// 向请求添加 API 密钥
+web3.setHeader('Authorization', 'Bearer YOUR_API_KEY');
+
+async function getBalance(address) {
+	const balance = await web3.eth.getBalance(address);
+	return web3.utils.fromWei(balance, 'ether');
+}
+```
+
+### Web3.py (Python)
+
+```python
+from web3 import Web3
+from web3.middleware import http_retry_request_middleware
+
+w3 = Web3(Web3.HTTPProvider(
+    'YOUR_API_ENDPOINT',
+    request_kwargs={
+        'headers': {'Authorization': 'Bearer YOUR_API_KEY'}
+    }
+))
+
+# 添加重试中间件
+w3.middleware_onion.add(http_retry_request_middleware)
+```
+
+## 可用方法
+
+所有支持的 API 方法及其在不同编程语言中的示例可在我们的 <Link to="/docs/ethereum/all-methods" title="所有可用以太坊 API 方法的完整参考">以太坊方法文档</Link> 中找到。其中包括：
+
+- 详细的方法描述
+- 请求和响应格式
+- 特定语言的代码示例
+- 常见用例
+
+## 网络选择
+
+使用 TheRPC 时，您将收到特定于您要访问的每个网络的 API 端点。只需将 `YOUR_API_ENDPOINT` 替换为您选择的网络的适当端点即可。
+
+## 后续步骤
+
+1. 浏览我们的 <Link to="/docs/ethereum/all-methods" title="所有可用以太坊 API 方法的完整参考">以太坊方法</Link> 文档了解所有可用的 API 方法
+2. 查看 <Link to="/docs/ethereum/tools/overview" title="所有可用以太坊开发工具的完整概述">工具和 SDK</Link> 获取特定语言指南
+3. 了解 <Link to="/docs/ethereum/authentication" title="保护 API 访问的身份验证指南">身份验证</Link>
+4. 查看 <Link to="/docs/ethereum/rate-limits" title="关于 API 使用限制和配额的信息">速率限制</Link>
+5. 探索 <Link to="/docs/ethereum/basic-operations" title="常见以太坊区块链操作指南">基本操作</Link>
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/authentication" title="保护 API 访问的身份验证指南">身份验证指南</Link> - 保护您的 API 访问
+- <Link to="/docs/ethereum/tools/overview" title="以太坊开发库和工具概述">开发工具</Link> - 探索可用的 SDK
+- <Link to="/docs/ethereum/faq" title="关于以太坊 API 使用的常见问题">常见问题解答</Link> - 常见问题和答案

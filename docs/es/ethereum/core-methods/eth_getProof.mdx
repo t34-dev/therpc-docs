@@ -1,0 +1,228 @@
+---
+title: eth_getProof - Generate Merkle Proofs | Ethereum API Methods
+description: Learn how to use the eth_getProof method to retrieve cryptographic proofs for account and storage data on the Ethereum blockchain. Includes verification examples.
+keywords: eth_getProof, Merkle proof, state proof, storage proof, account verification, Ethereum verification, state trie
+---
+
+# eth_getProof
+
+The `eth_getProof` method returns the account and storage values of a specific address, including cryptographic Merkle proofs. These proofs verify that the data is correctly included in the state trie without requiring trust in the data provider.
+
+## Use Cases
+
+- L2 solutions that require state verification
+- Cross-chain bridges and validation
+- Trustless blockchain data verification
+- Light client implementations
+- Stateless client development
+- Zero-knowledge proof systems
+- Fraud proof construction
+- Security audits and verification
+
+## Method Details
+
+This method retrieves both account proofs and storage proofs for specified storage keys.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getProof',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: 'The address of the account to get proofs for',
+			value: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI token contract
+		},
+		{
+			id: 'storageKeys',
+			required: true,
+			type: 'array',
+			desc: 'Array of storage keys to generate proofs for',
+			value: [
+				'0x0000000000000000000000000000000000000000000000000000000000000002', // totalSupply
+				'0x29ae811400000000000000000000000000000000000000000000000000000000', // Another storage slot
+			],
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Block number or block tag',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'The account information with Merkle proofs',
+			fields: [
+				{
+					id: 'address',
+					type: 'string',
+					desc: 'The address of the account',
+				},
+				{
+					id: 'accountProof',
+					type: 'array',
+					desc: 'Array of rlp-serialized MerkleTree nodes from stateRoot to the account leaf',
+				},
+				{
+					id: 'balance',
+					type: 'string',
+					desc: "The account's balance in wei (hex)",
+				},
+				{
+					id: 'codeHash',
+					type: 'string',
+					desc: "Hash of the account's code (hex)",
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: "The account's nonce (hex)",
+				},
+				{
+					id: 'storageHash',
+					type: 'string',
+					desc: "Hash of the account's storage trie root (hex)",
+				},
+				{
+					id: 'storageProof',
+					type: 'array',
+					desc: 'Array of storage proofs for requested keys',
+					fields: [
+						{
+							id: 'key',
+							type: 'string',
+							desc: 'The requested storage key',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: 'The storage value (hex)',
+						},
+						{
+							id: 'proof',
+							type: 'array',
+							desc: 'Array of rlp-serialized MerkleTree nodes from storageHash to storage value',
+						},
+					],
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.storageKeys || [], fields?.blockNumber || null]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+		"accountProof": [
+			"0xf90211a0...",
+			"0xf90211a0...",
+			"0xf90211a0...",
+			"0xf90211a0...",
+			"0xf90211a0...",
+			"0xf90211a0...",
+			"0xf90131a0..."
+		],
+		"balance": "0x0",
+		"codeHash": "0x34eb8290afdbf2cea95f7afaefe0e2e8071e0b9a3ee4f106c8f3b6a45663e05d",
+		"nonce": "0x1",
+		"storageHash": "0x9588589599c2d368b2c109def4942d664838b3b681e80898fae7d2d140fe6a4c",
+		"storageProof": [
+			{
+				"key": "0x0000000000000000000000000000000000000000000000000000000000000002",
+				"value": "0x000000000000000000000000000000000000000001cc3c3beb2aa7ced800000",
+				"proof": ["0xf90211a0...", "0xf90211a0...", "0xf90211a0...", "0xf90211a0..."]
+			},
+			{
+				"key": "0x29ae811400000000000000000000000000000000000000000000000000000000",
+				"value": "0x0000000000000000000000000000000000000000000000000000000000000001",
+				"proof": ["0xf90211a0...", "0xf90211a0...", "0xf90211a0...", "0xf90211a0..."]
+			}
+		]
+	}
+}
+```
+
+### Understanding Merkle Proofs
+
+A Merkle proof allows verification that a piece of data is part of a Merkle tree without having the entire tree. In Ethereum:
+
+1. The state trie root is a 32-byte hash stored in each block
+2. Account data is stored in the state trie, with the account address as the key
+3. Account storage is stored in a separate storage trie, with the storage key as the key
+4. Proofs consist of a set of nodes that allow verification from the root hash to the target data
+
+### Practical Example
+
+```javascript
+// Example: Verify total supply of DAI using a proof
+const ethers = require('ethers');
+const RLP = require('rlp');
+const { keccak256 } = ethers.utils;
+
+async function verifyTokenSupply(tokenAddress) {
+	// DAI token's totalSupply is stored at storage slot 2
+	const totalSupplySlot = '0x0000000000000000000000000000000000000000000000000000000000000002';
+
+	// Get the latest block hash for reference
+	const blockData = await provider.send('eth_getBlockByNumber', ['latest', false]);
+	const blockHash = blockData.hash;
+
+	// Get the proof
+	const proof = await provider.send('eth_getProof', [tokenAddress, [totalSupplySlot], 'latest']);
+
+	console.log(`Block hash: ${blockHash}`);
+	console.log(`State root: ${blockData.stateRoot}`);
+	console.log(`Storage hash: ${proof.storageHash}`);
+
+	// Extract total supply from the proof
+	const totalSupplyHex = proof.storageProof[0].value;
+	const totalSupply = BigInt(totalSupplyHex);
+	const totalSupplyDecimal = totalSupply / 10n ** 18n; // DAI has 18 decimals
+
+	console.log(`Verified total supply: ${totalSupplyDecimal.toString()} DAI`);
+
+	// To actually verify the proof cryptographically, we would need to:
+	// 1. Verify the account proof from stateRoot to storageHash
+	// 2. Verify the storage proof from storageHash to totalSupply value
+	// This requires implementing Merkle-Patricia trie verification
+
+	return {
+		blockHash,
+		stateRoot: blockData.stateRoot,
+		storageHash: proof.storageHash,
+		totalSupply: totalSupplyDecimal.toString(),
+	};
+}
+
+// Usage
+const daiProof = await verifyTokenSupply('0x6B175474E89094C44Da98b954EedeAC495271d0F');
+```
+
+### Finding Storage Slots
+
+For Solidity contracts, storage slots can be determined as follows:
+
+1. **Simple variables**: Stored sequentially starting from slot 0
+2. **Mappings**: `keccak256(abi.encode(key, slot))` where `slot` is the position of the mapping declaration
+3. **Dynamic arrays**: `keccak256(slot) + index`
+4. **ERC20 balances**: Usually in a mapping, e.g., `keccak256(abi.encode(userAddress, 3))`
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getStorageAt" title="Access raw contract storage data">eth_getStorageAt</Link> - Access raw storage values at specific positions in contracts
+- <Link to="/docs/ethereum/core-methods/eth_getCode" title="Retrieve contract bytecode">eth_getCode</Link> - Get the deployed bytecode of a smart contract

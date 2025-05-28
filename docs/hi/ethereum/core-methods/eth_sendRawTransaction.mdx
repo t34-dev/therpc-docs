@@ -1,0 +1,152 @@
+---
+title: eth_sendRawTransaction - Submit Signed Transactions | Ethereum API Methods
+description: Learn how to use the eth_sendRawTransaction method to broadcast signed transactions to the Ethereum network - the essential method for sending ETH, interacting with smart contracts, and deploying new contracts.
+keywords: eth_sendRawTransaction, signed transaction, transaction broadcast, ethereum transaction, raw transaction, transaction hash, eth transfer, gas fees, nonce management, smart contract interaction, transaction signing, offline signing, broadcast transaction, wallet integration, web3 transaction, contract deployment, eip1559 transaction, eip2930 transaction, legacy transaction, ethereum broadcast
+---
+
+# eth_sendRawTransaction
+
+The `eth_sendRawTransaction` method broadcasts a pre-signed transaction to the Ethereum network. This method is used to submit all types of transactions after they have been signed offline, making it the primary method for any state-changing operations on the blockchain.
+
+## Use Cases
+
+- Sending ETH transfers to other addresses and wallets
+- Token transfers (ERC-20, ERC-721, ERC-1155) in applications
+- Smart contract deployments for developers
+- Contract function calls and state changes in dApps
+- Automated transactions via scripts or bots
+- Multi-signature wallet interactions requiring offline signing
+- Meta-transactions (gas-less transactions) for better UX
+- DeFi operations (swaps, liquidity provision, staking)
+- Governance voting through contract interactions
+- NFT minting operations in marketplaces
+
+## Method Details
+
+This method submits a signed transaction to the network for processing.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_sendRawTransaction',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'data',
+			required: true,
+			type: 'string',
+			desc: 'The signed transaction data (hex string)',
+			value:
+				'0xf869018203e882520894f17f52151ebef6c7334fad080c5704d77216b732881bc16d674ec80000801ba02da1c48b670996dcb1f447ef9ef00b33033c48a4fe938f420bec3e56bfd24071a062e0aa78a81bf0290afbc3a9d8e9a068e6d74caa66c5e0fa8a46deaae96b0833',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The transaction hash, or the zero hash if the transaction is not yet available',
+		},
+	]}
+	getParams={(fields) => [
+		fields?.data ||
+			null,
+	]}
+/>
+
+### Transaction Signing Process
+
+Before using `eth_sendRawTransaction`, you need to:
+
+1. Create an unsigned transaction (with nonce, gas parameters, recipient, value, data)
+2. Sign the transaction with a private key
+3. Serialize and hex-encode the signed transaction
+4. Submit the hex string to this method
+
+### Understanding Transaction Types
+
+Ethereum supports different transaction types:
+
+| Type | Description | Structure |
+|------|-------------|-----------|
+| Legacy (Type 0) | Pre-EIP-1559 transactions with gasPrice | `{nonce, gasPrice, gasLimit, to, value, data, v, r, s}` |
+| EIP-2930 (Type 1) | Transactions with access lists | `{chainId, nonce, gasPrice, gasLimit, to, value, data, accessList, v, r, s}` |
+| EIP-1559 (Type 2) | Transactions with priority fee | `{chainId, nonce, maxPriorityFeePerGas, maxFeePerGas, gasLimit, to, value, data, accessList, v, r, s}` |
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331"
+}
+```
+
+### Error Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"error": {
+		"code": 3,
+		"message": "execution reverted: Dai/insufficient-balance",
+		"data": "0x08c379a00000000000000000000000000000000000000000000000000000000000000..."
+	}
+}
+```
+
+### Common Errors and Troubleshooting
+
+| Error | Description | Solution |
+|-------|-------------|----------|
+| Nonce too low | The transaction nonce has already been used | Get the latest nonce with `eth_getTransactionCount` |
+| Nonce too high | The transaction nonce is higher than expected | Use the correct sequential nonce |
+| Insufficient funds | Not enough ETH for gas + value | Add more ETH to the sender address |
+| Gas price too low | Offered gas price below minimum | Increase gas price or use EIP-1559 parameters |
+| Underpriced replacement | When replacing a tx, new gas price is too low | Increase gas price by at least 10% |
+| Already known | Transaction already in the mempool | Wait for the existing transaction |
+| Execution reverted | Contract execution failed | Check contract conditions and parameters |
+
+### Monitoring Transaction Status
+
+After broadcasting a transaction:
+
+1. Store the returned transaction hash
+2. Poll `eth_getTransactionReceipt` until it returns a non-null result
+3. Check the `status` field in the receipt:
+   - `0x1` indicates success
+   - `0x0` indicates failure (reverted)
+
+### Gas Estimation and Optimization
+
+Before sending transactions, you can:
+
+1. Use `eth_estimateGas` to get the approximate gas needed
+2. For EIP-1559 transactions, check current network conditions with `eth_feeHistory`
+3. For time-sensitive transactions, set higher priority fees
+4. For non-urgent transactions, set lower fees to save costs
+
+### Important Notes
+
+- Transactions must be signed with the sender's private key before submission
+- The RPC endpoint never has access to your private keys
+- Use eth_getTransactionReceipt to check status after submission
+- For contract creation, the receipt contains the new contract address in the contractAddress field
+- Hex strings must be properly formatted with even length and '0x' prefix
+- Consider using hardware wallets or secure key management for high-value transactions
+- Nonce management is critical for proper transaction sequencing
+- Transaction replacement requires higher gas price than the original
+- Transaction fees are non-refundable even if the transaction fails
+- EIP-1559 transactions can be more cost-effective during volatile fee periods
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Check transaction status and results">eth_getTransactionReceipt</Link> - Get the receipt of a processed transaction
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Look up transaction details by hash">eth_getTransactionByHash</Link> - Retrieve transaction information by hash
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="Estimate required gas for a transaction">eth_estimateGas</Link> - Calculate gas required for a transaction
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="Get account nonce for transaction sequencing">eth_getTransactionCount</Link> - Get the next available nonce
+- <Link to="/docs/ethereum/core-methods/eth_feeHistory" title="Get historical fee data for gas estimation">eth_feeHistory</Link> - Get historical fee information
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Test transaction execution without mining">eth_call</Link> - Test transaction execution without broadcasting

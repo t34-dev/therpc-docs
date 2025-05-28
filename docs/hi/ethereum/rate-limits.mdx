@@ -1,0 +1,186 @@
+---
+title: दर सीमाएँ और कोटा | Ethereum API उपयोग प्रबंधन
+description: TheRPC API दर सीमाओं, कोटा, इष्टतम API उपयोग के लिए कार्यान्वयन रणनीतियों के लिए व्यापक गाइड, जिसमें त्रुटि हैंडलिंग, कैशिंग, बैचिंग और उच्च-थ्रूपुट अनुप्रयोगों के लिए सर्वोत्तम प्रथाएँ शामिल हैं
+keywords: api दर सीमाएँ, अनुरोध कोटा, api थ्रॉटलिंग, दर सीमित करना, api उपयोग सीमाएँ, ethereum api अनुकूलन, ब्लॉकचेन api प्रदर्शन, web3 दर सीमाएँ, api कोटा प्रबंधन, अनुरोध बैचिंग, api त्रुटि हैंडलिंग
+---
+
+# दर सीमाएँ और कोटा
+
+यह गाइड TheRPC की दर सीमा प्रणाली को समझाती है और आपके API उपयोग के प्रबंधन के लिए सर्वोत्तम प्रथाएँ प्रदान करती है।
+
+## # अनुरोध सीमाएँ
+
+दर सीमाएँ कई स्तरों पर लागू होती हैं:
+
+- प्रति सेकंड अनुरोध
+- प्रति मिनट अनुरोध
+- प्रति दिन अनुरोध
+- समवर्ती कनेक्शन
+
+विशिष्ट सीमाएँ आपकी सदस्यता योजना पर निर्भर करती हैं। वर्तमान सीमाओं के लिए अपना डैशबोर्ड देखें।
+
+## # त्रुटि प्रतिक्रियाएँ
+
+जब आप दर सीमाओं को पार करते हैं, तो आपको प्राप्त होगा:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32029,
+		"message": "Rate limit exceeded"
+	},
+	"id": 1
+}
+```
+
+HTTP प्रतिक्रिया में हेडर्स शामिल होंगे:
+
+```bash
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1628696400
+```
+
+## # सर्वोत्तम प्रथाएँ
+
+### पुनर्प्रयास लागू करें
+
+```javascript
+async function callWithRetry(method, params, maxRetries = 3) {
+	for (let i = 0; i < maxRetries; i++) {
+		try {
+			const response = await makeRequest(method, params);
+			return response;
+		} catch (error) {
+			if (error.code === -32029) {
+				// Rate limit exceeded
+				const backoffTime = Math.pow(2, i) * 1000;
+				await new Promise((resolve) => setTimeout(resolve, backoffTime));
+				continue;
+			}
+			throw error;
+		}
+	}
+	throw new Error('Max retries exceeded');
+}
+```
+
+### बैच अनुरोध
+
+एकल अनुरोध में कई कॉल को संयोजित करें:
+
+```json
+[
+	{
+		"jsonrpc": "2.0",
+		"method": "eth_getBalance",
+		"params": ["0x742d35Cc6634C0532925a3b844Bc454e4438f44e", "latest"],
+		"id": 1
+	},
+	{
+		"jsonrpc": "2.0",
+		"method": "eth_blockNumber",
+		"params": [],
+		"id": 2
+	}
+]
+```
+
+### WebSocket सदस्यताओं का उपयोग करें
+
+रीयल-टाइम डेटा के लिए, पोलिंग के बजाय <Link to="/docs/ethereum/core-methods/eth_subscribe">eth_subscribe</Link> का उपयोग करें।
+
+## # निगरानी
+
+इन माध्यमों से अपने उपयोग की निगरानी करें:
+
+- डैशबोर्ड मेट्रिक्स
+- दर सीमा हेडर्स
+- उपयोग अलर्ट
+
+## # कोटा प्रबंधन
+
+### उपयोग ट्रैक करें
+
+```javascript
+function trackApiUsage(response) {
+	const limits = {
+		limit: response.headers['X-RateLimit-Limit'],
+		remaining: response.headers['X-RateLimit-Remaining'],
+		reset: response.headers['X-RateLimit-Reset'],
+	};
+
+	// Log or monitor usage
+	console.log(`API calls remaining: ${limits.remaining}/${limits.limit}`);
+}
+```
+
+### कैशिंग लागू करें
+
+```javascript
+const cache = new Map();
+
+async function getCachedBlockNumber(cacheTime = 5000) {
+	const cached = cache.get('blockNumber');
+	if (cached && Date.now() - cached.timestamp < cacheTime) {
+		return cached.value;
+	}
+
+	const newValue = await web3.eth.getBlockNumber();
+	cache.set('blockNumber', {
+		value: newValue,
+		timestamp: Date.now(),
+	});
+
+	return newValue;
+}
+```
+
+## # योजना सीमाएँ
+
+विभिन्न सदस्यता योजनाओं में विभिन्न सीमाएँ होती हैं:
+
+### आधार सीमाएँ
+
+- अनुरोध दर
+- दैनिक कोटा
+- WebSocket कनेक्शन
+- सदस्यता सीमाएँ
+
+### अतिरिक्त सुविधाएँ
+
+- अभिलेखीय डेटा एक्सेस
+- डीबग मेथड्स
+- ट्रेस API
+
+विस्तृत योजना तुलना के लिए मूल्य निर्धारण पृष्ठ देखें।
+
+## # अपग्रेड विकल्प
+
+यदि आप नियमित रूप से दर सीमाओं से टकराते हैं, तो विचार करें:
+
+1. अपने अनुरोधों का अनुकूलन
+2. कैशिंग लागू करना
+3. WebSocket सदस्यताओं का उपयोग करना
+4. अपनी योजना को अपग्रेड करना
+
+## # त्रुटि रोकथाम
+
+### उपयोग की निगरानी करें
+
+- अनुरोध गणना ट्रैक करें
+- अलर्ट सेट करें
+- उपयोग पैटर्न की समीक्षा करें
+
+### अनुरोधों का अनुकूलन करें
+
+- जब संभव हो बैच करें
+- प्रतिक्रियाओं को कैश करें
+- उपयुक्त पोलिंग अंतराल का उपयोग करें
+
+### अन्य संदर्भ
+
+- <Link to="/docs/ethereum/authentication" title="Guide to securing your API access with authentication">प्रमाणीकरण गाइड</Link> - API कुंजी प्रबंधन
+- <Link to="/docs/ethereum/basic-operations" title="Guide to common Ethereum blockchain operations">बुनियादी संचालन</Link> - इष्टतम अनुरोध पैटर्न
+- <Link to="/docs/ethereum/faq" title="Frequently asked questions about Ethereum API usage">FAQ</Link> - सामान्य प्रश्न और उत्तर

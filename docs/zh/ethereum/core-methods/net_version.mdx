@@ -1,0 +1,103 @@
+---
+title: net_version - 获取网络ID | 以太坊API方法
+description: 学习如何使用net_version方法识别您的客户端连接到哪个以太坊网络，包括主网、测试网和其他EVM兼容网络。
+keywords: net_version, 网络ID, 以太坊网络, 链ID, 网络识别, 区块链网络, 以太坊主网, 测试网检测, 网络切换, 多链, evm网络, 网络验证, 区块链ID, 链选择, 网络诊断, 链检测
+---
+
+# net_version
+
+`net_version`方法以字符串形式返回当前的网络ID。这使应用程序能够确定客户端连接到哪个以太坊网络，如主网、测试网或其他EVM兼容网络。
+
+## 使用场景
+
+- 发送交易前的网络验证
+- 多链应用程序中的跨链兼容性检查
+- dApps的环境特定功能
+- 防止发送到错误网络的安全验证
+- 多网络dApp开发和测试
+- 防止测试网与主网操作的意外混淆
+- 智能合约部署验证
+- 钱包网络切换确认
+- 交易验证安全检查
+- 特定网络功能启用
+
+## 方法详情
+
+此方法不需要参数，并返回表示网络ID的字符串值。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'net_version',
+		id: 67,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '当前网络ID（字符串形式）',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 67,
+	"result": "1" // 以太坊主网
+}
+```
+
+### 常见网络ID
+
+| 网络ID | 网络名称                 |
+| ---------- | ---------------------------- |
+| "1"        | 以太坊主网             |
+| "5"        | Goerli测试网               |
+| "11155111" | Sepolia测试网              |
+| "10"       | Optimism主网             |
+| "42161"    | Arbitrum One                 |
+| "42170"    | Arbitrum Nova                |
+| "137"      | Polygon主网              |
+| "80001"    | Polygon Mumbai测试网       |
+| "56"       | BNB智能链主网      |
+| "97"       | BNB智能链测试网      |
+| "43114"    | Avalanche C-Chain            |
+| "250"      | Fantom Opera                 |
+| "100"      | Gnosis Chain (原xDai) |
+| "1284"     | Moonbeam                     |
+| "1285"     | Moonriver                    |
+| "324"      | zkSync Era主网           |
+| "59144"    | Linea主网                |
+| "8453"     | Base主网                 |
+| "84531"    | Base Goerli测试网          |
+| "534352"   | Scroll主网               |
+| "7777777"  | Zora主网                 |
+
+### 重要说明
+
+- 网络ID以字符串形式返回，而非数字
+- 网络ID有时与链ID相同，但并非总是如此
+- 某些网络可能随时间改变其网络ID
+- 开发跨链应用程序时，始终验证网络ID
+- 对于安全关键型应用程序，考虑使用多种验证方法
+- EIP-155引入了链ID用于重放保护，在某些情况下与网络ID不同
+- 对于交易签名，链ID（来自`eth_chainId`）通常比网络ID更相关
+
+### 网络ID和链ID的区别
+
+- **网络ID**：在P2P协议中标识网络
+- **链ID**：用于交易签名以防止重放攻击
+- 对于大多数网络，它们的值相同，但存在例外
+- 始终为特定用例使用适当的ID
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_chainId" title="获取用于交易签名的链ID">eth_chainId</Link> - 返回用于交易签名的链ID
+- <Link to="/docs/ethereum/core-methods/net_listening" title="检查您的节点是否正在主动监听连接">net_listening</Link> - 返回客户端是否正在主动网络通信
+- <Link to="/docs/ethereum/core-methods/net_peerCount" title="检查有多少对等节点连接到您的节点">net_peerCount</Link> - 返回已连接对等节点的数量

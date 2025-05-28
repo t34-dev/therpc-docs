@@ -1,0 +1,213 @@
+---
+title: eth_getFilterLogs - Retrieve All Logs for a Filter | Ethereum API Methods
+description: Learn how to use eth_getFilterLogs to fetch all historical logs matching a filter's criteria in one request - essential for event analysis and initial data loading in dApps.
+keywords: eth_getFilterLogs, ethereum log retrieval, historical blockchain events, filter based query, smart contract logs, complete event history, filter log extraction, event backfilling, token transfers, blockchain data
+---
+
+# eth_getFilterLogs
+
+The `eth_getFilterLogs` method returns an array of all logs matching the filter with the given ID. Unlike `eth_getFilterChanges`, which only returns new logs since the last poll, this method returns all logs that match the original filter criteria, regardless of whether they've been returned before, making it perfect for initializing application state or backfilling missed events.
+
+## Use Cases
+
+- Initial data loading in dApps and wallet interfaces
+- Historical event analysis and transaction history
+- Smart contract state reconstruction from events
+- Application state synchronization after downtime
+- Complete event history retrieval and auditing
+- Data analytics and comprehensive reporting
+- Auditing contract interactions and governance
+- Backfilling missed events after service disruption
+- Token balance history reconstruction
+- Market data analysis for trading applications
+
+## Method Details
+
+This method takes a filter ID and returns all logs that match the filter criteria, providing a comprehensive view of historical events.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_getFilterLogs",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterId',
+      required: true,
+      type: 'string',
+      desc: "The filter ID returned by eth_newFilter",
+      value: "0x1a4b0d22dbb7284cf485c969d2857ab3"
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'array',
+      desc: "Array of all log objects matching the filter criteria"
+    }
+  ]}
+  getParams={(fields) => [fields?.filterId || null]}
+/>
+
+### Response Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "topics": [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x000000000000000000000000a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+        "0x00000000000000000000000023a6b9c321aba35d18ca26e66824e917778d9d2b"
+      ],
+      "data": "0x0000000000000000000000000000000000000000000000003635c9adc5dea00000",
+      "blockNumber": "0x10892bc",
+      "transactionHash": "0x56b28388cadcf4da8cbd30aa3c3f126e0513550e6fab6fc20992f3e1435846c8",
+      "transactionIndex": "0x3",
+      "blockHash": "0x6b092af2e8fbe2ceba2034ef4f334f3274a1cce5ffe955fa1895565d9278dac7",
+      "logIndex": "0x7",
+      "removed": false
+    },
+    {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "topics": [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x000000000000000000000000b5d85cbf7cb3ee0d56b3bb207d5fc4b82f43f511",
+        "0x00000000000000000000000023a6b9c321aba35d18ca26e66824e917778d9d2b"
+      ],
+      "data": "0x00000000000000000000000000000000000000000000000000000000007a1200",
+      "blockNumber": "0x10892be",
+      "transactionHash": "0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0",
+      "transactionIndex": "0x6",
+      "blockHash": "0x429e967f9b3b86ee1349669ebb49c5c4a7690287a6d215cc8d7e07d891823d33",
+      "logIndex": "0x5",
+      "removed": false
+    }
+  ]
+}
+```
+
+### Understanding Log Objects
+
+Each log object contains the following comprehensive data:
+
+- **address**: Contract address that generated the event
+- **topics**: Array of 0-4 32-byte topics (indexed parameters)
+  - First topic is typically the event signature hash (keccak256 of event signature)
+  - Subsequent topics are indexed event parameters (each limited to 32 bytes)
+- **data**: Contains the non-indexed event parameters (hex string)
+- **blockNumber**: Block number where the log was created
+- **transactionHash**: Transaction hash that generated the log
+- **transactionIndex**: Transaction's index position in the block
+- **blockHash**: Hash of the block where the log was created
+- **logIndex**: Log index position in the block
+- **removed**: `true` if the log was removed due to a chain reorganization
+
+### Decoding Log Data
+
+To properly use event data, you need to decode it according to the event's ABI:
+
+```javascript
+// Example: Decoding an ERC-20 Transfer event
+function decodeTransferEvent(log) {
+  // ERC-20 Transfer: event Transfer(address indexed from, address indexed to, uint256 value)
+  
+  // From and To are indexed parameters (in topics)
+  const from = '0x' + log.topics[1].slice(26); // Remove padding
+  const to = '0x' + log.topics[2].slice(26);   // Remove padding
+  
+  // Value is a non-indexed parameter (in data)
+  const value = BigInt(log.data);
+  
+  return { from, to, value };
+}
+
+// Usage
+const transferEvents = logs
+  .filter(log => log.topics[0] === '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef')
+  .map(decodeTransferEvent);
+```
+
+### Difference from eth_getLogs
+
+Both `eth_getFilterLogs` and `eth_getLogs` return logs matching criteria, but they have important differences:
+
+1. **Filter-based vs. Direct Query**:
+   - `eth_getFilterLogs` requires creating a filter first with `eth_newFilter`
+   - `eth_getLogs` takes filter criteria directly in the request
+
+2. **Filter Reusability**:
+   - With `eth_getFilterLogs`, you can reuse the same filter ID for multiple calls
+   - With `eth_getLogs`, you must specify the criteria every time
+
+3. **Resource Management**:
+   - `eth_getFilterLogs` relies on server-side filter state, which may expire
+   - `eth_getLogs` is stateless and doesn't rely on server-side filter state
+
+4. **Typical Use Cases**:
+   - `eth_getFilterLogs` is useful in combination with `eth_getFilterChanges` for ongoing monitoring
+   - `eth_getLogs` is often simpler for one-time historical queries
+
+### Common Filter Patterns
+
+Here are some typical filter patterns used with this method:
+
+```javascript
+// 1. ERC-20 token transfers for a specific address
+async function getTokenTransfersForAddress(tokenAddress, userAddress) {
+  const transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+  const userAddressPadded = userAddress.replace('0x', '0x000000000000000000000000');
+  
+  // Create filter for incoming or outgoing transfers
+  const filterId = await provider.send('eth_newFilter', [{
+    address: tokenAddress,
+    topics: [
+      transferEventSignature,
+      [userAddressPadded, null],  // From (outgoing) - OR condition
+      [userAddressPadded, null]   // To (incoming) - OR condition
+    ],
+    fromBlock: '0x1000000',       // Starting block number (adjust as needed)
+    toBlock: 'latest'
+  }]);
+  
+  // Get all matching logs
+  return provider.send('eth_getFilterLogs', [filterId]);
+}
+
+// 2. Smart contract events for a specific function
+async function getSwapEvents(poolAddress) {
+  const swapEventSignature = '0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822';
+  
+  const filterId = await provider.send('eth_newFilter', [{
+    address: poolAddress,
+    topics: [swapEventSignature],
+    fromBlock: '0x1000000',
+    toBlock: 'latest'
+  }]);
+  
+  return provider.send('eth_getFilterLogs', [filterId]);
+}
+```
+
+### Performance Considerations
+
+- This method can be resource-intensive on the node provider
+- For large date ranges, results can be very large
+- May time out if too many logs match the criteria
+- Consider using smaller block ranges for high-volume events
+- Many providers limit the size of responses or the number of logs returned
+- For very large datasets, batching by block ranges is recommended
+- This call may be more expensive in terms of rate limiting than other methods
+- Always check provider documentation for specific limitations
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Create event filters">eth_newFilter</Link> - Create a filter for event logs
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Get new logs since last poll">eth_getFilterChanges</Link> - Retrieve new logs since last poll
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Remove filters">eth_uninstallFilter</Link> - Remove a filter when no longer needed
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Direct log queries">eth_getLogs</Link> - Query logs without filter persistence

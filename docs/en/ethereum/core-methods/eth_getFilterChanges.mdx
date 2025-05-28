@@ -1,0 +1,194 @@
+---
+title: eth_getFilterChanges - Poll for New Events | Ethereum API Methods
+description: Learn how to efficiently poll for new blockchain events using eth_getFilterChanges - essential for monitoring smart contract activity, token transfers, and blockchain state changes.
+keywords: eth_getFilterChanges, ethereum event polling, blockchain logs retrieval, filter based monitoring, smart contract events, event log updates, filter polling strategy, event notification, log collection, blockchain events
+---
+
+# eth_getFilterChanges
+
+The `eth_getFilterChanges` method returns an array of logs which occurred since the last poll for the specified filter. This powerful subscription method works with filters created by `eth_newFilter`, `eth_newBlockFilter`, and `eth_newPendingTransactionFilter`, allowing efficient monitoring of blockchain activity without constantly rescanning historical data.
+
+## Use Cases
+
+- Efficient event monitoring with minimal resource usage
+- Real-time dApp updates and notifications
+- Smart contract state tracking and synchronization
+- Transaction confirmation monitoring
+- Token transfer detection and wallet updates
+- Protocol activity analytics and metrics dashboards
+- Batch processing of blockchain events
+- Resource-efficient blockchain monitoring at scale
+- Log-based automation and triggers
+- Trading bot notifications and market monitoring
+
+## Method Details
+
+This method takes a filter ID and returns any new logs that match the filter criteria since the last poll, providing the foundation for event-driven blockchain applications.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_getFilterChanges",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterId',
+      required: true,
+      type: 'string',
+      desc: "The filter ID returned by eth_newFilter, eth_newBlockFilter, or eth_newPendingTransactionFilter",
+      value: "0x1a4b0d22dbb7284cf485c969d2857ab3"
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'array',
+      desc: "Array of log objects, or an empty array if nothing has changed since last poll"
+    }
+  ]}
+  getParams={(fields) => [fields?.filterId || null]}
+/>
+
+### Response Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "topics": [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x000000000000000000000000a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+        "0x00000000000000000000000023a6b9c321aba35d18ca26e66824e917778d9d2b"
+      ],
+      "data": "0x0000000000000000000000000000000000000000000000003635c9adc5dea00000",
+      "blockNumber": "0x10892bc",
+      "transactionHash": "0x56b28388cadcf4da8cbd30aa3c3f126e0513550e6fab6fc20992f3e1435846c8",
+      "transactionIndex": "0x3",
+      "blockHash": "0x6b092af2e8fbe2ceba2034ef4f334f3274a1cce5ffe955fa1895565d9278dac7",
+      "logIndex": "0x7",
+      "removed": false
+    }
+  ]
+}
+```
+
+### Understanding Log Objects
+
+Each log object contains the following fields that provide comprehensive event information:
+
+- **address**: Contract address that generated the event
+- **topics**: Array of 0-4 32-byte topics (indexed parameters)
+  - First topic is typically the event signature hash (keccak256 of the event name and parameters)
+  - Subsequent topics are indexed event parameters (limited to 32 bytes each)
+- **data**: Contains the non-indexed event parameters (hex string)
+- **blockNumber**: Block number where the log was created
+- **transactionHash**: Transaction hash that generated the log
+- **transactionIndex**: Transaction's index position in the block
+- **blockHash**: Hash of the block where the log was created
+- **logIndex**: Log index position in the block
+- **removed**: `true` if the log was removed due to a chain reorganization (reorg)
+
+### Common Event Signatures
+
+Some frequently monitored event signatures (first topic):
+
+- ERC-20 Transfer: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`
+- ERC-20 Approval: `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925`
+- ERC-721 Transfer: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` (same as ERC-20)
+- Uniswap V2 Swap: `0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822`
+
+### Complete Polling Implementation
+
+Here's a complete pattern for effective event polling:
+
+```javascript
+// 1. Create a filter for a specific event
+async function monitorTokenTransfers(tokenAddress, fromBlock = 'latest') {
+  // ERC-20 Transfer event signature
+  const transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+  
+  // Create the filter
+  const filterId = await provider.send('eth_newFilter', [{
+    address: tokenAddress,
+    topics: [transferEventSignature],
+    fromBlock,
+    toBlock: 'latest'
+  }]);
+  
+  console.log(`Created filter: ${filterId}`);
+  return filterId;
+}
+
+// 2. Poll for changes
+async function pollForTransfers(filterId, interval = 10000) {
+  setInterval(async () => {
+    try {
+      const logs = await provider.send('eth_getFilterChanges', [filterId]);
+      
+      if (logs.length > 0) {
+        console.log(`Found ${logs.length} new transfers`);
+        
+        logs.forEach(log => {
+          // Decode transfer event data
+          const from = '0x' + log.topics[1].slice(26);
+          const to = '0x' + log.topics[2].slice(26);
+          const value = BigInt(log.data);
+          
+          console.log(`Transfer: ${from} → ${to}: ${value}`);
+        });
+      }
+    } catch (error) {
+      console.error('Filter may have expired:', error);
+      // Recreate the filter if needed
+    }
+  }, interval);
+}
+
+// 3. Clean up when done
+async function stopMonitoring(filterId) {
+  await provider.send('eth_uninstallFilter', [filterId]);
+  console.log(`Filter ${filterId} uninstalled`);
+}
+```
+
+### Return Values for Different Filter Types
+
+The response format varies depending on the original filter type:
+
+1. **Log Filter** (created with `eth_newFilter`):
+   - Returns log objects as shown in the example above
+   - Contains full event data with all parameters
+
+2. **Block Filter** (created with `eth_newBlockFilter`):
+   - Returns block hashes as an array of strings
+   - Example: `["0x4b7", "0x4b8", "0x4b9"]`
+
+3. **Pending Transaction Filter** (created with `eth_newPendingTransactionFilter`):
+   - Returns pending transaction hashes as an array of strings
+   - Example: `["0xc6ef2fc5426d6ad6fd9e2a26abeab0aa2411b7ab17f30a99d3cb96aed1d1055b"]`
+
+### Important Notes and Best Practices
+
+- **Filter Expiration**: Filters expire after a period of inactivity (typically 5 minutes)
+- **Polling Frequency**: 
+  - Too frequent: May cause rate limiting from the provider
+  - Too infrequent: Risk filter expiration or missing events during reorgs
+  - Recommended: 10-30 seconds for most applications
+- **Error Handling**: Always implement robust error handling for filter expiration
+- **Alternatives**: For persistent connections, WebSocket subscriptions are more efficient
+- **Filter Recreation**: Be prepared to recreate filters if they expire
+- **Log Processing**: Always completely process all returned logs before the next poll
+- **Chain Reorgs**: Check the `removed` flag to handle reorged events properly
+- **Large Responses**: Be prepared to handle potentially large batches of logs
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Create event filters">eth_newFilter</Link> - Create a new filter for specific event logs
+- <Link to="/docs/ethereum/core-methods/eth_getFilterLogs" title="Get all filter logs">eth_getFilterLogs</Link> - Get all logs matching a filter's criteria
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Remove a filter">eth_uninstallFilter</Link> - Remove a filter when no longer needed
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Query logs directly">eth_getLogs</Link> - Query logs without creating a persistent filter

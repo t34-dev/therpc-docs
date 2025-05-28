@@ -1,0 +1,141 @@
+---
+title: 常见问题解答 | 以太坊 API 故障排除
+description: 全面解答关于 TheRPC 以太坊 API 使用的常见问题，包括身份验证、速率限制、错误处理、性能优化和最佳实施实践
+keywords: therpc 常见问题, api 问题, 区块链 api 常见问题, 以太坊 api 帮助, json rpc 故障排除, 以太坊开发问题, 区块链 api 错误, 以太坊 api 性能, web3 最佳实践, 智能合约交互
+---
+
+# 常见问题解答
+
+## # 身份验证与访问
+
+- #### 如何获取 API 密钥？
+
+  在 TheRPC.io 注册并导航到控制面板生成您的 API 密钥。每个密钥都有自己的速率限制和权限。
+
+- #### 我可以使用多个 API 密钥吗？
+
+  是的，您可以为不同的应用程序或环境创建多个 API 密钥。这有助于监控使用情况和维护安全性。
+
+- #### 如果我的 API 密钥被泄露会怎么样？
+  立即从您的控制面板撤销已泄露的密钥并生成一个新密钥。您的旧密钥将立即停止工作。
+
+## # API 使用
+
+### HTTP 和 WebSocket 端点有什么区别？
+
+- **HTTP**：最适合单个请求和简单集成。使用方法如 <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="获取当前区块号的方法">eth_blockNumber</Link> 或 <Link to="/docs/ethereum/core-methods/eth_getBalance" title="检索账户ETH余额的方法">eth_getBalance</Link>
+- **WebSocket**：适用于实时数据和事件订阅，如 <Link to="/docs/ethereum/core-methods/eth_subscribe" title="订阅实时区块链事件的方法">eth_subscribe</Link>
+
+### 如何处理速率限制？
+
+当收到速率限制错误时，实施指数退避。如果您经常达到限制，请考虑升级您的计划。
+
+### 建议的超时设置是什么？
+
+我们建议：
+
+- HTTP 请求：30 秒超时
+- WebSocket 连接：60 秒 ping/pong 间隔
+- 订阅操作：30 秒超时
+
+## # 错误处理
+
+### 常见错误代码
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32601,
+		"message": "Method not found"
+	},
+	"id": 1
+}
+```
+
+- `-32700`：解析错误
+- `-32600`：无效请求
+- `-32601`：方法未找到
+- `-32602`：无效参数
+- `-32603`：内部错误
+- `-32000 至 -32099`：服务器错误
+
+### 错误处理最佳实践
+
+1. 始终检查响应中是否有 `error` 字段
+2. 实施适当的重试逻辑和退避机制
+3. 记录详细的错误信息以进行调试
+4. 适当处理网络超时
+
+## # 技术问题
+
+### 如何跟踪待处理交易？
+
+使用 <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="获取交易收据和确认状态的方法">eth_getTransactionReceipt</Link> 轮询交易状态。要获取实时更新，请通过 WebSocket 使用 <Link to="/docs/ethereum/core-methods/eth_subscribe" title="订阅实时区块链事件的方法">eth_subscribe</Link> 订阅待处理交易。
+
+```javascript
+// 交易跟踪示例
+const receipt = await web3.eth.getTransactionReceipt(txHash);
+if (receipt) {
+	console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
+}
+```
+
+### 如何确保我的请求按顺序处理？
+
+使用交易的 `nonce` 参数，并在您的应用程序中维护队列以进行顺序处理。您可以使用 <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="获取账户交易计数（nonce）的方法">eth_getTransactionCount</Link> 获取当前 nonce。
+
+### 处理链重组的推荐方法是什么？
+
+1. 使用 <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="获取当前区块号的方法">eth_blockNumber</Link> 等待足够的区块确认
+2. 通过 <Link to="/docs/ethereum/core-methods/eth_subscribe" title="订阅实时区块链事件的方法">eth_subscribe</Link> 监听 `newHeads` 事件
+3. 使用 <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="通过区块号获取区块信息的方法">eth_getBlockByNumber</Link> 验证交易最终性
+
+## # 性能
+
+### 如何优化我的 API 使用？
+
+1. 尽可能批处理相关请求
+2. 通过 <Link to="/docs/ethereum/core-methods/eth_subscribe" title="订阅实时区块链事件的方法">eth_subscribe</Link> 使用 WebSocket 获取实时数据
+3. 实施适当的缓存
+4. 选择适当的轮询间隔
+
+### 高吞吐量应用程序的最佳实践是什么？
+
+1. 使用连接池
+2. 实施请求队列
+3. 监控速率限制
+4. 考虑专用基础设施
+
+## # 网络特定
+
+### 如何在网络之间切换？
+
+只需为每个网络使用适当的端点，同时保持相同的 API 密钥和请求格式。您可以使用 <Link to="/docs/ethereum/core-methods/net_version" title="获取当前网络ID的方法">net_version</Link> 验证网络。
+
+### 我可以在不同网络上使用相同的代码吗？
+
+是的，我们的 API 在不同网络上提供一致的接口。只需为不同网络更新端点 URL。您可以使用 <Link to="/docs/ethereum/core-methods/eth_chainId" title="获取当前链ID的方法">eth_chainId</Link> 检查链 ID。
+
+## # 开发与集成
+
+### 我应该使用哪个 Web3 库？
+
+- **JavaScript**: web3.js 或 ethers.js
+- **Python**: web3.py
+- **Java**: web3j
+- **其他语言**：请参阅我们的 <Link to="/docs/tools/overview" title="不同编程语言工具概述">工具和 SDK</Link> 部分
+
+### 如何测试我的集成？
+
+1. 从测试网端点开始
+2. 使用我们的测试 API 密钥
+3. 实施适当的错误处理
+4. 使用 <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="获取当前区块号的方法">eth_blockNumber</Link> 等方法验证响应
+5. 监控性能
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/quick-start" title="快速开始使用以太坊 API">快速入门指南</Link> - 快速入门
+- <Link to="/docs/ethereum/authentication" title="保护 API 访问的指南">身份验证指南</Link> - 详细身份验证信息
+- <Link to="/docs/ethereum/rate-limits" title="关于 API 使用限制和配额的信息">速率限制</Link> - 了解使用限制

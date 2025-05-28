@@ -1,0 +1,189 @@
+---
+title: Ethereum ब्लॉकचेन विकास के लिए Go टूल्स | Go-Ethereum गाइड
+description: Ethereum विकास के लिए Go टूल्स का व्यापक गाइड, जिसमें आधिकारिक Go-Ethereum (geth) कार्यान्वयन, स्मार्ट कॉन्ट्रैक्ट एकीकरण और प्रोडक्शन-रेडी कोड उदाहरण शामिल हैं
+keywords: go ethereum, geth, ethereum go, golang blockchain, go-ethereum, golang web3, ethereum golang, ethereum node go, geth client, go smart contracts, golang dapp, blockchain golang
+---
+
+# Go टूल्स
+
+Go आधिकारिक Ethereum कार्यान्वयन go-ethereum (geth) के माध्यम से प्रदान करता है, जिससे यह Ethereum विकास के लिए एक शक्तिशाली विकल्प बनता है।
+
+<PayAttention category="Go" />
+
+## # Go-Ethereum (geth)
+
+Ethereum प्रोटोकॉल का आधिकारिक Go कार्यान्वयन।
+
+```go
+package ethereum
+
+import (
+    "context"
+    "math/big"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/core/types"
+)
+
+type EthereumClient struct {
+    client *ethclient.Client
+}
+
+func NewEthereumClient(url string) (*EthereumClient, error) {
+    client, err := ethclient.Dial(url)
+    if err != nil {
+        return nil, err
+    }
+    return &EthereumClient{client: client}, nil
+}
+
+func (ec *EthereumClient) GetBalance(address string) (*big.Float, error) {
+    account := common.HexToAddress(address)
+    balance, err := ec.client.BalanceAt(context.Background(), account, nil)
+    if err != nil {
+        return nil, err
+    }
+
+    fbalance := new(big.Float)
+    fbalance.SetString(balance.String())
+    ethValue := new(big.Float).Quo(fbalance, big.NewFloat(1e18))
+
+    return ethValue, nil
+}
+
+func (ec *EthereumClient) SendTransaction(from, to common.Address, value *big.Int) (*types.Transaction, error) {
+    nonce, err := ec.client.PendingNonceAt(context.Background(), from)
+    if err != nil {
+        return nil, err
+    }
+
+    gasPrice, err := ec.client.SuggestGasPrice(context.Background())
+    if err != nil {
+        return nil, err
+    }
+
+    tx := types.NewTransaction(nonce, to, value, 21000, gasPrice, nil)
+    return tx, nil
+}
+```
+
+- **GitHub**: <Link to="https://github.com/ethereum/go-ethereum" target="_blank" absolute>go-ethereum</Link>
+- **दस्तावेज़ीकरण**: <Link to="https://geth.ethereum.org/" target="_blank" absolute>geth.ethereum.org</Link>
+- **विशेषताएँ**:
+  - पूर्ण नोड कार्यान्वयन
+  - पूर्ण Ethereum प्रोटोकॉल
+  - उच्च प्रदर्शन
+  - CLI टूल्स
+  - मोबाइल समर्थन
+  - कॉन्ट्रैक्ट बाइंडिंग्स
+
+## # स्मार्ट कॉन्ट्रैक्ट एकीकरण
+
+Go में स्मार्ट कॉन्ट्रैक्ट्स के साथ काम करना:
+
+```go
+package contracts
+
+import (
+    "github.com/ethereum/go-ethereum/accounts/abi/bind"
+    "github.com/ethereum/go-ethereum/common"
+)
+
+type SmartContractClient struct {
+    contract *bind.BoundContract
+    address  common.Address
+}
+
+func NewContract(address common.Address, client *ethclient.Client) (*SmartContractClient, error) {
+    parsed, err := abi.JSON(strings.NewReader(ContractABI))
+    if err != nil {
+        return nil, err
+    }
+
+    contract := bind.NewBoundContract(address, parsed, client, client, client)
+    return &SmartContractClient{
+        contract: contract,
+        address:  address,
+    }, nil
+}
+
+func (sc *SmartContractClient) CallMethod(method string, args ...interface{}) error {
+    opts := &bind.CallOpts{
+        Pending: false,
+        Context: context.Background(),
+    }
+
+    return sc.contract.Call(opts, method, args...)
+}
+```
+
+## # इवेंट मॉनिटरिंग
+
+Ethereum इवेंट्स की सदस्यता लें और उन्हें मॉनिटर करें:
+
+```go
+func (ec *EthereumClient) MonitorBlocks() (<-chan *types.Header, error) {
+    headers := make(chan *types.Header)
+    sub, err := ec.client.SubscribeNewHead(context.Background(), headers)
+    if err != nil {
+        return nil, err
+    }
+
+    go func() {
+        for {
+            select {
+            case err := <-sub.Err():
+                log.Fatal(err)
+            case header := <-headers:
+                block, err := ec.client.BlockByHash(context.Background(), header.Hash())
+                if err != nil {
+                    log.Fatal(err)
+                }
+                fmt.Println("New block:", block.Number().Uint64())
+            }
+        }
+    }()
+
+    return headers, nil
+}
+```
+
+## # युटिल्स और हेल्पर्स
+
+Ethereum विकास के लिए उपयोगी युटिलिटीज़:
+
+```go
+package utils
+
+import (
+    "math/big"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/common/hexutil"
+)
+
+// WeiToEther वेई को ईथर में परिवर्तित करता है
+func WeiToEther(wei *big.Int) *big.Float {
+    return new(big.Float).Quo(
+        new(big.Float).SetInt(wei),
+        new(big.Float).SetInt(big.NewInt(1e18)),
+    )
+}
+
+// EtherToWei ईथर को वेई में परिवर्तित करता है
+func EtherToWei(ether *big.Float) *big.Int {
+    truncInt, _ := new(big.Float).Mul(ether, big.NewFloat(1e18)).Int(nil)
+    return truncInt
+}
+
+// IsValidAddress जांचता है कि क्या पता मान्य है
+func IsValidAddress(address string) bool {
+    return common.IsHexAddress(address)
+}
+```
+
+### इसे भी देखें
+
+- <Link to="/docs/ethereum/tools/overview" title="उपलब्ध Ethereum विकास टूल्स और SDK का पूर्ण अवलोकन">टूल्स अवलोकन</Link> - सभी उपलब्ध SDK और टूल्स
+- <Link to="/docs/ethereum/authentication" title="Ethereum नोड्स और API सेवाओं के साथ प्रमाणीकरण के लिए गाइड">प्रमाणीकरण गाइड</Link> - विस्तृत प्रमाणीकरण जानकारी
+- <Link to="/docs/ethereum/basic-operations" title="डेवलपर्स के लिए मूलभूत Ethereum ब्लॉकचेन ऑपरेशंस सीखें">मूलभूत ऑपरेशंस गाइड</Link> - आधारभूत ऑपरेशंस
+- <Link to="/docs/ethereum/all-methods" title="सभी उपलब्ध Ethereum API विधियों का पूर्ण संदर्भ">उपलब्ध विधियां</Link> - API क्षमताओं का अन्वेषण करें

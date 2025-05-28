@@ -1,0 +1,172 @@
+---
+title: eth_estimateGas - Estimar Costo de Gas de Transacción | Métodos de API de Ethereum
+description: Aprenda a usar el método eth_estimateGas para calcular el gas estimado requerido para las transacciones de Ethereum. Incluye parámetros, ejemplos y mejores prácticas.
+keywords: eth_estimateGas, estimación de gas, gas de transacción, gas ethereum, costo de ejecución de contrato inteligente, límite de gas, tarifas de transacción, optimizar gas, transacción fallida
+---
+
+# eth_estimateGas
+
+El método `eth_estimateGas` genera una estimación de cuánto gas es necesario para permitir que una transacción se complete. Este método simula la ejecución sin escribir realmente en la blockchain, proporcionando a los desarrolladores una forma fiable de evitar errores de gas insuficiente y optimizar los costos de transacción.
+
+## Casos de Uso
+
+- Pre-cálculo de costos de transacción para interfaces de usuario
+- Estimación de costo de despliegue de contratos inteligentes
+- Verificación de viabilidad de transacción antes del envío
+- Análisis de optimización de gas y reducción de costos
+- Prevención de transacciones fallidas debido a gas insuficiente
+- Planificación de presupuesto para transacciones por lotes
+- Determinación de límites de gas para interacciones complejas con contratos
+- Prueba de funcionalidad de contratos sin gastar gas real
+
+## Detalles del Método
+
+Este método simula la ejecución de la transacción y devuelve el consumo estimado de gas, típicamente añadiendo un margen de seguridad al valor bruto.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_estimateGas',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'transaction',
+			required: true,
+			type: 'object',
+			desc: 'El objeto de llamada de transacción que contiene los siguientes campos:',
+			fields: [
+				{
+					id: 'from',
+					type: 'string',
+					desc: 'La dirección desde la cual se envía la transacción',
+					value: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Router Uniswap V2
+				},
+				{
+					id: 'to',
+					type: 'string',
+					required: true,
+					desc: 'La dirección a la cual está dirigida la transacción',
+					value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // Contrato WETH
+				},
+				{
+					id: 'gas',
+					type: 'integer',
+					desc: 'El entero de gas proporcionado para la ejecución de la transacción',
+					value: '',
+				},
+				{
+					id: 'gasPrice',
+					type: 'integer',
+					desc: 'El entero de gasPrice usado para cada gas pagado codificado como hexadecimal',
+					value: '',
+				},
+				{
+					id: 'value',
+					type: 'integer',
+					desc: 'El entero de valor enviado con esta transacción codificado como hexadecimal',
+					value: '0x186a0',
+				},
+				{
+					id: 'data',
+					type: 'string',
+					desc: 'El hash de la firma del método y parámetros codificados',
+					value: '',
+				},
+			],
+		},
+		{
+			id: 'blockNumber',
+			type: 'string',
+			desc: 'El número de bloque en formato hexadecimal o etiquetas: latest, earliest, pending, safe, finalized',
+			value: 'latest',
+		},
+		{
+			id: 'stateOverride',
+			type: 'object',
+			desc: 'Anulación de estado opcional para simulación de transacción',
+			fields: [
+				{
+					id: 'balance',
+					type: 'string',
+					desc: 'Saldo falso para establecer para la cuenta',
+					value: '',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'Nonce falso para establecer para la cuenta',
+					value: '',
+				},
+				{
+					id: 'code',
+					type: 'string',
+					desc: 'Bytecode EVM falso para inyectar',
+					value: '',
+				},
+				{
+					id: 'state',
+					type: 'object',
+					desc: 'Anulaciones de slot de almacenamiento falso',
+					value: '',
+				},
+				{
+					id: 'stateDiff',
+					type: 'object',
+					desc: 'Anulaciones individuales de slot de almacenamiento falso',
+					value: '',
+				},
+			],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'La cantidad estimada de gas en formato hexadecimal',
+		},
+	]}
+	getParams={(fields) => {
+		const params = [fields?.transaction || null];
+		if (fields?.blockNumber) params.push(fields.blockNumber);
+		if (fields?.stateOverride) params.push(fields.stateOverride);
+		return params;
+	}}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x5208" // 21000 gas (transferencia ETH estándar)
+}
+```
+
+### Estimaciones Comunes de Gas
+
+Diferentes operaciones requieren diferentes cantidades de gas:
+
+- Transferencia de ETH: 21,000 gas (`0x5208`)
+- Transferencia de token ERC20: ~45,000-65,000 gas
+- Llamada simple a contrato inteligente: ~30,000-100,000 gas
+- Despliegue de contrato inteligente: Varía ampliamente según el tamaño y complejidad del contrato
+- Acuñación de NFT: ~50,000-300,000 gas
+
+Para mejores resultados, siempre use `eth_estimateGas` en lugar de codificar estos valores, ya que las actualizaciones de contratos y las condiciones de red pueden cambiar los requisitos de gas.
+
+### Consideraciones Importantes
+
+- La estimación incluye un margen de seguridad y puede ser mayor que el uso real
+- El método fallará con un error si la transacción fallaría en la cadena
+- Las estimaciones de gas pueden variar entre diferentes nodos y proveedores
+- Las operaciones intensivas en memoria pueden aumentar significativamente el uso de gas
+- Las anulaciones de estado permiten probar diferentes escenarios sin cambiar la blockchain
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Ejecutar llamadas de solo lectura">eth_call</Link> - Ejecutar una llamada sin crear una transacción
+- <Link to="/docs/ethereum/core-methods/eth_sendTransaction" title="Enviar transacciones en cadena">eth_sendTransaction</Link> - Crear y enviar transacción
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="Obtener precio actual del gas">eth_gasPrice</Link> - Obtener el precio actual del gas en wei

@@ -1,0 +1,122 @@
+---
+title: txpool_status - Obtener Conteo del Pool de Transacciones | Métodos API de Ethereum
+description: Aprende a usar el método txpool_status para monitorear transacciones pendientes y en cola en el mempool de tu nodo Ethereum, verificar la congestión de la red y optimizar estrategias de precio de gas.
+keywords: txpool_status, pool de transacciones, transacciones pendientes, transacciones en cola, mempool, txpool ethereum, geth, cola de transacciones, mempool ethereum, conteo de tx pendientes, congestión de red, optimización de precio de gas, acumulación blockchain, monitoreo de transacciones, pool de transacciones del nodo, estado de transacciones ethereum
+---
+
+# txpool_status
+
+El método `txpool_status` devuelve el número de transacciones en estados pendientes y en cola en el pool de transacciones. Este método proporciona una vista rápida del tamaño del pool de transacciones y la congestión de la red sin recuperar datos detallados de transacciones.
+
+## Casos de Uso
+
+- Monitoreo del tamaño del pool de transacciones para verificaciones de salud de la red
+- Detección de congestión de red para ajustar precios de gas
+- Monitoreo de rendimiento de nodos en configuraciones de infraestructura
+- Evaluación de acumulación de transacciones para operaciones de tiempo crítico
+- Estimación del tiempo de inclusión de transacciones para retroalimentación al usuario
+- Análisis de mempool para investigación y optimización
+- Optimización de estrategia de precio de gas para confirmaciones más rápidas
+- Visualización de actividad de red en paneles de control
+- Detección de patrones inusuales de transacciones
+- Construcción de motores de recomendación de precio de gas
+
+## Detalles del Método
+
+Este método no requiere parámetros y devuelve un conteo de transacciones en cada estado.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'txpool_status',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'Objeto que contiene conteos de transacciones pendientes y en cola',
+			fields: [
+				{
+					id: 'pending',
+					type: 'string',
+					desc: 'Número de transacciones pendientes (hexadecimal)',
+				},
+				{
+					id: 'queued',
+					type: 'string',
+					desc: 'Número de transacciones en cola (hexadecimal)',
+				},
+			],
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"pending": "0x21c",
+		"queued": "0xa5"
+	}
+}
+```
+
+### Entendiendo la Respuesta
+
+La respuesta contiene dos valores hexadecimales:
+
+- **pending**: Número de transacciones pendientes (ej., `"0x21c"` = 540 transacciones)
+- **queued**: Número de transacciones en cola (ej., `"0xa5"` = 165 transacciones)
+
+Para convertir hexadecimal a decimal:
+
+- `"0x21c"` → 540 (transacciones pendientes)
+- `"0xa5"` → 165 (transacciones en cola)
+
+### Estados de Transacciones
+
+- **Pendientes**: Transacciones elegibles para inclusión en el próximo bloque
+- Tienen nonces válidos (iguales al nonce actual del remitente)
+- Cumplen con todos los demás criterios de validez
+- Listas para ser minadas
+
+- **En Cola**: Transacciones aún no elegibles para ejecución
+- Pueden tener nonces futuros (más altos que el nonce actual del remitente + conteo pendiente)
+- Pueden tener otras restricciones que impiden la ejecución inmediata
+- Esperando que se cumplan los prerrequisitos
+
+### Indicadores de Congestión de Red
+
+Los conteos del pool de transacciones pueden indicar congestión de red:
+
+| Conteo Pendiente | Conteo en Cola | Estado de la Red   |
+| ---------------- | -------------- | ------------------ |
+| < 100            | < 50           | Baja actividad     |
+| 100-500          | < 100          | Actividad normal   |
+| 500-2000         | 100-500        | Alta actividad     |
+| > 2000           | > 500          | Congestión de red  |
+
+_Nota: Estos son rangos aproximados y pueden variar según las condiciones de la red._
+
+### Notas Importantes
+
+- Este método es principalmente soportado por clientes Geth
+- No todas las implementaciones de clientes Ethereum soportan el espacio de nombres txpool
+- Los conteos se devuelven como cadenas hexadecimales, no números decimales
+- Un alto conteo pendiente podría indicar congestión de red o bajos precios de gas
+- Un alto conteo en cola podría indicar muchas transacciones futuras o secuenciación incorrecta de nonce
+- Estos conteos pueden cambiar rápidamente con cada nuevo bloque y transacción entrante
+- Durante períodos de alta actividad, estos números pueden aumentar significativamente
+- Valores cero para ambos indican un pool de transacciones vacío o un nodo recién sincronizado
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/txpool_inspect" title="Obtener un resumen legible de transacciones en el mempool">txpool_inspect</Link> - Devuelve un resumen de texto del pool de transacciones
+- <Link to="/docs/ethereum/core-methods/txpool_content" title="Obtener información detallada sobre todas las transacciones en el mempool">txpool_content</Link> - Devuelve información detallada sobre todas las transacciones en el pool

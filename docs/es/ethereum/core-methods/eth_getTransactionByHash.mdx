@@ -1,0 +1,211 @@
+---
+title: eth_getTransactionByHash - Recuperar Transacción por Hash | Métodos de API de Ethereum
+description: Aprenda a utilizar el método eth_getTransactionByHash para obtener información detallada de transacciones utilizando un hash de transacción. Incluye ejemplos para varios tipos de transacciones.
+keywords: eth_getTransactionByHash, hash de transacción, transacción ethereum, detalles de transacción, búsqueda de hash tx, consulta blockchain
+---
+
+# eth_getTransactionByHash
+
+El método `eth_getTransactionByHash` devuelve información completa sobre una transacción identificada por su hash único. Este es uno de los métodos más comúnmente utilizados para recuperar detalles de transacciones directamente.
+
+## Casos de Uso
+
+- Confirmación de estado de transacción
+- Validación de transacción
+- Verificación de pagos
+- Análisis de interacción con contratos inteligentes
+- Monitorización de transacciones
+- Análisis de uso de gas
+- Recuperación de datos históricos de transacciones
+- Depuración de transacciones
+
+## Detalles del Método
+
+Este método recupera datos detallados de transacción utilizando el hash único de la transacción.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getTransactionByHash',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'hash',
+			required: true,
+			type: 'string',
+			desc: 'El hash de la transacción',
+			value: '0xbb3a336e3f823ec18197f1e13ee875700f08f03e2cab75f0d0b118dabb44cba0',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'El objeto de transacción, o null si no se encuentra',
+			fields: [
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: 'Hash del bloque que contiene esta transacción, null para transacciones pendientes',
+				},
+				{
+					id: 'blockNumber',
+					type: 'string',
+					desc: 'Número del bloque que contiene esta transacción (hex), null para transacciones pendientes',
+				},
+				{
+					id: 'from',
+					type: 'string',
+					desc: 'Dirección del remitente',
+				},
+				{
+					id: 'gas',
+					type: 'string',
+					desc: 'Gas proporcionado por el remitente (hex)',
+				},
+				{
+					id: 'gasPrice',
+					type: 'string',
+					desc: 'Precio del gas en wei (hex)',
+				},
+				{
+					id: 'maxFeePerGas',
+					type: 'string',
+					desc: 'Tarifa máxima por gas (transacciones EIP-1559)',
+				},
+				{
+					id: 'maxPriorityFeePerGas',
+					type: 'string',
+					desc: 'Tarifa máxima de prioridad por gas (transacciones EIP-1559)',
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: 'Hash de la transacción',
+				},
+				{
+					id: 'input',
+					type: 'string',
+					desc: 'Carga de datos de la transacción',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'Número de transacciones del remitente previas a esta (hex)',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					desc: 'Dirección del destinatario, null para transacciones de creación de contratos',
+				},
+				{
+					id: 'transactionIndex',
+					type: 'string',
+					desc: "Entero de la posición de la transacción en el bloque (hex), null para transacciones pendientes",
+				},
+				{
+					id: 'value',
+					type: 'string',
+					desc: 'Valor transferido en wei (hex)',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: 'Tipo de transacción (0=legacy, 1=EIP2930, 2=EIP1559)',
+				},
+				{
+					id: 'accessList',
+					type: 'array',
+					desc: 'Lista de direcciones y claves de almacenamiento (EIP-2930 y EIP-1559)',
+				},
+				{
+					id: 'chainId',
+					type: 'string',
+					desc: 'ID de cadena especificado en la transacción',
+				},
+				{
+					id: 'v',
+					type: 'string',
+					desc: 'Parámetro V de la firma',
+				},
+				{
+					id: 'r',
+					type: 'string',
+					desc: 'Parámetro R de la firma',
+				},
+				{
+					id: 's',
+					type: 'string',
+					desc: 'Parámetro S de la firma',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.hash || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"blockHash": "0xb3b20624f8f0f86eb50dd04688409e5cea4bd02d700bf6e79e9384d47d6a5a35",
+		"blockNumber": "0x11a48cb",
+		"from": "0x28c6c06298d514db089934071355e5743bf21d60",
+		"gas": "0x21924",
+		"gasPrice": "0x1057b28df",
+		"maxFeePerGas": "0x11986c07a",
+		"maxPriorityFeePerGas": "0x77359400",
+		"hash": "0x5d15326cb350e13d19d1618b7534dcad9feac5cce8a877b8e6fdfd963a4889f7",
+		"input": "0xa9059cbb000000000000000000000000ae2fc483527b8ef99eb5d9b44875f005ba1fae9600000000000000000000000000000000000000000000001158e460913d00000",
+		"nonce": "0x3b50",
+		"to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+		"transactionIndex": "0x4d",
+		"value": "0x0",
+		"type": "0x2",
+		"accessList": [],
+		"chainId": "0x1",
+		"v": "0x0",
+		"r": "0x35707b530856150cec9ef609a724e2eb651f71ed9f0b0f94d9969919dae58387",
+		"s": "0x7b305ef8f21e889f63d5178e7d2cbb85880ceaae045b0f46aef808c70b3a7a42"
+	}
+}
+```
+
+### Identificación de Tipos de Transacción
+
+Examinando los datos de la transacción, puedes identificar patrones comunes de transacción:
+
+1. **Transferencia Simple de ETH**:
+
+- `to` es una dirección regular (no un contrato)
+- `input` es "0x" (datos vacíos)
+- `value` es mayor que 0
+
+2. **Transferencia de Token ERC-20**:
+
+- `to` es una dirección de contrato de token
+- `input` comienza con "0xa9059cbb" (firma del método de transferencia)
+- `value` es típicamente 0
+
+3. **Despliegue de Contrato**:
+
+- `to` es null
+- `input` contiene el bytecode del contrato
+
+4. **Llamada a Método de Contrato**:
+
+- `to` es una dirección de contrato
+- `input` comienza con la firma de la función (primeros 4 bytes del hash keccak256 del nombre de la función y parámetros)
+- Puede incluir `value` si la función es pagable
+
+```
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Verificar el estado de ejecución de la transacción">eth_getTransactionReceipt</Link> - Obtener recibo de transacción con resultados de ejecución y eventos
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockHashAndIndex" title="Encontrar transacciones por posición en un bloque">eth_getTransactionByBlockHashAndIndex</Link> - Buscar transacciones usando un hash de bloque y posición de índice

@@ -1,0 +1,133 @@
+---
+title: eth_getStorageAt - Retrieve Contract Storage | Ethereum API Methods
+description: Learn how to use the eth_getStorageAt method to access raw storage data from Ethereum smart contracts. Includes storage layout explanations and practical examples.
+keywords: eth_getStorageAt, contract storage, ethereum storage, smart contract state, storage slots, solidity storage, blockchain data access
+---
+
+# eth_getStorageAt
+
+The `eth_getStorageAt` method returns the value stored at a specific storage position for a given smart contract address. This low-level method allows direct access to the contract's state variables and is crucial for contract analysis and debugging.
+
+## Use Cases
+
+- Smart contract debugging and analysis
+- Token balance verification
+- Protocol governance inspection
+- Proxy implementation verification
+- Contract state auditing
+- Storage layout validation
+- DAO proposal status checking
+- Contract upgrade verification
+
+## Method Details
+
+This method provides raw access to any storage slot in a contract's storage.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getStorageAt',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: 'The address of the smart contract',
+			value: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', // UNI token contract
+		},
+		{
+			id: 'position',
+			required: true,
+			type: 'string',
+			desc: 'The integer of the storage position (hex string)',
+			value: '0x0', // First storage slot
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Block number in hex format or block tag',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The value at the specified storage position (32 bytes, hex encoded)',
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.position || null, fields?.blockNumber || null]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x000000000000000000000000000000000000000000000000000000000000000a"
+}
+```
+
+### Understanding Solidity Storage Layout
+
+Solidity's storage layout follows specific rules:
+
+1. **State Variables**: Stored sequentially starting from slot 0
+
+```solidity
+// Storage slot 0
+uint256 firstVariable;
+// Storage slot 1
+address secondVariable;
+```
+
+2. **Mappings**: The slot itself contains no data, but serves as a seed for computing positions
+
+```solidity
+// Storage slot 2 (empty)
+mapping(address => uint256) balances;
+// Value stored at keccak256(abi.encode(userAddress, 2))
+```
+
+3. **Dynamic Arrays**: The slot contains the array length, data starts at `keccak256(slot)`
+
+```solidity
+// Storage slot 3 has length
+uint256[] myArray;
+// Values stored at keccak256(3) + index
+```
+
+4. **Packed Variables**: Multiple variables smaller than 32 bytes are packed together
+
+```solidity
+// All in storage slot 4
+uint128 a;
+uint64 b;
+uint64 c;
+```
+
+### Common Storage Slots
+
+- **ERC20 Total Supply**: Often stored at slot 0 or 2
+- **ERC20 Balances Mapping**: Often at slot 1 or 3
+- **ERC20 Allowances Mapping**: Often at slot 2 or 4
+- **Proxy Implementation Address**: For EIP-1967 proxies at `0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc`
+
+### Storage Inspection Tools
+
+For complex contracts, consider using dedicated tools:
+
+- **Slither**: Static analyzer that can generate storage layouts
+- **Tenderly**: Visual debugger with storage inspection
+- **Hardhat**: Console debugging with storage access
+- **Etherscan**: Sometimes provides verified contract storage layouts
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getCode" title="Retrieve smart contract bytecode">eth_getCode</Link> - Get the bytecode deployed at a specific address
+- <Link to="/docs/ethereum/core-methods/eth_getProof" title="Generate Merkle proofs for account data">eth_getProof</Link> - Retrieve cryptographic proofs for account and storage values

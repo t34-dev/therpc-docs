@@ -1,0 +1,82 @@
+---
+title: eth_maxPriorityFeePerGas - Obtener Estimaciones de Tarifa Prioritaria | Métodos API de Ethereum
+description: Aprenda a usar el método eth_maxPriorityFeePerGas para obtener la tarifa prioritaria recomendada actual (propina) necesaria para la inclusión de transacciones en la red Ethereum.
+keywords: eth_maxPriorityFeePerGas, tarifa prioritaria, propina de transacción, EIP-1559, precio de gas, propina de minero, prioridad de transacción, optimización de gas ethereum, propina de validador, estimación de tarifas blockchain, cálculo de tarifas de gas, tarifa de transacción, propina eth, tarifa prioritaria ethereum, tarifa de inclusión de bloque, propina de gas, precios de transacción
+---
+
+# eth_maxPriorityFeePerGas
+
+El método `eth_maxPriorityFeePerGas` devuelve la tarifa prioritaria recomendada (propina) por unidad de gas que debería incluirse en las transacciones EIP-1559. Este valor representa lo que los validadores actualmente esperan como incentivo para incluir transacciones en los bloques.
+
+## Casos de Uso
+
+- Análisis del mercado de tarifas para investigadores de blockchain
+- Optimización de tarifas de transacción para carteras y dApps
+- Construcción de transacciones EIP-1559 en aplicaciones
+- Desarrollo de estrategias de precio de gas para operaciones de alta prioridad
+- Estimación de prioridad para transacciones sensibles al tiempo
+- Sugerencias de precio de gas en DApps para mejor experiencia de usuario
+- Monitoreo de incentivos de validadores en tiempo real
+- Optimización de costos de transacción durante congestión de red
+- Establecimiento de tarifas apropiadas para despliegues de contratos inteligentes
+- Construcción de estimadores de tarifas para aplicaciones de carteras
+
+## Detalles del Método
+
+Este método proporciona la tarifa prioritaria recomendada actual en wei.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_maxPriorityFeePerGas',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'La tarifa prioritaria recomendada en wei (hexadecimal)',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x3b9aca00" // 1 Gwei (1,000,000,000 wei)
+}
+```
+
+### Entendiendo las Tarifas Prioritarias
+
+La tarifa prioritaria es un componente de la estructura de tarifas EIP-1559:
+
+- **Tarifa Base**: Determinada algorítmicamente, quemada tras la inclusión de la transacción
+- **Tarifa Prioritaria (propina)**: Pago opcional a validadores para inclusión de transacciones
+- **Tarifa Máxima**: Cantidad máxima que un usuario está dispuesto a pagar (incluye tanto la tarifa base como la tarifa prioritaria)
+
+La tarifa prioritaria sirve como incentivo para que los validadores incluyan una transacción en su bloque. Las tarifas prioritarias más altas generalmente resultan en una inclusión más rápida de la transacción, especialmente durante períodos de congestión de la red.
+
+### Notas Importantes
+
+- Las tarifas prioritarias fluctúan según la demanda de la red
+- Para transacciones sensibles al tiempo, considere usar una tarifa prioritaria más alta
+- Durante períodos de baja actividad en la red, la tarifa prioritaria mínima (a menudo 1 Gwei) suele ser suficiente
+- Este método refleja la estimación del nodo, otros nodos pueden tener estimaciones ligeramente diferentes
+- Este método solo es relevante para redes que soportan EIP-1559 (Ethereum post-fork de Londres)
+- Incluso con una tarifa prioritaria alta, la inclusión no está garantizada durante congestión extrema
+- Las tarifas prioritarias pueden variar significativamente durante lanzamientos de NFT y otros eventos de alta demanda
+- Diferentes validadores pueden tener diferentes estrategias para la selección de transacciones
+- Los datos de tarifas históricas (vía eth_feeHistory) pueden proporcionar contexto para las recomendaciones actuales de tarifas prioritarias
+- Algunas carteras y dApps implementan sus propios algoritmos de estimación de tarifas que pueden diferir de la sugerencia del nodo
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_feeHistory" title="Obtener datos históricos de tarifas para mejor estimación de tarifas">eth_feeHistory</Link> - Recuperar datos históricos de tarifas para una estimación más precisa
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="Obtener precio de gas legacy para transacciones pre-EIP-1559">eth_gasPrice</Link> - Obtener precio de gas legacy para transacciones pre-EIP-1559

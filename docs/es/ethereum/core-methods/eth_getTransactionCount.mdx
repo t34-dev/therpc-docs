@@ -1,0 +1,216 @@
+---
+title: eth_getTransactionCount - Obtener Nonce de Cuenta | Métodos de API de Ethereum
+description: Aprenda a utilizar el método eth_getTransactionCount para recuperar el número de transacciones enviadas desde una dirección Ethereum, también conocido como nonce.
+keywords: eth_getTransactionCount, contador de transacciones, nonce, nonce de cuenta, cuenta ethereum, secuencia de transacciones, transacciones pendientes
+---
+
+# eth_getTransactionCount
+
+El método `eth_getTransactionCount` devuelve el número de transacciones enviadas desde una dirección específica, que también se conoce como "nonce". Este valor es crucial para crear nuevas transacciones, ya que cada transacción desde una cuenta debe usar un valor de nonce exactamente uno más alto que la transacción anterior.
+
+## Casos de Uso
+
+- Creación y firma de transacciones
+- Gestión de nonce para secuencias de transacciones
+- Análisis de actividad de cuenta
+- Identificación de transacciones atascadas
+- Validación de direcciones (EOA vs Contrato)
+- Sincronización de billeteras
+- Prevención de repetición de transacciones
+- Gestión de cola de transacciones
+
+## Detalles del Método
+
+Este método devuelve el valor de nonce actual para una dirección, que representa el número de transacciones enviadas desde esa dirección.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getTransactionCount',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: 'La dirección para verificar el contador de transacciones',
+			value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', // vitalik.eth
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Número de bloque en formato hex o etiqueta de bloque',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'El número de transacciones enviadas desde la dirección (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.blockNumber || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x4b9" // 1209 en decimal
+}
+```
+
+### Significado de las Etiquetas de Bloque
+
+El parámetro `blockNumber` acepta varios valores especiales:
+
+- `latest`: Estado actual después de que todas las transacciones pendientes sean ejecutadas
+- `pending`: Estado actual más transacciones pendientes en el mempool
+- `earliest`: Estado del bloque génesis
+- `safe`: Último bloque considerado seguro por la red
+- `finalized`: Último bloque que ha logrado finalidad
+
+Usar `pending` es especialmente importante para la gestión de nonce al enviar múltiples transacciones en secuencia.
+
+### Ejemplo Práctico
+
+```javascript
+// Ejemplo: Crear y firmar múltiples transacciones en secuencia
+async function sendTransactionBatch(privateKey, toAddress, values) {
+	const wallet = new ethers.Wallet(privateKey, provider);
+	const fromAddress = wallet.address;
+
+	// Obtener el nonce actual
+	const nonce = await provider.send('eth_getTransactionCount', [fromAddress, 'pending']);
+	const currentNonce = parseInt(nonce, 16);
+
+	console.log(`Nonce inicial: ${currentNonce}`);
+
+	// Crear y enviar múltiples transacciones
+	const txPromises = values.map((value, index) => {
+		const txNonce = currentNonce + index;
+		console.log(`Preparando transacción con nonce ${txNonce}`);
+
+		const tx = {
+			from: fromAddress,
+			to: toAddress,
+			value: ethers.utils.parseEther(value.toString()),
+			nonce: txNonce,
+			gasLimit: 21000,
+			gasPrice: ethers.utils.parseUnits('50', 'gwei'),
+		};
+
+		return wallet.sendTransaction(tx);
+	});
+
+	return Promise.all(txPromises);
+}
+
+// Uso
+const recipientAddress = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
+const valueArray = [0.01, 0.02, 0.03]; // Valores ETH a enviar
+sendTransactionBatch(privateKey, recipientAddress, valueArray)
+	.then((results) => console.log(`Enviadas ${results.length} transacciones`))
+	.catch((error) => console.error('Transacción fallida:', error));
+```
+
+### Estrategias de Gestión de Nonce
+
+```javascript
+// Ejemplo: Analizando y corrigiendo brechas de nonce
+async function analyzeNonceGaps(address) {
+	// Obtener nonce confirmado
+	const confirmedNonceHex = await provider.send('eth_getTransactionCount', [address, 'latest']);
+
+	// Obtener nonce pendiente (incluyendo transacciones en mempool)
+	const pendingNonceHex = await provider.send('eth_getTransactionCount', [address, 'pending']);
+
+	const confirmedNonce = parseInt(confirmedNonceHex, 16);
+	const pendingNonce = parseInt(pendingNonceHex, 16);
+
+	console.log(`Dirección: ${address}`);
+	console.log(`Nonce confirmado: ${confirmedNonce}`);
+	console.log(`Nonce pendiente: ${pendingNonce}`);
+
+	if (pendingNonce > confirmedNonce) {
+		console.log(`Hay ${pendingNonce - confirmedNonce} transacciones pendientes`);
+
+		// Obtener transacciones pendientes para analizar
+		// Nota: Esto normalmente requeriría un método RPC especializado o servicio
+		// ya que los nodos Ethereum estándar no proporcionan una forma de listar transacciones pendientes para una dirección
+	}
+
+	return {
+		address,
+		confirmedNonce,
+		pendingNonce,
+		pendingCount: pendingNonce - confirmedNonce,
+	};
+}
+
+// Ejemplo: Resolver transacciones atascadas reemplazándolas con un precio de gas más alto
+async function replaceStuckTransaction(wallet, originalNonce, newGasPrice) {
+	// Crear una transacción de "reemplazo" con el mismo nonce pero mayor precio de gas
+	const tx = {
+		from: wallet.address,
+		to: wallet.address, // Enviar a sí mismo
+		value: 0, // Valor cero (solo pagando gas)
+		nonce: originalNonce,
+		gasLimit: 21000,
+		gasPrice: newGasPrice, // Debe ser al menos 10% más alto que el original
+	};
+
+	// Firmar y enviar la transacción de reemplazo
+	return wallet.sendTransaction(tx);
+}
+```
+
+### Avanzado: Análisis de Actividad de Cuenta
+
+```javascript
+// Ejemplo: Analizar actividad de cuenta a lo largo del tiempo
+async function analyzeAccountActivity(address, startBlock, endBlock, interval = 1000) {
+	const result = [];
+
+	// Procesar en fragmentos para evitar sobrecargar el nodo
+	for (let blockNum = startBlock; blockNum <= endBlock; blockNum += interval) {
+		const blockHex = `0x${blockNum.toString(16)}`;
+		const count = await provider.send('eth_getTransactionCount', [address, blockHex]);
+
+		result.push({
+			blockNumber: blockNum,
+			nonce: parseInt(count, 16),
+		});
+	}
+
+	// Calcular actividad en cada intervalo
+	for (let i = 1; i < result.length; i++) {
+		const txCount = result[i].nonce - result[i - 1].nonce;
+		result[i].newTransactions = txCount;
+
+		const blockSpan = result[i].blockNumber - result[i - 1].blockNumber;
+		result[i].txPerBlock = txCount / blockSpan;
+	}
+
+	return result;
+}
+```
+
+### Notas Importantes
+
+1. La primera transacción desde una cuenta nueva debe usar nonce 0
+2. Cada transacción subsiguiente debe incrementar el nonce exactamente en 1
+3. Las transacciones con un nonce mayor al esperado permanecerán pendientes hasta que todos los nonces inferiores sean procesados
+4. Si una transacción con un nonce específico es descartada, puedes reenviar una nueva transacción con el mismo nonce
+5. Usar la etiqueta `pending` es crucial cuando se crean múltiples transacciones en secuencia
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_sendRawTransaction" title="Enviar transacciones firmadas a la red">eth_sendRawTransaction</Link> - Enviar transacciones firmadas en bruto a la red Ethereum
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Buscar detalles de transacción">eth_getTransactionByHash</Link> - Recuperar información detallada sobre una transacción usando su hash

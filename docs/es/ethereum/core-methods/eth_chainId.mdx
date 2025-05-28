@@ -1,0 +1,71 @@
+---
+title: eth_chainId - Obtener ID de la Cadena de Red | Métodos API de Ethereum
+description: Aprenda a usar el método eth_chainId para recuperar el ID de red/cadena actual utilizado para transacciones protegidas contra replay. Incluye ejemplos y formato de respuesta.
+keywords: eth_chainId, ethereum chain id, network id, EIP-155, protección contra replay, red blockchain, multicadena, detección de red, identificador de blockchain
+---
+
+# eth_chainId
+
+El método `eth_chainId` devuelve el ID de red/cadena actual, que es crucial para firmar transacciones protegidas contra replay según lo introducido en EIP-155. Este método simple pero esencial ayuda a garantizar que las transacciones se ejecuten en la red prevista y evita ataques de replay de transacciones.
+
+## Casos de Uso
+
+- Verificar la conexión de red actual en wallets y DApps
+- Implementar protección contra replay de transacciones
+- Construir lógica específica de red en aplicaciones multicadena
+- Desarrollo de aplicaciones entre cadenas y cambio de red
+- Validación de firma de transacciones
+- Detección de red para interfaces de usuario
+- Cambio automático de red en aplicaciones web3
+
+## Detalles del Método
+
+Este es un método de consulta sencillo que devuelve el ID de cadena de la red conectada en formato hexadecimal. No requiere parámetros y es extremadamente ligero.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_chainId',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'El ID de cadena en formato hexadecimal',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x1" // Representa Ethereum Mainnet (Chain ID: 1)
+}
+```
+
+### IDs de Cadena Comunes
+
+- 0x1 (1): Ethereum Mainnet
+- 0x5 (5): Goerli Testnet
+- 0xAA36A7 (11155111): Sepolia Testnet 
+- 0x89 (137): Polygon Mainnet
+- 0xA (10): Optimism
+- 0xA4B1 (42161): Arbitrum One
+- 0x38 (56): BNB Smart Chain
+- 0xA86A (43114): Avalanche C-Chain
+
+### Entendiendo EIP-155
+
+EIP-155 introdujo la protección contra replay al incluir el ID de cadena en las firmas de transacciones. Antes de esta mejora, una transacción firmada para una red podría potencialmente reproducirse en otra red o bifurcación. El método `eth_chainId` es esencial para implementar esta protección, ya que permite a las aplicaciones obtener el valor correcto del ID de cadena para incluirlo en las firmas de transacciones.
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Obtener información detallada del bloque">eth_getBlockByNumber</Link> - Recuperar información del bloque por número de bloque
+- <Link to="/docs/ethereum/core-methods/eth_syncing" title="Verificar el estado de sincronización del nodo">eth_syncing</Link> - Comprobar si el nodo está actualmente sincronizando

@@ -1,0 +1,49 @@
+---
+title: Block Timestamps Guide | Ethereum Time Management
+description: Comprehensive guide to Ethereum block timestamps, including accuracy considerations, implementing time-based operations, and developing secure time-dependent smart contracts and applications.
+keywords: block timestamps, ethereum time, blockchain timing, block time, ethereum clock, miner timestamps, time-based contracts, blockchain chronology, timestamp manipulation, ethereum datetime
+---
+
+# Block Timestamps Guide
+
+Block timestamps in Ethereum provide timing information for transactions and smart contracts. Understanding how to work with them is essential for time-sensitive applications.
+
+## Understanding Block Timestamps
+
+- How timestamps are determined
+- Accuracy and limitations
+- Miner manipulation considerations
+- Network time drift
+
+## Working with Timestamps
+
+```javascript
+// Get block timestamp
+const getBlockTimestamp = async (blockNumber) => {
+	const block = await web3.eth.getBlock(blockNumber);
+	return block.timestamp;
+};
+
+// Calculate average block time
+const getAverageBlockTime = async (blockCount = 100) => {
+	const latestBlock = await web3.eth.getBlockNumber();
+	const oldBlock = await web3.eth.getBlock(latestBlock - blockCount);
+	const newBlock = await web3.eth.getBlock(latestBlock);
+
+	return (newBlock.timestamp - oldBlock.timestamp) / blockCount;
+};
+```
+
+## Best Practices
+
+1. Don't rely on exact timestamp precision
+2. Account for potential miner manipulation
+3. Use block numbers for precise ordering
+4. Consider network time drift
+5. Implement safe time buffers
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlock" title="API method to retrieve block information including timestamps">eth_getBlock</Link> - Retrieve block information including timestamps
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="Learn fundamental techniques for working with Ethereum blocks">Working with Blocks</Link> - General block handling
+- <Link to="/docs/ethereum/guides/block-gas-management" title="Guide to managing gas costs across time in Ethereum">Block Gas Management</Link> - Managing gas costs over time

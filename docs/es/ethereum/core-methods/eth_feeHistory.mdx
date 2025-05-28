@@ -1,0 +1,124 @@
+---
+title: eth_feeHistory - Obtener Datos Históricos de Tarifas de Gas | Métodos de API de Ethereum
+description: Aprenda a usar el método eth_feeHistory para recuperar información histórica de tarifas de gas de la blockchain de Ethereum. Incluye ejemplos de análisis de tarifas y cálculos de percentiles.
+keywords: eth_feeHistory, tarifas de gas, tarifas ethereum, EIP-1559, tarifa base, tarifa de prioridad, historial de gas, costos de transacción, tendencias de tarifas, optimización de gas
+---
+
+# eth_feeHistory
+
+El método `eth_feeHistory` devuelve datos históricos de tarifas de gas, permitiendo el análisis de tendencias de tarifas de red y ayudando a tomar decisiones informadas sobre precios de gas para transacciones. Este método se volvió esencial después de la implementación de EIP-1559, que introdujo un nuevo mecanismo de mercado de tarifas con tarifas base y tarifas de prioridad.
+
+## Casos de Uso
+
+- Optimización de tarifas de gas para transacciones rentables
+- Análisis histórico de tarifas para aplicaciones de billetera
+- Optimización de tiempo de transacción basada en patrones de tarifas
+- Estimación de tarifas para DApps para una mejor experiencia de usuario
+- Análisis y estrategia de MEV (Valor Máximo Extraíble)
+- Modelos y algoritmos de predicción de precio de gas
+- Herramientas de visualización de tarifas y paneles
+- Análisis económico de patrones de uso de la red
+
+## Detalles del Método
+
+Este método recupera una colección de información histórica de gas, incluyendo tarifas base, relaciones de utilización de gas y tarifas de prioridad (propinas) en percentiles especificados.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_feeHistory',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockCount',
+			required: true,
+			type: 'string',
+			desc: 'Número de bloques en el rango solicitado (1-1024)',
+			value: '0x4',
+		},
+		{
+			id: 'newestBlock',
+			required: true,
+			type: 'string',
+			desc: 'Número de bloque más alto del rango o etiqueta de bloque',
+			value: 'latest',
+		},
+		{
+			id: 'rewardPercentiles',
+			required: true,
+			type: 'array',
+			desc: 'Lista de percentiles para cálculo de tarifa de prioridad',
+			value: [25, 75],
+		},
+	]}
+	returns={[
+		{
+			id: 'oldestBlock',
+			type: 'string',
+			desc: 'Cadena hexadecimal del bloque más antiguo en el rango',
+		},
+		{
+			id: 'baseFeePerGas',
+			type: 'array',
+			desc: 'Array de tarifas base por gas (incluye el siguiente bloque)',
+		},
+		{
+			id: 'gasUsedRatio',
+			type: 'array',
+			desc: 'Array de proporciones de gas utilizado en bloques',
+		},
+		{
+			id: 'reward',
+			type: 'array',
+			desc: 'Array de valores percentiles de tarifa de prioridad',
+		},
+	]}
+	getParams={(fields) => [fields?.blockCount || null, fields?.newestBlock || null, fields?.rewardPercentiles || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"oldestBlock": "0x1B177F5",
+		"baseFeePerGas": ["0x12", "0x10", "0x11", "0xf", "0xe"],
+		"gasUsedRatio": [0.5232, 0.4521, 0.4814, 0.2891],
+		"reward": [
+			["0x12", "0x34"],
+			["0x11", "0x38"],
+			["0x15", "0x42"],
+			["0x13", "0x39"]
+		]
+	}
+}
+```
+
+### Entendiendo la Respuesta
+
+- **oldestBlock**: El número de bloque inicial del rango histórico
+- **baseFeePerGas**: Tarifas base para cada bloque en el rango (más la estimación del siguiente bloque)
+- **gasUsedRatio**: Qué tan lleno estaba cada bloque (0.0-1.0), lo que afecta las tarifas base futuras
+- **reward**: Valores de tarifa de prioridad en los percentiles solicitados, útiles para determinar propinas competitivas
+
+La tarifa base cambia según la congestión de la red: aumenta cuando los bloques están más del 50% llenos y disminuye cuando están menos del 50% llenos. Entender este mecanismo ayuda a predecir tarifas futuras.
+
+### Ejemplo de Caso de Uso Común
+
+```javascript
+// Ejemplo de cálculo de tarifa base promedio del historial
+const blockCount = 10;
+const result = await provider.send('eth_feeHistory', [blockCount, 'latest', [25, 75]]);
+const baseFees = result.baseFeePerGas.map((hex) => parseInt(hex, 16));
+const avgBaseFee = baseFees.reduce((a, b) => a + b) / baseFees.length;
+```
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="Obtener precio actual de gas">eth_gasPrice</Link> - Devuelve el precio actual de gas en wei
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="Estimar gas de transacción">eth_estimateGas</Link> - Estima el gas necesario para la ejecución de transacciones
+- <Link to="/docs/ethereum/core-methods/eth_maxPriorityFeePerGas" title="Obtener tarifa de prioridad sugerida">eth_maxPriorityFeePerGas</Link> - Devuelve un valor sugerido de tarifa de prioridad

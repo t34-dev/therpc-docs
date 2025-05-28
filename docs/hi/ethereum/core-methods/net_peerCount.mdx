@@ -1,0 +1,87 @@
+---
+title: net_peerCount - Get Connected Peers Count | Ethereum API Methods
+description: Learn how to use the net_peerCount method to check how many peers are connected to your Ethereum node, monitor network health, and diagnose connectivity issues.
+keywords: net_peerCount, peer connections, ethereum network, node peers, p2p connections, network size, blockchain connectivity, node health check, ethereum connections, peer monitoring, network diagnostics, connection count, node network status, blockchain peers, ethereum node health, network connections
+---
+
+# net_peerCount
+
+The `net_peerCount` method returns the number of peers currently connected to the client. This method provides essential insight into the node's connectivity within the Ethereum network and helps diagnose network issues.
+
+## Use Cases
+
+- Network health monitoring for blockchain applications
+- Node connectivity verification during setup and maintenance
+- Sync status troubleshooting when blocks aren't updating
+- Network size estimation for research purposes
+- Node performance analysis and optimization
+- Connection quality assessment before critical operations
+- Identifying isolated nodes that might miss transactions
+- Verifying proper network configuration
+- Monitoring node health in production environments
+- Detecting connectivity problems in automated systems
+
+## Method Details
+
+This method requires no parameters and returns a hexadecimal encoded integer.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'net_peerCount',
+		id: 67,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The number of connected peers (hexadecimal)',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 67,
+	"result": "0x1a" // 26 connected peers
+}
+```
+
+### Understanding the Results
+
+The response is a hexadecimal string representation of the number of connected peers. For example:
+
+- `"0x0"` = 0 peers
+- `"0xa"` = 10 peers
+- `"0x1a"` = 26 peers
+- `"0x64"` = 100 peers
+
+### Peer Count Significance
+
+The number of peers can indicate several things about your node:
+
+- **0 peers**: The node is completely isolated from the network
+- **1-5 peers**: The node has minimal connectivity
+- **10-30 peers**: Normal range for most Ethereum nodes
+- **30+ peers**: High connectivity, typical for public nodes or validators
+
+### Important Notes
+
+- A low peer count might indicate network connectivity issues
+- Some private nodes might intentionally limit peer connections
+- Public nodes usually maintain more peer connections
+- The peer count is constantly changing as nodes join and leave the network
+- The reported number includes only direct peer connections
+- For hosted nodes, the peer count might reflect the provider's network rather than your specific instance
+- A high peer count doesn't necessarily mean better performance
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/net_listening" title="Check if your node is actively listening for connections">net_listening</Link> - Returns whether the client is actively networking
+- <Link to="/docs/ethereum/core-methods/net_version" title="Identify which Ethereum network your node is connected to">net_version</Link> - Returns the current network ID

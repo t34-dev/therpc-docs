@@ -1,0 +1,186 @@
+---
+title: Límites de Velocidad y Cuotas | Gestión de Uso de la API Ethereum
+description: Guía completa sobre los límites de velocidad de la API TheRPC, cuotas, estrategias de implementación para un uso óptimo de la API, incluyendo manejo de errores, almacenamiento en caché, agrupación de solicitudes y mejores prácticas para aplicaciones de alto rendimiento
+keywords: límites de velocidad api, cuotas de solicitudes, limitación api, limitación de velocidad, límites de uso api, optimización api ethereum, rendimiento api blockchain, límites de velocidad web3, gestión de cuotas api, agrupación de solicitudes, manejo de errores api
+---
+
+# Límites de Velocidad y Cuotas
+
+Esta guía explica el sistema de limitación de velocidad de TheRPC y proporciona mejores prácticas para gestionar el uso de tu API.
+
+## # Límites de Solicitudes
+
+Los límites de velocidad se aplican en varios niveles:
+
+- Solicitudes por segundo
+- Solicitudes por minuto
+- Solicitudes por día
+- Conexiones concurrentes
+
+Los límites específicos dependen de tu plan de suscripción. Consulta tu panel de control para conocer los límites actuales.
+
+## # Respuestas de Error
+
+Cuando excedes los límites de velocidad, recibirás:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32029,
+		"message": "Rate limit exceeded"
+	},
+	"id": 1
+}
+```
+
+La respuesta HTTP incluirá encabezados:
+
+```bash
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1628696400
+```
+
+## # Mejores Prácticas
+
+### Implementar Reintentos
+
+```javascript
+async function callWithRetry(method, params, maxRetries = 3) {
+	for (let i = 0; i < maxRetries; i++) {
+		try {
+			const response = await makeRequest(method, params);
+			return response;
+		} catch (error) {
+			if (error.code === -32029) {
+				// Rate limit exceeded
+				const backoffTime = Math.pow(2, i) * 1000;
+				await new Promise((resolve) => setTimeout(resolve, backoffTime));
+				continue;
+			}
+			throw error;
+		}
+	}
+	throw new Error('Max retries exceeded');
+}
+```
+
+### Agrupar Solicitudes
+
+Combina múltiples llamadas en una sola solicitud:
+
+```json
+[
+	{
+		"jsonrpc": "2.0",
+		"method": "eth_getBalance",
+		"params": ["0x742d35Cc6634C0532925a3b844Bc454e4438f44e", "latest"],
+		"id": 1
+	},
+	{
+		"jsonrpc": "2.0",
+		"method": "eth_blockNumber",
+		"params": [],
+		"id": 2
+	}
+]
+```
+
+### Usar Suscripciones WebSocket
+
+Para datos en tiempo real, usa <Link to="/docs/ethereum/core-methods/eth_subscribe">eth_subscribe</Link> en lugar de sondeo.
+
+## # Monitorización
+
+Monitoriza tu uso a través de:
+
+- Métricas del panel de control
+- Encabezados de límite de velocidad
+- Alertas de uso
+
+## # Gestión de Cuotas
+
+### Seguimiento de Uso
+
+```javascript
+function trackApiUsage(response) {
+	const limits = {
+		limit: response.headers['X-RateLimit-Limit'],
+		remaining: response.headers['X-RateLimit-Remaining'],
+		reset: response.headers['X-RateLimit-Reset'],
+	};
+
+	// Log or monitor usage
+	console.log(`API calls remaining: ${limits.remaining}/${limits.limit}`);
+}
+```
+
+### Implementar Almacenamiento en Caché
+
+```javascript
+const cache = new Map();
+
+async function getCachedBlockNumber(cacheTime = 5000) {
+	const cached = cache.get('blockNumber');
+	if (cached && Date.now() - cached.timestamp < cacheTime) {
+		return cached.value;
+	}
+
+	const newValue = await web3.eth.getBlockNumber();
+	cache.set('blockNumber', {
+		value: newValue,
+		timestamp: Date.now(),
+	});
+
+	return newValue;
+}
+```
+
+## # Límites del Plan
+
+Diferentes planes de suscripción tienen diferentes límites:
+
+### Límites Base
+
+- Tasa de solicitudes
+- Cuota diaria
+- Conexiones WebSocket
+- Límites de suscripción
+
+### Características Adicionales
+
+- Acceso a datos de archivo
+- Métodos de depuración
+- API de rastreo
+
+Consulta la página de precios para comparaciones detalladas de planes.
+
+## # Opciones de Actualización
+
+Si regularmente alcanzas los límites de velocidad, considera:
+
+1. Optimizar tus solicitudes
+2. Implementar almacenamiento en caché
+3. Usar suscripciones WebSocket
+4. Actualizar tu plan
+
+## # Prevención de Errores
+
+### Monitorizar Uso
+
+- Seguimiento del recuento de solicitudes
+- Configurar alertas
+- Revisar patrones de uso
+
+### Optimizar Solicitudes
+
+- Agrupar cuando sea posible
+- Almacenar respuestas en caché
+- Usar intervalos de sondeo apropiados
+
+### Ver también
+
+- <Link to="/docs/ethereum/authentication" title="Guía para asegurar el acceso a tu API con autenticación">Guía de Autenticación</Link> - Gestión de Claves API
+- <Link to="/docs/ethereum/basic-operations" title="Guía de operaciones comunes en la blockchain Ethereum">Operaciones Básicas</Link> - Patrones Óptimos de Solicitud
+- <Link to="/docs/ethereum/faq" title="Preguntas frecuentes sobre el uso de la API de Ethereum">FAQ</Link> - Preguntas y Respuestas Comunes

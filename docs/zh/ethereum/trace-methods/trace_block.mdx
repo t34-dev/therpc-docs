@@ -1,0 +1,294 @@
+---
+title: trace_block - 获取区块中所有交易执行追踪 | 以太坊 API 方法
+description: 学习如何使用 trace_block 方法检索指定以太坊区块中所有交易的综合执行追踪，提供智能合约交互的详细见解。
+keywords: trace_block, ethereum block trace, block transactions trace, blockchain trace analysis, smart contract interaction, internal transaction, trace api ethereum, block execution trace, transaction execution flow, blockchain analysis, evm trace, block trace, trace by block number, block execution analysis, smart contract debugging, transaction debugging, block analysis, transaction flow, block transaction history, ethereum tracing
+---
+
+# trace_block
+
+`trace_block` 方法返回指定区块中包含的所有交易的执行追踪。这提供了对单个区块内发生的所有合约交互的全面洞察。
+
+## 使用场景
+
+- 分析特定区块内的所有合约交互
+- 通过检查执行流程调试复杂交易
+- 提取标准交易日志中不可见的内部交易
+- 审计区块级执行模式以进行安全分析
+- 监控和可视化跨多个合约的交易执行流程
+- 跟踪和分析 MEV（矿工可提取价值）活动
+- 研究区块链历史特定点的协议交互
+- 追踪区块内多个合约之间的价值流动
+- 分析区块中交易的并行执行
+- 构建全面的区块浏览器功能
+
+## 方法详情
+
+此方法返回指定区块中所有交易的追踪数组。
+
+<ApiMethodBlock
+	chain="ethereum"
+	disabled={true}
+	scheme={{
+		method: 'trace_block',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockParameter',
+			required: true,
+			type: 'string',
+			desc: '区块号（十六进制区块号或 "latest"、"earliest"、"pending"）',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: '区块中所有交易的追踪对象数组',
+			fields: [
+				{
+					id: 'action',
+					type: 'object',
+					desc: '关于所采取行动的信息',
+					fields: [
+						{
+							id: 'callType',
+							type: 'string',
+							desc: '调用类型（如 "call"、"delegatecall"、"staticcall"）',
+						},
+						{
+							id: 'from',
+							type: 'string',
+							desc: '发送者地址',
+						},
+						{
+							id: 'gas',
+							type: 'string',
+							desc: '为此操作提供的燃料',
+						},
+						{
+							id: 'input',
+							type: 'string',
+							desc: '输入数据',
+						},
+						{
+							id: 'to',
+							type: 'string',
+							desc: '接收者地址',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: '发送的价值（以 wei 为单位）',
+						},
+						{
+							id: 'init',
+							type: 'string',
+							desc: '合约初始化代码（对于创建追踪）',
+						},
+					],
+				},
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: '区块的哈希',
+				},
+				{
+					id: 'blockNumber',
+					type: 'integer',
+					desc: '区块号',
+				},
+				{
+					id: 'result',
+					type: 'object',
+					desc: '调用结果',
+					fields: [
+						{
+							id: 'gasUsed',
+							type: 'string',
+							desc: '使用的燃料量',
+						},
+						{
+							id: 'output',
+							type: 'string',
+							desc: '输出数据',
+						},
+						{
+							id: 'address',
+							type: 'string',
+							desc: '创建的合约地址（对于创建追踪）',
+						},
+						{
+							id: 'code',
+							type: 'string',
+							desc: '合约代码（对于创建追踪）',
+						},
+					],
+				},
+				{
+					id: 'subtraces',
+					type: 'integer',
+					desc: '子追踪数量',
+				},
+				{
+					id: 'traceAddress',
+					type: 'array',
+					desc: '执行追踪中的地址路径',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: '交易的哈希',
+				},
+				{
+					id: 'transactionPosition',
+					type: 'integer',
+					desc: '交易在区块中的索引位置',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: '追踪类型（如 "call"、"create"、"suicide"）',
+				},
+				{
+					id: 'error',
+					type: 'string',
+					desc: '错误消息（如果交易失败）',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || '0x0']}
+/>
+
+### 理解追踪响应
+
+响应包含区块中所有交易的追踪，每个交易可能包含多个追踪。追踪形成层次结构：
+
+- 顶层追踪（`traceAddress: []`）表示初始交易
+- 每个子追踪有一个 `traceAddress` 数组，表示其在调用树中的位置
+- `subtraces` 字段显示一个追踪直接子项的数量
+
+以下是追踪结构的简化可视化表示：
+
+```
+交易 1
+├── 调用合约 A [traceAddress: []]
+│   ├── 从 A 到 B 的调用 [traceAddress: [0]]
+│   └── 从 A 到 C 的调用 [traceAddress: [1]]
+│       └── 从 C 到 D 的调用 [traceAddress: [1, 0]]
+└── 调用合约 E [traceAddress: []]
+
+交易 2
+└── ... （类似结构）
+```
+
+### 追踪类型
+
+该方法返回不同类型的追踪，由 `type` 字段指示：
+
+- **call**: 对地址的消息调用
+- **create**: 合约创建
+- **suicide**: 合约自毁操作（也称为 SELFDESTRUCT）
+
+### 调用类型
+
+对于 `type: "call"` 的追踪，`callType` 字段表示调用类型：
+
+- **call**: 地址之间的标准调用（最常见）
+- **delegatecall**: 保留发送者上下文的特殊调用
+- **staticcall**: 不能修改状态的只读调用（在拜占庭引入）
+- **callcode**: 遗留调用类型（已弃用）
+
+### 错误处理
+
+如果交易或子追踪失败：
+
+- `error` 字段将包含原因（例如 "out of gas"、"reverted"）
+- `result` 字段可能为空或不完整
+- 导致错误点的追踪仍然包括在内
+
+### 响应示例
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    {
+      "action": {
+        "callType": "call",
+        "from": "0x8bb73bcb5d553b5a556358d27625323fd781d37",
+        "gas": "0x576e",
+        "input": "0x370158ea000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "to": "0x6090a6e47849629b7245dfa1ca21d94cd15878ef",
+        "value": "0x0"
+      },
+      "blockHash": "0x8512d367492371edf44ebcbbbd935bc434946dddc2b126cb558df5906012186c",
+      "blockNumber": 1059416,
+      "result": {
+        "gasUsed": "0x14a0",
+        "output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+      },
+      "subtraces": 0,
+      "traceAddress": [],
+      "transactionHash": "0x4c253746e8d0ab1d135df9711532c41a85ab33f069f1c733ceb0a6bf3e304503",
+      "transactionPosition": 0,
+      "type": "call"
+    },
+    {
+      "action": {
+        "callType": "call",
+        "from": "0x431957dbd818eaab7c5ed352430d1bf44dccd837",
+        "gas": "0x3d090",
+        "input": "0x4c37a69b00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001",
+        "to": "0x6090a6e47849629b7245dfa1ca21d94cd15878ef",
+        "value": "0x0"
+      },
+      "blockHash": "0x8512d367492371edf44ebcbbbd935bc434946dddc2b126cb558df5906012186c",
+      "blockNumber": 1059416,
+      "result": {
+        "gasUsed": "0x2b43",
+        "output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+      },
+      "subtraces": 0,
+      "traceAddress": [],
+      "transactionHash": "0x1eb099b3e9396b9d188b1c313261f6a13c7e13cb5c1afd3884847cc2c61289c0",
+      "transactionPosition": 1,
+      "type": "call"
+    }
+  ]
+}
+```
+
+### 性能考虑
+
+- 追踪完整区块资源密集，尤其是对于有许多交易的区块
+- 对于具有复杂交易的区块，响应大小可能非常大
+- 对于高吞吐量链或在链拥堵期间，区块可能包含数十或数百个交易
+- 如果您不需要整个区块，考虑对特定交易使用 `trace_transaction`
+- 处理区块追踪时，建议在应用程序中设置限制和分页
+
+### 重要注意事项
+
+- 此方法需要在以太坊节点上启用追踪 API
+- 并非所有以太坊客户端都支持追踪（主要是带有 `--gcmode=archive` 的 Geth 和 OpenEthereum/Nethermind）
+- 公共 RPC 提供商可能由于资源密集性而限制或禁用追踪方法
+- 结果只能为最终确认的区块信任（最好避免使用 "latest"、"pending"）
+- 响应结构在不同以太坊客户端实现之间可能略有不同
+- 对于非存档节点上的最近区块，结果可能可用，但对于较旧的区块可能不可用
+- 响应包括失败的交易，及其直到失败点的追踪
+- 追踪数据包括在主链上不可见的操作（例如内部交易）
+- 对于具有许多复杂交易的区块，响应可能包含数千个追踪
+- 此 API 端点比标准 JSON-RPC 调用对以太坊节点施加的负载要大得多
+- 在生产环境中使用时，最佳做法是运行您自己的启用追踪的存档节点
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/trace-methods/trace_transaction" title="获取特定交易的详细执行追踪">trace_transaction</Link> - 检索单个交易的追踪
+- <Link to="/docs/ethereum/trace-methods/trace_filter" title="在多个区块中搜索特定的交易追踪">trace_filter</Link> - 跨多个区块搜索追踪
+- <Link to="/docs/ethereum/trace-methods/trace_call" title="追踪调用而不在区块链上创建交易">trace_call</Link> - 执行并追踪调用而不创建交易
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="获取特定交易的收据">eth_getTransactionReceipt</Link> - 获取基本交易信息的交易收据
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="通过区块号获取区块信息">eth_getBlockByNumber</Link> - 获取不带详细追踪的区块信息

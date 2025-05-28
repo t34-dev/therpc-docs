@@ -1,0 +1,50 @@
+---
+title: Block Gas Management Guide | Transaction Fee Optimization in Ethereum
+description: Comprehensive guide to effectively managing gas usage at the block level, optimizing transaction costs, implementing EIP-1559 fee strategies, and developing gas-efficient applications.
+keywords: ethereum gas, block gas limit, gas optimization, transaction fees, eip-1559, ethereum fees, gas price, gas estimation, optimal gas, fee market, basefee, ethereum transaction costs
+---
+
+# Block Gas Management Guide
+
+Understanding and managing gas consumption at the block level is crucial for optimizing transaction costs and ensuring reliable operation of Ethereum applications.
+
+## Gas Fundamentals
+
+- Block gas limits
+- Gas price dynamics
+- EIP-1559 fee mechanism
+- Gas estimation strategies
+
+## Implementation Strategies
+
+```javascript
+// Get block gas limit
+const getBlockGasLimit = async () => {
+	const block = await web3.eth.getBlock('latest');
+	return block.gasLimit;
+};
+
+// Estimate optimal gas price
+const getOptimalGasPrice = async () => {
+	const blockCount = 10;
+	const latest = await web3.eth.getBlockNumber();
+	const blocks = await Promise.all([...Array(blockCount)].map((_, i) => web3.eth.getBlock(latest - i)));
+
+	const gasPrices = blocks.map((block) => block.baseFeePerGas);
+	return Math.floor(gasPrices.reduce((a, b) => a + b) / blockCount);
+};
+```
+
+## Optimization Techniques
+
+1. Dynamic gas price adjustment
+2. Transaction batching
+3. Off-peak execution
+4. Gas limit optimization
+5. EIP-1559 fee strategies
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="API method to retrieve current gas price">eth_gasPrice</Link> - Get current gas price
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="API method to estimate gas cost for a transaction">eth_estimateGas</Link> - Estimate gas cost for transaction
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="Learn fundamental techniques for working with Ethereum blocks">Working with Blocks</Link> - General block handling

@@ -1,0 +1,343 @@
+---
+title: trace_replayBlockTransactions - Replay Block Transactions | Ethereum API Methods
+description: Learn how to use the trace_replayBlockTransactions method to replay all transactions in a block with trace information for detailed analysis and debugging.
+keywords: trace_replayBlockTransactions, ethereum trace, transaction replay, block transactions, smart contract debugging, execution tracing
+---
+
+# trace_replayBlockTransactions
+
+The `trace_replayBlockTransactions` method replays all transactions in a specified block and returns detailed trace information for each transaction. This provides insights into the execution flow of transactions, allowing for detailed analysis and debugging.
+
+## Use Cases
+
+- Analyzing transaction execution flows in specific blocks
+- Debugging complex smart contract interactions
+- Understanding state changes from transaction execution
+- Auditing and verifying transaction results
+- Gas optimization research
+- Investigating failed transactions
+- Research and analysis of historical blocks
+- Testing contract behavior under specific block conditions
+- Identifying patterns across multiple transactions in a block
+- Verifying consensus rules at the transaction level
+
+## Method Details
+
+This method replays all transactions in a block with detailed trace information.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'trace_replayBlockTransactions',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Block number in hex format or block tag (latest, earliest, pending)',
+			value: 'latest',
+		},
+		{
+			id: 'traceTypes',
+			required: true,
+			type: 'array',
+			desc: 'Array of trace types to include in the response',
+			value: ['trace', 'vmTrace', 'stateDiff'],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: 'Array of trace results for each transaction in the block',
+			fields: [
+				{
+					id: 'output',
+					type: 'string',
+					desc: 'Output data from the transaction',
+				},
+				{
+					id: 'stateDiff',
+					type: 'object',
+					desc: 'State differences caused by the transaction (if requested)',
+					fields: [
+						{
+							id: 'address',
+							type: 'object',
+							desc: 'State changes for an address',
+						},
+					],
+				},
+				{
+					id: 'trace',
+					type: 'array',
+					desc: 'Array of trace objects',
+					fields: [
+						{
+							id: 'action',
+							type: 'object',
+							desc: 'Details about the call action',
+							fields: [
+								{
+									id: 'callType',
+									type: 'string',
+									desc: 'Type of call (call, delegatecall, etc.)',
+								},
+								{
+									id: 'from',
+									type: 'string',
+									desc: 'Sender address',
+								},
+								{
+									id: 'gas',
+									type: 'string',
+									desc: 'Gas provided for the call',
+								},
+								{
+									id: 'input',
+									type: 'string',
+									desc: 'Input data for the call',
+								},
+								{
+									id: 'to',
+									type: 'string',
+									desc: 'Recipient address',
+								},
+								{
+									id: 'value',
+									type: 'string',
+									desc: 'Value transferred in wei',
+								},
+							],
+						},
+						{
+							id: 'result',
+							type: 'object',
+							desc: 'Result of the call',
+							fields: [
+								{
+									id: 'gasUsed',
+									type: 'string',
+									desc: 'Amount of gas used',
+								},
+								{
+									id: 'output',
+									type: 'string',
+									desc: 'Output data from the call',
+								},
+							],
+						},
+						{
+							id: 'subtraces',
+							type: 'integer',
+							desc: 'Number of subtraces',
+						},
+						{
+							id: 'traceAddress',
+							type: 'array',
+							desc: 'Address path of trace location in the call tree',
+						},
+						{
+							id: 'type',
+							type: 'string',
+							desc: 'Type of trace',
+						},
+					],
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: 'Hash of the transaction',
+				},
+				{
+					id: 'vmTrace',
+					type: 'object',
+					desc: 'Virtual machine execution trace (if requested)',
+					fields: [
+						{
+							id: 'code',
+							type: 'string',
+							desc: 'EVM bytecode being executed',
+						},
+						{
+							id: 'ops',
+							type: 'array',
+							desc: 'Array of executed operations',
+							fields: [
+								{
+									id: 'cost',
+									type: 'integer',
+									desc: 'Gas cost of the operation',
+								},
+								{
+									id: 'ex',
+									type: 'object',
+									desc: 'Execution result of the operation',
+								},
+								{
+									id: 'pc',
+									type: 'integer',
+									desc: 'Program counter',
+								},
+								{
+									id: 'sub',
+									type: 'object',
+									desc: 'Information about call sub-execution',
+								},
+							],
+						},
+					],
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null, fields?.traceTypes || ['trace', 'vmTrace', 'stateDiff']]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+			"stateDiff": {
+				"0x1234567890123456789012345678901234567890": {
+					"balance": {
+						"*": {
+							"from": "0x100",
+							"to": "0x110"
+						}
+					},
+					"code": "=",
+					"nonce": {
+						"*": {
+							"from": "0x10",
+							"to": "0x11"
+						}
+					},
+					"storage": {
+						"0x0000000000000000000000000000000000000000000000000000000000000001": {
+							"*": {
+								"from": "0x0000000000000000000000000000000000000000000000000000000000000000",
+								"to": "0x0000000000000000000000000000000000000000000000000000000000000001"
+							}
+						}
+					}
+				}
+			},
+			"trace": [
+				{
+					"action": {
+						"callType": "call",
+						"from": "0x71c7656ec7ab88b098defb751b7401b5f6d8976f",
+						"gas": "0x4c40d",
+						"input": "0xa9059cbb000000000000000000000000ea674fdde714fd979de3edf0f56aa9716b898ec80000000000000000000000000000000000000000000000002b5e3af16b1880000",
+						"to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+						"value": "0x0"
+					},
+					"result": {
+						"gasUsed": "0x9868",
+						"output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+					},
+					"subtraces": 0,
+					"traceAddress": [],
+					"type": "call"
+				}
+			],
+			"transactionHash": "0x69f8de1af3129dc3b1adb5b3c1577476f737f9335f156e177b48c2ed88f3f7c4",
+			"vmTrace": {
+				"code": "0x60606040...",
+				"ops": [
+					{
+						"cost": 3,
+						"ex": {
+							"mem": null,
+							"push": ["0x60"],
+							"store": null,
+							"used": 16723979
+						},
+						"pc": 0,
+						"sub": null
+					}
+					// Additional ops...
+				]
+			}
+		}
+		// Additional transaction traces...
+	]
+}
+```
+
+### Trace Types
+
+The `traceTypes` parameter accepts an array of the following values:
+
+- **trace**: The basic trace of transaction execution
+- **vmTrace**: A detailed trace of the EVM execution
+- **stateDiff**: State changes resulting from the transaction
+
+You can request any combination of these trace types.
+
+### State Diff Format
+
+The state diff format uses the following symbols:
+
+- **"="**: No change in the value
+- **"+"**: The value was created
+- **"-"**: The value was deleted
+- **"\*"**: The value was modified, with "from" and "to" values
+
+### VM Trace Format
+
+The VM trace contains:
+
+- **code**: The EVM bytecode being executed
+- **ops**: Array of operations with:
+- **cost**: Gas cost of the operation
+- **ex**: Execution result (memory, stack, storage)
+- **pc**: Program counter
+- **sub**: Information for subcalls
+
+### Trace Format
+
+The trace format shows the execution path:
+
+- **action**: Details about the call
+- **result**: Result of the call
+- **subtraces**: Number of child calls
+- **traceAddress**: Position in the call tree
+- **type**: Type of operation (call, create, suicide)
+
+### Important Notes
+
+- This method is computationally intensive and may take time to complete
+- Requires trace APIs to be enabled on the Ethereum node
+- Not all Ethereum clients support this method
+- The response size can be very large for blocks with many transactions
+- Consider limiting the trace types for better performance
+- Empty blocks will return an empty array
+- Historical blocks can only be traced if the node maintains archive data
+- For blocks with complex transactions, the response might be extremely large
+- Each trace type adds significantly to the response size
+- Different clients may implement slight variations of the trace formats
+
+### Block Tags
+
+The `blockNumber` parameter accepts:
+
+- Hex-encoded block number (`0x1b4`)
+- `latest`: The most recent mined block
+- `earliest`: The genesis block
+- `pending`: Currently pending block (transactions waiting to be mined)
+
+### See also
+
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="Get basic traces for transactions in a block">trace_block</Link> - Get basic traces for all transactions in a block
+- <Link to="/docs/ethereum/trace-methods/trace_call" title="Trace a call without creating a transaction">trace_call</Link> - Execute and trace a call without creating a transaction
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Get low-level EVM execution details for a transaction">debug_traceTransaction</Link> - Get detailed execution trace for a single transaction

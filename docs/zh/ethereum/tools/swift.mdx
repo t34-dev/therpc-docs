@@ -1,0 +1,152 @@
+---
+title: 以太坊区块链开发的Swift工具 | Web3.swift集成指南
+description: Swift库用于以太坊开发的综合指南，包括Web3.swift、iOS和macOS集成示例、SwiftUI模式和原生钱包管理
+keywords: swift以太坊, ios以太坊, web3.swift, 以太坊ios, 苹果以太坊, swift区块链, ios dapp, swift web3, 以太坊macos, swiftui区块链, ios钱包, swift智能合约, 苹果区块链开发
+---
+
+# Swift工具
+
+Swift开发者可以使用几个库进行以太坊开发，其中web3.swift是iOS和macOS应用程序最受欢迎的选择。
+
+<PayAttention category="Swift" />
+
+## # Web3.swift
+
+以太坊的原生Swift实现。
+
+```swift
+import Web3
+import BigInt
+
+class EthereumClient {
+    private let web3 = Web3(rpcURL: "YOUR_ETHEREUM_NODE_URL")
+
+    func getBalance(address: String) async throws -> Double {
+        let address = try EthereumAddress(hex: address, eip55: true)
+        let balance = try await web3.eth.getBalance(address: address)
+        return balance.converted(to: .ether).value
+    }
+
+    func sendTransaction(
+        from: EthereumPrivateKey,
+        to: String,
+        amount: Double
+    ) async throws -> String {
+        let toAddress = try EthereumAddress(hex: to, eip55: true)
+        let amount = EthereumAmount(value: amount, unit: .ether)
+
+        let transaction = try await web3.eth.prepareTransaction(
+            to: toAddress,
+            value: amount,
+            from: from.address
+        )
+
+        let signed = try transaction.sign(with: from)
+        return try await web3.eth.send(transaction: signed)
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/argentlabs/web3.swift" target="_blank" absolute>web3.swift</Link>
+- **特性**:
+  - 原生Swift实现
+  - iOS和macOS支持
+  - Async/await支持
+  - 类型安全的合约交互
+  - 钱包管理
+  - ENS支持
+
+## # SwiftUI集成
+
+以太坊交互的现代SwiftUI示例：
+
+```swift
+import SwiftUI
+import Web3
+
+struct WalletView: View {
+    @StateObject private var viewModel = WalletViewModel()
+
+    var body: some View {
+        VStack {
+            Text("Balance: \(viewModel.balance) ETH")
+
+            Button("Refresh") {
+                Task {
+                    await viewModel.updateBalance()
+                }
+            }
+        }
+    }
+}
+
+class WalletViewModel: ObservableObject {
+    private let client = EthereumClient()
+    @Published var balance: Double = 0
+
+    func updateBalance() async {
+        do {
+            balance = try await client.getBalance(address: "YOUR_ADDRESS")
+        } catch {
+            print("Error: \(error)")
+        }
+    }
+}
+```
+
+## # 智能合约集成
+
+使用Swift与智能合约交互：
+
+```swift
+struct Contract {
+    let web3 = Web3(rpcURL: "YOUR_ETHEREUM_NODE_URL")
+    let contractAddress: EthereumAddress
+
+    func callMethod() async throws -> String {
+        let contract = try await web3.eth.Contract(
+            json: contractABI,
+            address: contractAddress
+        )
+
+        return try await contract.method(
+            "methodName",
+            parameters: [param1, param2],
+            extraData: Data()
+        ).call()
+    }
+}
+```
+
+## # 错误处理
+
+以太坊操作的适当Swift错误处理：
+
+```swift
+enum EthereumError: Error {
+    case invalidAddress
+    case insufficientFunds
+    case networkError(String)
+}
+
+extension EthereumClient {
+    func safeGetBalance(address: String) async throws -> Double {
+        guard address.hasPrefix("0x") else {
+            throw EthereumError.invalidAddress
+        }
+
+        do {
+            return try await getBalance(address: address)
+        } catch {
+            throw EthereumError.networkError(error.localizedDescription)
+        }
+    }
+}
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/tools/overview" title="可用以太坊开发工具和SDK的完整概述">工具概述</Link> - 所有可用的SDK和工具
+- <Link to="/docs/ethereum/authentication" title="与以太坊节点和API服务认证的指南">认证指南</Link> - 详细认证信息
+- <Link to="/docs/ethereum/basic-operations" title="学习开发者的基本以太坊区块链操作">基本操作指南</Link> - 基础操作
+- <Link to="/docs/ethereum/all-methods" title="所有可用以太坊API方法的完整参考">可用方法</Link> - 探索API功能

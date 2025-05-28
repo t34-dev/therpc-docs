@@ -1,0 +1,197 @@
+---
+title: eth_getTransactionByBlockNumberAndIndex - Recuperar Transacción por Número de Bloque e Índice | Métodos de API de Ethereum
+description: Aprenda a utilizar el método eth_getTransactionByBlockNumberAndIndex para obtener detalles de transacciones utilizando un número de bloque y posición de índice en la blockchain de Ethereum.
+keywords: eth_getTransactionByBlockNumberAndIndex, detalles de transacción, transacción ethereum, número de bloque, índice de transacción, consulta blockchain
+---
+
+# eth_getTransactionByBlockNumberAndIndex
+
+El método `eth_getTransactionByBlockNumberAndIndex` devuelve información detallada sobre una transacción especificando su posición (índice) dentro de un bloque identificado por el número o etiqueta del bloque. Este método es particularmente útil para recuperar transacciones de alturas de bloque conocidas o bloques especiales como "latest".
+
+## Casos de Uso
+
+- Monitorización de transacciones en tiempo real
+- Funcionalidad de explorador de bloques
+- Análisis específico de transacciones
+- Extracción de datos históricos
+- Verificación de transacciones
+- Procesamiento secuencial de transacciones
+- Análisis de interacción con contratos inteligentes
+- Investigación de mempool (usando la etiqueta "pending")
+
+## Detalles del Método
+
+Este método localiza una transacción utilizando tanto un número de bloque (o etiqueta) como el índice de la transacción dentro de ese bloque.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getTransactionByBlockNumberAndIndex',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Número de bloque en formato hex o etiquetas: latest, earliest, pending, safe, finalized',
+			value: '0x1194BB0', // Example block number (18,350,000)
+		},
+		{
+			id: 'index',
+			required: true,
+			type: 'string',
+			desc: "Posición de índice de la transacción en el bloque (hexadecimal)",
+			value: '0x0', // First transaction in the block
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'El objeto de transacción, o null si no se encuentra',
+			fields: [
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: 'Hash del bloque que contiene esta transacción',
+				},
+				{
+					id: 'blockNumber',
+					type: 'string',
+					desc: 'Número del bloque que contiene esta transacción (hex)',
+				},
+				{
+					id: 'from',
+					type: 'string',
+					desc: 'Dirección del remitente',
+				},
+				{
+					id: 'gas',
+					type: 'string',
+					desc: 'Gas proporcionado por el remitente (hex)',
+				},
+				{
+					id: 'gasPrice',
+					type: 'string',
+					desc: 'Precio del gas en wei (hex)',
+				},
+				{
+					id: 'maxFeePerGas',
+					type: 'string',
+					desc: 'Tarifa máxima por gas (transacciones EIP-1559)',
+				},
+				{
+					id: 'maxPriorityFeePerGas',
+					type: 'string',
+					desc: 'Tarifa máxima de prioridad por gas (transacciones EIP-1559)',
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: 'Hash de la transacción',
+				},
+				{
+					id: 'input',
+					type: 'string',
+					desc: 'Carga de datos de la transacción',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'Número de transacciones del remitente previas a esta (hex)',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					desc: 'Dirección del destinatario, null para transacciones de creación de contratos',
+				},
+				{
+					id: 'transactionIndex',
+					type: 'string',
+					desc: "Entero de la posición de la transacción en el bloque (hex)",
+				},
+				{
+					id: 'value',
+					type: 'string',
+					desc: 'Valor transferido en wei (hex)',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: 'Tipo de transacción (0=legacy, 1=EIP2930, 2=EIP1559)',
+				},
+				{
+					id: 'accessList',
+					type: 'array',
+					desc: 'Lista de direcciones y claves de almacenamiento (EIP-2930 y EIP-1559)',
+				},
+				{
+					id: 'chainId',
+					type: 'string',
+					desc: 'ID de cadena especificado en la transacción',
+				},
+				{
+					id: 'v',
+					type: 'string',
+					desc: 'Parámetro V de la firma',
+				},
+				{
+					id: 'r',
+					type: 'string',
+					desc: 'Parámetro R de la firma',
+				},
+				{
+					id: 's',
+					type: 'string',
+					desc: 'Parámetro S de la firma',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null, fields?.index || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"blockHash": "0x0f2c90d18695045ede8b52476bba47db4c99ad8e9c748dd64147dcb698e88d5f",
+		"blockNumber": "0x1194bb0",
+		"from": "0xef3a770aec2e5e97994c8f0e283e7992e2c39a2a",
+		"gas": "0x2b13c",
+		"gasPrice": "0x342770c00",
+		"maxFeePerGas": "0x342770c00",
+		"maxPriorityFeePerGas": "0x3b9aca00",
+		"hash": "0xa1c2c6b23cec00cdfa10a2bc30357c4250a2efb3cdf3c4d5c71e8b90ccb9071d",
+		"input": "0x095ea7b30000000000000000000000007a250d5630b4cf539739df2c5dacb4c659f2488dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+		"nonce": "0x1a8",
+		"to": "0x6982508145454ce325ddbe47a25d4ec3d2311933",
+		"transactionIndex": "0x0",
+		"value": "0x0",
+		"type": "0x2",
+		"accessList": [],
+		"chainId": "0x1",
+		"v": "0x1",
+		"r": "0xea5232855738e1c0d1a6695f0a0c76de2db3c6c84eec9d7b7f4523d8dc0db1d5",
+		"s": "0x2fd0b585c8e8df25e2e95ca8afe94b2d84a4c298d1e526f9afa0c2f1d492cd0d"
+	}
+}
+```
+
+### Significado de las Etiquetas de Bloque
+
+- `latest`: El bloque minado más recientemente
+- `earliest`: Bloque génesis (bloque 0)
+- `pending`: Bloque actualmente pendiente (transacciones en mempool)
+- `safe`: Último bloque considerado seguro por la red
+- `finalized`: Último bloque que ha logrado finalidad
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockHashAndIndex">eth_getTransactionByBlockHashAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash">eth_getTransactionByHash</Link>

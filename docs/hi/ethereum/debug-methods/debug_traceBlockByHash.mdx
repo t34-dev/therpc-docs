@@ -1,0 +1,321 @@
+---
+title: debug_traceBlockByHash - Get Comprehensive Transaction Traces in a Block by Hash | Ethereum API Methods
+description: Learn how to use the debug_traceBlockByHash method to retrieve detailed opcode-level execution traces for all transactions in a specific Ethereum block identified by its hash, essential for debugging and analyzing complex blockchain behavior.
+keywords: debug_traceBlockByHash, ethereum block hash tracing, transaction trace by hash, block execution analysis, opcode-level debugging, ethereum transaction analysis, block trace, block hash debugging, transaction batch analysis, multiple transaction debugging, smart contract execution trace, ethereum debug api, chain analysis, transaction insight, contract execution analysis, blockchain debugging, historical block tracing, ethereum virtual machine analysis, trace functions by block hash, identify failed transactions, smart contract testing, transaction flow verification
+---
+
+# debug_traceBlockByHash
+
+The `debug_traceBlockByHash` method returns a full trace of all invoked opcodes of all transactions included in the specified block, identified by its hash. This method provides comprehensive opcode-level execution information for analyzing and debugging every transaction within a specified block, making it ideal for deep investigation of blockchain state transitions.
+
+## Use Cases
+
+- Debug complex transaction failures and interactions within a specific known block
+- Analyze execution patterns across multiple transactions in a precisely identified block
+- Investigate gas usage optimization across transactions in historical blocks
+- Perform security auditing of deployed contracts in production environments
+- Verify correct transaction behavior and execution flow in specific important blocks
+- Understand complex multi-contract interactions across a series of transactions
+- Analyze historical blocks by their hash to investigate network behavior
+- Trace exact execution of transactions for block validation or bug hunting
+- Identify patterns in transaction execution within the same block context
+- Investigate MEV (Miner Extractable Value) transaction ordering effects
+- Debug failed transactions in the context of their block environment
+
+## Method Details
+
+This method traces the execution of all transactions in a block, identified by its hash, at the opcode level.
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    method: 'debug_traceBlockByHash',
+    id: 1,
+    jsonrpc: '2.0',
+  }}
+  fields={[
+    {
+      id: 'blockHash',
+      required: true,
+      type: 'string',
+      desc: "The hash of the block to trace",
+      value: "0x4f32106f6ac5b44248aeda10c3e718f1048ddc274629cd1897a0ff1f7926c41e"
+    },
+    {
+      id: 'options',
+      type: 'object',
+      desc: "Trace options to configure the debugging output",
+      fields: [
+        {
+          id: 'disableStorage',
+          type: 'boolean',
+          desc: "Setting this to true disables storage capture",
+          value: false
+        },
+        {
+          id: 'disableMemory',
+          type: 'boolean',
+          desc: "Setting this to true disables memory capture",
+          value: false
+        },
+        {
+          id: 'disableStack',
+          type: 'boolean',
+          desc: "Setting this to true disables stack capture",
+          value: false
+        },
+        {
+          id: 'tracer',
+          type: 'string',
+          desc: "Use a custom tracer (available: callTracer, prestateTracer, 4byteTracer, etc.)",
+          value: "callTracer"
+        },
+        {
+          id: 'timeout',
+          type: 'string',
+          desc: "Overrides the default timeout of 5 seconds for JavaScript-based tracing",
+          value: "10s"
+        }
+      ]
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'array',
+      desc: "Array of transaction traces within the block",
+      fields: [
+        {
+          id: 'gas',
+          type: 'integer',
+          desc: "Gas used by the transaction"
+        },
+        {
+          id: 'failed',
+          type: 'boolean',
+          desc: "Whether the transaction failed"
+        },
+        {
+          id: 'returnValue',
+          type: 'string',
+          desc: "The return value of the transaction"
+        },
+        {
+          id: 'structLogs',
+          type: 'array',
+          desc: "Array of structured EVM operation logs",
+          fields: [
+            {
+              id: 'pc',
+              type: 'integer',
+              desc: "Program counter position"
+            },
+            {
+              id: 'op',
+              type: 'string',
+              desc: "The executed opcode"
+            },
+            {
+              id: 'gas',
+              type: 'integer',
+              desc: "Remaining gas"
+            },
+            {
+              id: 'gasCost',
+              type: 'integer',
+              desc: "Gas cost for this operation"
+            },
+            {
+              id: 'depth',
+              type: 'integer',
+              desc: "Call depth"
+            },
+            {
+              id: 'memory',
+              type: 'array',
+              desc: "EVM memory contents (if not disabled)"
+            },
+            {
+              id: 'stack',
+              type: 'array',
+              desc: "EVM stack contents (if not disabled)"
+            },
+            {
+              id: 'storage',
+              type: 'object',
+              desc: "Storage changes (if not disabled)"
+            }
+          ]
+        }
+      ]
+    }
+  ]}
+  getParams={(fields) => {
+    const params = [
+      fields?.blockHash || null
+    ];
+
+    const options = {};
+
+    if (fields?.options?.disableStorage !== undefined) {
+      options.disableStorage = fields.options.disableStorage;
+    }
+
+    if (fields?.options?.disableMemory !== undefined) {
+      options.disableMemory = fields.options.disableMemory;
+    }
+
+    if (fields?.options?.disableStack !== undefined) {
+      options.disableStack = fields.options.disableStack;
+    }
+
+    if (fields?.options?.tracer) {
+      options.tracer = fields.options.tracer;
+    }
+
+    if (fields?.options?.timeout) {
+      options.timeout = fields.options.timeout;
+    }
+
+    if (Object.keys(options).length > 0) {
+      params.push(options);
+    } else {
+      params.push(null);
+    }
+
+    return params;
+
+}}
+/>
+
+### Response Example (Simplified)
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"gas": 21000,
+			"failed": false,
+			"returnValue": "",
+			"structLogs": [
+				{
+					"pc": 0,
+					"op": "PUSH1",
+					"gas": 68232,
+					"gasCost": 3,
+					"depth": 1,
+					"stack": [],
+					"memory": [],
+					"storage": {}
+				},
+				{
+					"pc": 2,
+					"op": "MSTORE",
+					"gas": 68229,
+					"gasCost": 12,
+					"depth": 1,
+					"stack": ["0x60", "0x40"],
+					"memory": [
+						"0000000000000000000000000000000000000000000000000000000000000000",
+						"0000000000000000000000000000000000000000000000000000000000000000"
+					],
+					"storage": {}
+				}
+				// ... more operations
+			]
+		}
+		// Additional transaction traces...
+	]
+}
+```
+
+### Response with callTracer
+
+When using the `callTracer` option, the response is formatted as a call graph for each transaction:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"type": "CALL",
+			"from": "0x1923f626bb8dc025849e00f99c25fe2b2f7fb0db",
+			"to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+			"value": "0x0",
+			"gas": "0x13458",
+			"gasUsed": "0x8fc",
+			"input": "0xa9059cbb0000000000000000000000001f9840a85d5af5bf1d1762f925bdaddc4201f984000000000000000000000000000000000000000000000002b5e3af16b1880000",
+			"output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+			"calls": [
+				{
+					"type": "STATICCALL",
+					"from": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+					"to": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+					"gas": "0x8fc",
+					"gasUsed": "0x54b",
+					"input": "0x70a08231000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec7",
+					"output": "0x0000000000000000000000000000000000000000000000000000000000000000"
+				}
+			]
+		}
+		// Additional call traces...
+	]
+}
+```
+
+### Available Tracers
+
+Geth provides several built-in tracers:
+
+1. **Default tracer**: Detailed opcode-level execution logs
+2. **callTracer**: Focuses on call hierarchy between contracts
+3. **prestateTracer**: Shows contract state before execution
+4. **4byteTracer**: Tracks function selector usage statistics
+5. **noopTracer**: Minimal tracer for performance testing
+6. **opCountTracer**: Counts occurrences of each opcode
+
+You can also use JavaScript-based custom tracers for specialized analysis.
+
+### Differences from Other Block Tracing Methods
+
+While all three block tracing methods provide similar information:
+
+- `debug_traceBlockByHash` accepts a block hash for precise block identification
+- `debug_traceBlockByNumber` uses a block number or tag (e.g., "latest")
+- `debug_traceBlock` requires an RLP-encoded block as input
+- All methods return identical trace formats
+- This method is ideal when you know the exact block hash you want to investigate
+
+### Performance Considerations
+
+- Tracing entire blocks is extremely resource-intensive, especially for blocks with many transactions
+- Response size can be very large for blocks with complex transactions
+- Consider using the `disableMemory`, `disableStack`, or `disableStorage` options
+- For call graph analysis only, the `callTracer` is much more efficient
+- JavaScript tracers may require longer timeouts for complex blocks
+- Queries against historical blocks require an archive node
+- Tracing blocks with many transactions may time out on public nodes
+- For high-volume blocks, consider tracing individual transactions instead
+- Response time increases with block size and transaction complexity
+- For blocks with complex transactions, specialized tracers are recommended
+
+### Important Notes
+
+- This method requires debug APIs to be enabled on the node (--http.api=eth,debug,net,web3)
+- Not all Ethereum clients support this method (primarily Geth with debug APIs enabled)
+- For older blocks, an archive node is required to access historical state
+- The method provides detailed traces for all transactions in the block, which can result in very large responses
+- Different Ethereum clients may produce slightly different trace formats
+- The output format depends on the tracer used and may change between client versions
+- For regular block information without tracing, use eth_getBlockByHash
+
+### See also
+
+- <Link to="/docs/ethereum/debug-methods/debug_traceBlock" title="Trace all transactions within a block using an RLP-encoded block">debug_traceBlock</Link> - Trace a block using RLP-encoded block data
+- <Link to="/docs/ethereum/debug-methods/debug_traceBlockByNumber" title="Trace all transactions within a block specified by block number">debug_traceBlockByNumber</Link> - Trace block transactions by number
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Get detailed execution trace for a specific transaction">debug_traceTransaction</Link> - Trace a single transaction
+- <Link to="/docs/ethereum/debug-methods/debug_traceCall" title="Execute and trace a call without creating a transaction">debug_traceCall</Link> - Trace a call without creating a transaction
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Get basic block information without detailed tracing">eth_getBlockByHash</Link> - Get block by hash without tracing

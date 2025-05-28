@@ -1,0 +1,133 @@
+---
+title: Visión General de la API | Documentación Técnica de Ethereum JSON-RPC
+description: Visión técnica completa de la arquitectura de la API TheRPC, incluyendo especificación JSON-RPC 2.0, formatos de solicitud, autenticación, estructuras de respuesta y manejo de errores
+keywords: visión general json rpc, arquitectura api, técnica api blockchain, especificación api ethereum, json-rpc 2.0, comunicación blockchain, protocolo rpc ethereum, estructura api web3
+---
+
+# Visión General de la API
+
+## Arquitectura
+
+La API de TheRPC sigue la especificación JSON-RPC 2.0 y proporciona:
+
+- Endpoints estándar HTTP y WebSocket
+- Autenticación mediante claves API
+- Formatos de respuesta unificados
+- Compatibilidad entre redes
+
+## Protocolos de Comunicación
+
+### Endpoints HTTP
+
+Ideal para solicitudes individuales e integraciones simples. Vea ejemplos en nuestra <Link to="/docs/ethereum/tools/curl" title="Ejemplos HTTP/Curl para la integración de la API de Ethereum">guía HTTP/Curl</Link>.
+
+```
+https://YOUR_API_ENDPOINT
+```
+
+### Endpoints WebSocket
+
+Ideal para suscripciones y datos en tiempo real. Vea <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Método de suscripción de Ethereum para eventos blockchain en tiempo real">eth_subscribe</Link> para ejemplos de suscripción.
+
+```
+wss://YOUR_API_ENDPOINT
+```
+
+## Formato JSON-RPC
+
+### Estructura de Solicitud
+
+Todas las llamadas a la API siguen el formato JSON-RPC 2.0. Vea ejemplos completos en nuestra <Link to="/docs/ethereum/basic-operations" title="Guía para operaciones comunes de blockchain Ethereum">guía de Operaciones Básicas</Link>:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"method": "eth_blockNumber",
+	"params": [],
+	"id": 1
+}
+```
+
+Campos requeridos:
+
+- `jsonrpc`: Identificador de versión (siempre "2.0")
+- `method`: El método RPC a llamar (vea <Link to="/docs/ethereum/all-methods" title="Lista completa de métodos disponibles de la API de Ethereum">Métodos Disponibles</Link>)
+- `params`: Array de parámetros (puede estar vacío)
+- `id`: Identificador de solicitud
+
+### Formato de Respuesta
+
+Todas las respuestas siguen una estructura consistente:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x..."
+}
+```
+
+O en caso de error:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"error": {
+		"code": -32600,
+		"message": "Invalid Request"
+	}
+}
+```
+
+## Autenticación
+
+Todas las solicitudes requieren una clave API en la cabecera de Autorización. Vea nuestra <Link to="/docs/ethereum/authentication" title="Guía para asegurar su acceso a la API con autenticación">guía de Autenticación</Link> para una configuración detallada:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Categorías de Métodos
+
+### Métodos Estándar
+
+- **eth\_**: Métodos del protocolo Ethereum (<Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Método para obtener el número de bloque más reciente de Ethereum">eth_blockNumber</Link>, <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Método para recuperar el saldo ETH de una cuenta">eth_getBalance</Link>, etc.)
+- **net\_**: Métodos de estado de red (<Link to="/docs/ethereum/core-methods/net_version" title="Método para obtener el ID de red actual">net_version</Link>)
+- **web3\_**: Métodos de utilidad Web3 (<Link to="/docs/ethereum/core-methods/web3_clientVersion" title="Método para obtener la versión del cliente Ethereum">web3_clientVersion</Link>)
+
+### Métodos Avanzados
+
+- **debug\_**: Capacidades de depuración (<Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Método para rastrear la ejecución de una transacción Ethereum">debug_traceTransaction</Link>)
+- **trace\_**: Rastreo de transacciones (<Link to="/docs/ethereum/trace-methods/trace_transaction" title="Método para obtener las llamadas externas realizadas por una transacción">trace_transaction</Link>)
+- **txpool\_**: Información del pool de transacciones (<Link to="/docs/ethereum/core-methods/txpool_status" title="Método para obtener estadísticas de transacciones pendientes">txpool_status</Link>)
+
+## Manejo de Errores
+
+Códigos de error comunes (vea <Link to="/docs/ethereum/faq" title="Preguntas frecuentes sobre el uso de la API de Ethereum">FAQ</Link> para estrategias detalladas de manejo de errores):
+
+- `-32700`: Error de análisis
+- `-32600`: Solicitud inválida
+- `-32601`: Método no encontrado
+- `-32602`: Parámetros inválidos
+- `-32603`: Error interno
+
+## Ejemplos de Implementación
+
+Para ejemplos prácticos de implementación, consulte nuestras guías específicas de lenguaje:
+
+- <Link to="/docs/ethereum/tools/javascript-typescript" title="Herramientas JavaScript y TypeScript para desarrollo en Ethereum">Guía de JavaScript/TypeScript</Link>
+- <Link to="/docs/ethereum/tools/python" title="Herramientas y bibliotecas Python para desarrollo en Ethereum">Guía de Python</Link>
+- <Link to="/docs/ethereum/tools/curl" title="Ejemplos de solicitudes HTTP directas para la API de Ethereum">Ejemplos HTTP/Curl</Link>
+- Vea todos los SDKs disponibles en nuestra sección <Link to="/docs/ethereum/tools/overview" title="Resumen de todas las herramientas de desarrollo disponibles para Ethereum">Herramientas y SDKs</Link>
+
+## Límites de Tasa
+
+Para información sobre límites de solicitudes y cuotas, vea nuestra <Link to="/docs/ethereum/rate-limits" title="Información sobre límites de uso de API y cuotas">documentación de Límites de Tasa</Link>.
+
+## Ver También
+
+- <Link to="/docs/ethereum/authentication" title="Guía para asegurar su acceso a la API con autenticación">Guía de Autenticación</Link> - Información Detallada de Autenticación
+- <Link to="/docs/ethereum/all-methods" title="Lista completa de métodos disponibles de la API de Ethereum">Métodos Disponibles</Link> - Lista Completa de Métodos
+- <Link to="/docs/ethereum/basic-operations" title="Guía para operaciones comunes de blockchain Ethereum">Operaciones Básicas</Link> - Patrones de Uso Comunes
+- <Link to="/docs/ethereum/faq" title="Preguntas frecuentes sobre el uso de la API de Ethereum">FAQ</Link> - Preguntas y Respuestas Comunes

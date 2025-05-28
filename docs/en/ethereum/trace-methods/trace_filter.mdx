@@ -1,0 +1,337 @@
+---
+title: trace_filter - Query Ethereum Transaction Traces | Ethereum API Methods
+description: Learn how to use the trace_filter method to effectively search for and filter transaction traces based on multiple criteria, including address, block range, and more.
+keywords: trace_filter, ethereum trace search, transaction filter, trace query, blockchain data, smart contract interactions, internal transactions, trace filtering, ethereum forensics, call filter, trace analysis, block range search, address filter, transaction monitoring, trace indexing, smart contract tracing, contract calls, function calls, value transfers, trace querying
+---
+
+# trace_filter
+
+The `trace_filter` method allows you to search for specific traces within a range of blocks, filtering by various criteria such as from/to addresses, block range, and trace types. This provides a powerful way to analyze blockchain activity for specific contracts or accounts.
+
+## Use Cases
+
+- Finding all internal transactions for a specific address
+- Tracking token transfers that aren't visible in transaction logs
+- Forensic analysis of contract interactions and vulnerabilities
+- Monitoring specific contract calls across a range of blocks
+- Auditing contract-to-contract interactions for security review
+- Analyzing smart contract execution patterns
+- Detecting MEV and frontrunning activities
+- Tracing arbitrage paths across DeFi protocols
+- Building comprehensive block explorers
+- Validating complex financial flows in DeFi applications
+
+## Method Details
+
+This method retrieves transaction traces based on the specified filter criteria.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'trace_filter',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'filterParams',
+			required: true,
+			type: 'object',
+			desc: 'Filter parameters',
+			fields: [
+				{
+					id: 'fromBlock',
+					type: 'string',
+					desc: 'From block (hex block number or "latest", "earliest", "pending")',
+					value: '0x3d0000',
+				},
+				{
+					id: 'toBlock',
+					type: 'string',
+					desc: 'To block (hex block number or "latest", "earliest", "pending")',
+					value: '0x3d0100',
+				},
+				{
+					id: 'fromAddress',
+					type: 'array',
+					desc: 'Filter traces by sender addresses (array of address strings)',
+					value: ['0x8bbb73bcb5d553b5a556358d27625323fd781d37'],
+				},
+				{
+					id: 'toAddress',
+					type: 'array',
+					desc: 'Filter traces by recipient addresses (array of address strings)',
+					value: ['0x6090a6e47849629b7245dfa1ca21d94cd15878ef'],
+				},
+				{
+					id: 'after',
+					type: 'integer',
+					desc: 'Offset trace after given index',
+					value: 1000,
+				},
+				{
+					id: 'count',
+					type: 'integer',
+					desc: 'Maximum number of traces to return',
+					value: 100,
+				},
+			],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: 'Array of trace objects',
+			fields: [
+				{
+					id: 'action',
+					type: 'object',
+					desc: 'Information about the action taken',
+					fields: [
+						{
+							id: 'callType',
+							type: 'string',
+							desc: 'Type of call (e.g., "call", "delegatecall", "staticcall")',
+						},
+						{
+							id: 'from',
+							type: 'string',
+							desc: 'Sender address',
+						},
+						{
+							id: 'to',
+							type: 'string',
+							desc: 'Recipient address',
+						},
+						{
+							id: 'gas',
+							type: 'string',
+							desc: 'Gas provided for this part of the execution',
+						},
+						{
+							id: 'input',
+							type: 'string',
+							desc: 'Call data input',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: 'Value transferred in wei',
+						},
+						{
+							id: 'init',
+							type: 'string',
+							desc: 'Constructor initialization code (for "create" traces)',
+						},
+						{
+							id: 'address',
+							type: 'string',
+							desc: 'Address of the contract (for "suicide" traces)',
+						},
+						{
+							id: 'refundAddress',
+							type: 'string',
+							desc: 'Address receiving the refund (for "suicide" traces)',
+						},
+						{
+							id: 'balance',
+							type: 'string',
+							desc: 'Balance of the contract at destruction (for "suicide" traces)',
+						},
+					],
+				},
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: 'Hash of the block containing this trace',
+				},
+				{
+					id: 'blockNumber',
+					type: 'integer',
+					desc: 'Block number containing this trace',
+				},
+				{
+					id: 'result',
+					type: 'object',
+					desc: 'Result of the call',
+					fields: [
+						{
+							id: 'gasUsed',
+							type: 'string',
+							desc: 'Amount of gas used',
+						},
+						{
+							id: 'output',
+							type: 'string',
+							desc: 'Output data from the call',
+						},
+						{
+							id: 'address',
+							type: 'string',
+							desc: 'Address of the created contract (for "create" traces)',
+						},
+						{
+							id: 'code',
+							type: 'string',
+							desc: 'Deployed contract code (for "create" traces)',
+						},
+					],
+				},
+				{
+					id: 'subtraces',
+					type: 'integer',
+					desc: 'Number of subtraces',
+				},
+				{
+					id: 'traceAddress',
+					type: 'array',
+					desc: 'Address path of trace location in the call tree',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: 'Hash of the transaction being traced',
+				},
+				{
+					id: 'transactionPosition',
+					type: 'integer',
+					desc: 'Index position of the transaction in the block',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: 'Type of trace (call, create, suicide)',
+				},
+				{
+					id: 'error',
+					type: 'string',
+					desc: 'Error message if the call failed (optional)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.filterParams || {}]}
+/>
+
+### Filter Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `fromBlock` | string | Starting block number (hex) or tag ("latest", "earliest", "pending") |
+| `toBlock` | string | Ending block number (hex) or tag ("latest", "earliest", "pending") |
+| `fromAddress` | array | Optional array of sender addresses to filter by |
+| `toAddress` | array | Optional array of recipient addresses to filter by |
+| `after` | integer | Optional pagination parameter - offset traces after the given index |
+| `count` | integer | Optional maximum number of traces to return |
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x8bbb73bcb5d553b5a556358d27625323fd781d37",
+				"to": "0x6090a6e47849629b7245dfa1ca21d94cd15878ef",
+				"gas": "0x12a94",
+				"input": "0x0000000000000000000000000000000000000000000000000000000000000000",
+				"value": "0x0"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3928366,
+			"result": {
+				"gasUsed": "0xd979",
+				"output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+			},
+			"subtraces": 1,
+			"traceAddress": [],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		}
+	]
+}
+```
+
+### Filter Strategies
+
+Different filter combinations can be used to answer specific questions:
+
+**To find all calls to a specific contract:**
+```json
+{
+  "toAddress": ["0x1234567890123456789012345678901234567890"]
+}
+```
+
+**To find all internal transactions from a contract:**
+```json
+{
+  "fromAddress": ["0x1234567890123456789012345678901234567890"]
+}
+```
+
+**To find interactions between two specific addresses:**
+```json
+{
+  "fromAddress": ["0x1234567890123456789012345678901234567890"],
+  "toAddress": ["0xabcdef0123456789abcdef0123456789abcdef01"]
+}
+```
+
+**To analyze activity within a specific block range:**
+```json
+{
+  "fromBlock": "0x429d3b",
+  "toBlock": "0x429d3d"
+}
+```
+
+### Pagination
+
+For large result sets, use the `after` and `count` parameters to paginate through results:
+
+1. First request: `{ "after": 0, "count": 100, ... }`
+2. Next request: `{ "after": 100, "count": 100, ... }`
+3. Continue incrementing `after` by `count` value
+
+### Performance Considerations
+
+- Filtering across large block ranges can be resource-intensive
+- Always specify the narrowest block range necessary
+- Use address filtering to reduce result set size
+- Consider splitting large queries into smaller block ranges
+- For heavy usage, consider running your own archive node with trace indexing
+
+### Trace Types
+
+The method returns different types of traces:
+
+- **call**: A message call to an address
+- **create**: A contract creation
+- **suicide**: A contract self-destruct operation (also known as SELFDESTRUCT)
+
+### Important Notes
+
+- This method requires trace APIs to be enabled on the Ethereum node
+- Not all Ethereum clients support trace filtering (primarily Geth with `--gcmode=archive` and OpenEthereum/Nethermind)
+- Public RPC providers often limit or disable trace methods due to their resource intensity
+- Filters apply only to the stored traces, not to log events (use eth_getLogs for event logs)
+- The response size can be very large for wide block ranges or popular addresses
+- Block range restrictions may be imposed by the RPC provider (often limited to a few thousand blocks)
+- Calling this method on a non-archive node will return incomplete results
+- Trace filtering is significantly more resource-intensive than regular transaction queries
+- Unlike events, traces are not indexed by topics but only by addresses and block numbers
+- Transactions that failed due to out-of-gas or reverts still produce traces up to the failure
+
+### See also
+
+- <Link to="/docs/ethereum/trace-methods/trace_transaction" title="Get detailed execution traces for a specific transaction">trace_transaction</Link> - Retrieve traces for a single transaction
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="Get execution traces for all transactions in a block">trace_block</Link> - Retrieve traces for all transactions in a block
+- <Link to="/docs/ethereum/trace-methods/trace_call" title="Trace a call without creating a transaction">trace_call</Link> - Execute and trace a call without creating a transaction
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Query event logs based on filter criteria">eth_getLogs</Link> - Alternative for filtering event logs
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Get low-level EVM execution details for a transaction">debug_traceTransaction</Link> - Get lower-level execution details for transactions

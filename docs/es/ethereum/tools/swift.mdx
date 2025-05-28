@@ -1,0 +1,152 @@
+---
+title: Herramientas Swift para Desarrollo Blockchain Ethereum | Guía de Integración Web3.swift
+description: Guía completa de bibliotecas Swift para desarrollo Ethereum, incluyendo Web3.swift, ejemplos de integración para iOS y macOS, patrones SwiftUI, y gestión nativa de billeteras
+keywords: swift ethereum, ios ethereum, web3.swift, ethereum ios, apple ethereum, swift blockchain, ios dapp, swift web3, ethereum macos, swiftui blockchain, billetera ios, contratos inteligentes swift, desarrollo blockchain apple
+---
+
+# Herramientas Swift
+
+Los desarrolladores de Swift pueden usar varias bibliotecas para el desarrollo en Ethereum, siendo web3.swift la opción más popular para aplicaciones iOS y macOS.
+
+<PayAttention category="Swift" />
+
+## # Web3.swift
+
+Implementación nativa en Swift para Ethereum.
+
+```swift
+import Web3
+import BigInt
+
+class EthereumClient {
+    private let web3 = Web3(rpcURL: "YOUR_ETHEREUM_NODE_URL")
+
+    func getBalance(address: String) async throws -> Double {
+        let address = try EthereumAddress(hex: address, eip55: true)
+        let balance = try await web3.eth.getBalance(address: address)
+        return balance.converted(to: .ether).value
+    }
+
+    func sendTransaction(
+        from: EthereumPrivateKey,
+        to: String,
+        amount: Double
+    ) async throws -> String {
+        let toAddress = try EthereumAddress(hex: to, eip55: true)
+        let amount = EthereumAmount(value: amount, unit: .ether)
+
+        let transaction = try await web3.eth.prepareTransaction(
+            to: toAddress,
+            value: amount,
+            from: from.address
+        )
+
+        let signed = try transaction.sign(with: from)
+        return try await web3.eth.send(transaction: signed)
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/argentlabs/web3.swift" target="_blank" absolute>web3.swift</Link>
+- **Características**:
+  - Implementación nativa en Swift
+  - Soporte para iOS y macOS
+  - Soporte para async/await
+  - Interacciones con contratos con seguridad de tipos
+  - Gestión de billeteras
+  - Soporte para ENS
+
+## # Integración con SwiftUI
+
+Ejemplo moderno de SwiftUI para interacciones con Ethereum:
+
+```swift
+import SwiftUI
+import Web3
+
+struct WalletView: View {
+    @StateObject private var viewModel = WalletViewModel()
+
+    var body: some View {
+        VStack {
+            Text("Balance: \(viewModel.balance) ETH")
+
+            Button("Refresh") {
+                Task {
+                    await viewModel.updateBalance()
+                }
+            }
+        }
+    }
+}
+
+class WalletViewModel: ObservableObject {
+    private let client = EthereumClient()
+    @Published var balance: Double = 0
+
+    func updateBalance() async {
+        do {
+            balance = try await client.getBalance(address: "YOUR_ADDRESS")
+        } catch {
+            print("Error: \(error)")
+        }
+    }
+}
+```
+
+## # Integración de Contratos Inteligentes
+
+Interactúa con contratos inteligentes usando Swift:
+
+```swift
+struct Contract {
+    let web3 = Web3(rpcURL: "YOUR_ETHEREUM_NODE_URL")
+    let contractAddress: EthereumAddress
+
+    func callMethod() async throws -> String {
+        let contract = try await web3.eth.Contract(
+            json: contractABI,
+            address: contractAddress
+        )
+
+        return try await contract.method(
+            "methodName",
+            parameters: [param1, param2],
+            extraData: Data()
+        ).call()
+    }
+}
+```
+
+## # Manejo de Errores
+
+Manejo adecuado de errores en Swift para operaciones Ethereum:
+
+```swift
+enum EthereumError: Error {
+    case invalidAddress
+    case insufficientFunds
+    case networkError(String)
+}
+
+extension EthereumClient {
+    func safeGetBalance(address: String) async throws -> Double {
+        guard address.hasPrefix("0x") else {
+            throw EthereumError.invalidAddress
+        }
+
+        do {
+            return try await getBalance(address: address)
+        } catch {
+            throw EthereumError.networkError(error.localizedDescription)
+        }
+    }
+}
+```
+
+### Ver también
+
+- <Link to="/docs/ethereum/tools/overview" title="Visión general completa de herramientas y SDKs disponibles para desarrollo Ethereum">Visión General de Herramientas</Link> - Todos los SDKs y Herramientas Disponibles
+- <Link to="/docs/ethereum/authentication" title="Guía para autenticarse con nodos Ethereum y servicios API">Guía de Autenticación</Link> - Información Detallada de Autenticación
+- <Link to="/docs/ethereum/basic-operations" title="Aprende operaciones fundamentales de blockchain Ethereum para desarrolladores">Guía de Operaciones Básicas</Link> - Operaciones Fundamentales
+- <Link to="/docs/ethereum/all-methods" title="Referencia completa de todos los métodos API de Ethereum disponibles">Métodos Disponibles</Link> - Explora las Capacidades de la API

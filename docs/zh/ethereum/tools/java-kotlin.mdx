@@ -1,0 +1,149 @@
+---
+title: 以太坊开发的Java和Kotlin工具 | Web3j框架指南
+description: Web3j库用于Java和Kotlin以太坊开发的综合指南，包含代码示例、智能合约集成和Android实现模式
+keywords: java以太坊, kotlin以太坊, web3j, 以太坊jvm, android以太坊, kotlin区块链, java web3, android区块链, kotlin智能合约, java dapp, 以太坊android开发, kotlin协程以太坊
+---
+
+# Java和Kotlin工具
+
+JVM生态系统为以太坊开发提供了强大的工具，主要通过适用于Java和Kotlin的Web3j库。
+
+<PayAttention category="Java/Kotlin" />
+
+## # Web3j
+
+全面的Java和Kotlin以太坊库。
+
+### Java示例
+
+```java
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.utils.Convert;
+import java.math.BigDecimal;
+
+public class EthereumClient {
+    private final Web3j web3j;
+
+    public EthereumClient(String nodeUrl) {
+        this.web3j = Web3j.build(new HttpService(nodeUrl));
+    }
+
+    public BigDecimal getBalance(String address) throws Exception {
+        BigInteger balanceWei = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
+            .send()
+            .getBalance();
+        return Convert.fromWei(balanceWei.toString(), Convert.Unit.ETHER);
+    }
+
+    public String sendTransaction(Credentials credentials, String toAddress, BigDecimal ethAmount) {
+        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+        BigInteger value = Convert.toWei(ethAmount, Convert.Unit.ETHER).toBigInteger();
+
+        RawTransaction rawTransaction = RawTransaction.createEtherTransaction(
+            nonce, gasPrice, GAS_LIMIT, toAddress, value);
+
+        byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+        String hexValue = Numeric.toHexString(signedMessage);
+
+        return web3j.ethSendRawTransaction(hexValue).send().getTransactionHash();
+    }
+}
+```
+
+### Kotlin示例
+
+```kotlin
+import org.web3j.protocol.Web3j
+import org.web3j.protocol.http.HttpService
+import org.web3j.utils.Convert
+import java.math.BigDecimal
+
+class EthereumClient(nodeUrl: String) {
+    private val web3j = Web3j.build(HttpService(nodeUrl))
+
+    suspend fun getBalance(address: String): BigDecimal {
+        val balanceWei = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
+            .send()
+            .balance
+        return Convert.fromWei(balanceWei.toString(), Convert.Unit.ETHER)
+    }
+
+    suspend fun sendTransaction(
+        credentials: Credentials,
+        toAddress: String,
+        ethAmount: BigDecimal
+    ): String {
+        val gasPrice = web3j.ethGasPrice().send().gasPrice
+        val value = Convert.toWei(ethAmount, Convert.Unit.ETHER).toBigInteger()
+
+        val rawTransaction = RawTransaction.createEtherTransaction(
+            nonce, gasPrice, GAS_LIMIT, toAddress, value)
+
+        val signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials)
+        val hexValue = Numeric.toHexString(signedMessage)
+
+        return web3j.ethSendRawTransaction(hexValue).send().transactionHash
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/web3j/web3j" target="_blank" absolute>web3j</Link>
+- **文档**: <Link to="https://docs.web3j.io" target="_blank" absolute>docs.web3j.io</Link>
+- **特性**:
+  - Java 8+支持
+  - Kotlin协程支持
+  - Android兼容性
+  - 智能合约包装器
+  - 命令行工具
+  - 钱包支持
+
+## # Android支持
+
+Web3j为Android开发提供特定功能：
+
+```kotlin
+// Android example
+class EthereumViewModel : ViewModel() {
+    private val web3j = Web3j.build(HttpService("YOUR_ETHEREUM_NODE_URL"))
+
+    fun getBalance(address: String) = viewModelScope.launch {
+        withContext(Dispatchers.IO) {
+            val balance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST)
+                .send()
+                .balance
+            // Update UI
+        }
+    }
+}
+```
+
+## # 智能合约集成
+
+从Solidity生成合约包装器：
+
+```bash
+web3j solidity generate /path/to/contract.sol -o /path/to/output -p com.your.package
+```
+
+然后在代码中使用：
+
+```kotlin
+val contract = YourContract.load(
+    contractAddress,
+    web3j,
+    credentials,
+    gasPrice,
+    gasLimit
+)
+
+// Call contract method
+val result = contract.someMethod().send()
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/tools/overview" title="可用以太坊开发工具和SDK的完整概述">工具概述</Link> - 所有可用的SDK和工具
+- <Link to="/docs/ethereum/authentication" title="与以太坊节点和API服务认证的指南">认证指南</Link> - 详细认证信息
+- <Link to="/docs/ethereum/basic-operations" title="学习开发者的基本以太坊区块链操作">基本操作指南</Link> - 基础操作
+- <Link to="/docs/ethereum/all-methods" title="所有可用以太坊API方法的完整参考">可用方法</Link> - 探索API功能

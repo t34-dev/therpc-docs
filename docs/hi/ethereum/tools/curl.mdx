@@ -1,0 +1,61 @@
+---
+title: Ethereum API एकीकरण के लिए Curl उदाहरण | सीधे HTTP इंटरैक्शन गाइड
+description: प्रमाणीकरण, अनुरोध प्रारूपण और सामान्य API संचालन सहित Curl कमांड और HTTP अनुरोधों का उपयोग करके Ethereum ब्लॉकचेन के साथ इंटरैक्ट करने का व्यापक गाइड
+keywords: curl ethereum, http ethereum api, ethereum json rpc, direct api calls, ethereum curl examples, ethereum http requests, json-rpc ethereum, curl blockchain commands, ethereum api testing, ethereum node requests, ethereum http interface
+---
+
+# Curl
+
+यह गाइड दिखाता है कि Curl कमांड का उपयोग करके Ethereum नोड्स के साथ सीधे कैसे इंटरैक्ट किया जा सकता है। यह परीक्षण, डीबगिंग और अंतर्निहित API कॉल को समझने के लिए उपयोगी है।
+
+<PayAttention category="Curl/Http" />
+
+## मूल उपयोग
+
+नवीनतम ब्लॉक नंबर प्राप्त करने का एक बुनियादी उदाहरण:
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+## प्रमाणीकरण
+
+प्रमाणीकृत एंडपॉइंट का उपयोग करते समय:
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+## सामान्य संचालन
+
+### बैलेंस प्राप्त करें
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_getBalance","params":["0x742d35Cc6634C0532925a3b844Bc454e4438f44e","latest"],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+### लेनदेन प्राप्त करें
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_getTransactionByHash","params":["0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+### यह भी देखें
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">टूल्स अवलोकन</Link> - सभी उपलब्ध SDK और टूल्स
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">प्रमाणीकरण गाइड</Link> - विस्तृत प्रमाणीकरण जानकारी
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">मूल संचालन</Link> - मूलभूत ब्लॉकचेन संचालन
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">उपलब्ध विधियां</Link> - API क्षमताओं का अन्वेषण करें

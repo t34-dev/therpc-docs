@@ -1,0 +1,189 @@
+---
+title: Herramientas C# para Desarrollo Ethereum | Guía del Framework Nethereum
+description: Guía completa de bibliotecas C# para desarrollo blockchain Ethereum, incluyendo el framework Nethereum, integración con .NET, interacción con contratos inteligentes y ejemplos de Unity3D
+keywords: c# ethereum, nethereum, .net ethereum, ethereum c#, dotnet blockchain, c# smart contracts, unity3d ethereum, nethereum api, ethereum unity, c# web3, blockchain .net, asp.net ethereum
+---
+
+# Herramientas C#
+
+Los desarrolladores de C# pueden utilizar Nethereum, una biblioteca integral de integración .NET para el desarrollo en Ethereum.
+
+<PayAttention category="C#" />
+
+## # Nethereum
+
+La solución completa de .NET para el desarrollo en Ethereum.
+
+```csharp
+using Nethereum.Web3;
+using Nethereum.Web3.Accounts;
+using Nethereum.Util;
+using Nethereum.Hex.HexTypes;
+
+public class EthereumService
+{
+    private readonly Web3 _web3;
+
+    public EthereumService(string url)
+    {
+        _web3 = new Web3(url);
+    }
+
+    public async Task<decimal> GetBalanceAsync(string address)
+    {
+        var balance = await _web3.Eth.GetBalance.SendRequestAsync(address);
+        return Web3.Convert.FromWei(balance.Value);
+    }
+
+    public async Task<string> SendTransactionAsync(
+        string privateKey,
+        string toAddress,
+        decimal etherAmount)
+    {
+        var account = new Account(privateKey);
+        var web3 = new Web3(account, _web3.Client.Url);
+
+        var transaction = await web3.Eth.GetEtherTransferService()
+            .TransferEtherAsync(toAddress, etherAmount);
+
+        return transaction;
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/Nethereum/Nethereum" target="_blank" absolute>Nethereum</Link>
+- **Documentación**: <Link to="https://docs.nethereum.com" target="_blank" absolute>docs.nethereum.com</Link>
+- **Características**:
+  - Integración completa con Ethereum
+  - Despliegue e interacción con contratos inteligentes
+  - Soporte para HD Wallet
+  - Soporte para Unity3D
+  - Compatibilidad con Xamarin
+  - Soporte para IPC, RPC, WebSocket
+
+## # Integración de Contratos Inteligentes
+
+Trabajando con contratos inteligentes en C#:
+
+```csharp
+public class SmartContractService
+{
+    private readonly Web3 _web3;
+    private readonly Contract _contract;
+
+    public SmartContractService(string url, string contractAddress, string abi)
+    {
+        _web3 = new Web3(url);
+        _contract = _web3.Eth.GetContract(abi, contractAddress);
+    }
+
+    public async Task<T> CallFunctionAsync<T>(string functionName, params object[] parameters)
+    {
+        var function = _contract.GetFunction(functionName);
+        return await function.CallAsync<T>(parameters);
+    }
+
+    public async Task<string> ExecuteFunctionAsync(
+        string functionName,
+        string fromAddress,
+        params object[] parameters)
+    {
+        var function = _contract.GetFunction(functionName);
+        return await function.SendTransactionAsync(fromAddress, parameters);
+    }
+}
+```
+
+## # Integración con ASP.NET
+
+Ejemplo de integración con ASP.NET Web API:
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class EthereumController : ControllerBase
+{
+    private readonly EthereumService _ethereumService;
+
+    public EthereumController(EthereumService ethereumService)
+    {
+        _ethereumService = ethereumService;
+    }
+
+    [HttpGet("balance/{address}")]
+    public async Task<ActionResult<decimal>> GetBalance(string address)
+    {
+        try
+        {
+            var balance = await _ethereumService.GetBalanceAsync(address);
+            return Ok(balance);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+}
+```
+
+## # Manejo de Eventos
+
+Suscripción a eventos de Ethereum:
+
+```csharp
+public class EventMonitorService
+{
+    private readonly Web3 _web3;
+
+    public async Task MonitorEventsAsync(string contractAddress, string eventName)
+    {
+        var filterAll = _web3.Eth.GetEvent<YourEventDTO>(contractAddress)
+            .CreateFilterInput();
+
+        var subscription = _web3.Eth.GetEvent<YourEventDTO>(contractAddress)
+            .GetFilterChanges(filterAll);
+
+        subscription.Subscribe(evt =>
+        {
+            Console.WriteLine($"New event: {evt.Event}");
+        });
+    }
+}
+```
+
+## # Integración con Unity3D
+
+Ejemplo de integración con Unity3D:
+
+```csharp
+public class EthereumUnityManager : MonoBehaviour
+{
+    private Web3 _web3;
+
+    private async void Start()
+    {
+        _web3 = new Web3("YOUR_ETHEREUM_NODE_URL");
+        await InitializeWalletAsync();
+    }
+
+    private async Task InitializeWalletAsync()
+    {
+        try
+        {
+            var balance = await _web3.Eth.GetBalance.SendRequestAsync("YOUR_ADDRESS");
+            Debug.Log($"Wallet Balance: {Web3.Convert.FromWei(balance.Value)} ETH");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to initialize wallet: {ex.Message}");
+        }
+    }
+}
+```
+### Ver también
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">Visión General de Herramientas</Link> - Todos los SDKs y Herramientas Disponibles
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">Guía de Autenticación</Link> - Información Detallada de Autenticación
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">Guía de Operaciones Básicas</Link> - Operaciones Fundamentales
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">Métodos Disponibles</Link> - Explorar Capacidades de la API
+

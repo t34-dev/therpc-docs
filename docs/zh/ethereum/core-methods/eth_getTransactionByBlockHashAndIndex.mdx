@@ -1,0 +1,251 @@
+---
+title: eth_getTransactionByBlockHashAndIndex - 通过区块哈希获取交易 | 以太坊 API 方法
+description: 了解如何使用 eth_getTransactionByBlockHashAndIndex 方法通过区块哈希和交易索引位置获取交易信息。
+keywords: eth_getTransactionByBlockHashAndIndex, 交易查询, 区块哈希, 交易索引, 以太坊交易, 区块链数据访问, eth交易, 交易详情
+---
+
+# eth_getTransactionByBlockHashAndIndex
+
+`eth_getTransactionByBlockHashAndIndex` 方法检索特定区块内指定位置的交易信息，该区块通过其哈希值标识。
+
+## 使用场景
+
+- 构建区块浏览器以显示交易详情
+- 分析区块内特定位置的交易
+- 验证交易是否包含在特定区块中
+- 审计历史区块中的交易序列
+- 区块链取证和交易追踪
+- 智能合约事件和状态分析
+- 跨索引交叉引用交易
+- 验证交易执行顺序
+
+## 方法详情
+
+从具有给定哈希的区块中返回指定索引位置的交易数据。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getTransactionByBlockHashAndIndex',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockHash',
+			required: true,
+			type: 'string',
+			desc: '包含交易的区块哈希',
+			value: '0xc0f4906fea23cf6f3cce98cb44e8e1449e455b28d684dfa9ff65426495584de6',
+		},
+		{
+			id: 'transactionIndex',
+			required: true,
+			type: 'string',
+			desc: '区块中交易索引位置的整数（十六进制）',
+			value: '0x0',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: '交易对象，如果没有找到交易则为null',
+			fields: [
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: '包含此交易的区块哈希',
+				},
+				{
+					id: 'blockNumber',
+					type: 'string',
+					desc: '包含此交易的区块号（十六进制）',
+				},
+				{
+					id: 'from',
+					type: 'string',
+					desc: '发送者的地址',
+				},
+				{
+					id: 'gas',
+					type: 'string',
+					desc: '发送者提供的gas（十六进制）',
+				},
+				{
+					id: 'gasPrice',
+					type: 'string',
+					desc: '发送者提供的gas价格（十六进制）',
+				},
+				{
+					id: 'maxFeePerGas',
+					type: 'string',
+					desc: '每单位gas的最大费用（EIP-1559后）',
+				},
+				{
+					id: 'maxPriorityFeePerGas',
+					type: 'string',
+					desc: '每单位gas的最大优先费用（EIP-1559后）',
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: '交易哈希',
+				},
+				{
+					id: 'input',
+					type: 'string',
+					desc: '交易的合约代码或输入数据',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: '发送者在此区块的交易计数（十六进制）',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					desc: '接收者的地址，合约创建则为null',
+				},
+				{
+					id: 'transactionIndex',
+					type: 'string',
+					desc: '区块中交易索引位置的整数（十六进制）',
+				},
+				{
+					id: 'value',
+					type: 'string',
+					desc: '以wei为单位转移的价值（十六进制）',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: '交易类型（0：传统，1：EIP-2930，2：EIP-1559）',
+				},
+				{
+					id: 'v',
+					type: 'string',
+					desc: 'ECDSA恢复ID',
+				},
+				{
+					id: 'r',
+					type: 'string',
+					desc: 'ECDSA签名r',
+				},
+				{
+					id: 's',
+					type: 'string',
+					desc: 'ECDSA签名s',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockHash || null, fields?.transactionIndex || null]}
+/>
+
+### 交易类型
+
+以太坊交易已经演变为几种格式：
+
+| 类型 | 描述 | EIP | 关键字段 |
+|------|-------------|-----|------------|
+| `0x0` | 传统交易 | Pre-EIP-2718 | `gasPrice` |
+| `0x1` | 访问列表交易 | EIP-2930 | `gasPrice`, `accessList` |
+| `0x2` | 费用市场交易 | EIP-1559 | `maxFeePerGas`, `maxPriorityFeePerGas` |
+| `0x7E` | Blob交易 | EIP-4844 | 增加 `blobVersionedHashes`, `maxFeePerBlobGas` |
+
+### 响应示例
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "blockHash": "0xc0f4906fea23cf6f3cce98cb44e8e1449e455b28d684dfa9ff65426495584de6",
+    "blockNumber": "0x1b4",
+    "from": "0x687422eea2cb73b5d3e242ba5456b782919afc85",
+    "gas": "0x4c4b40",
+    "gasPrice": "0x1",
+    "hash": "0xc55e2b90168af6972193c1f86fa4d7d7b31a29c156665d15b9cd48618b5177ef",
+    "input": "0x608060405234801561001057600080fd5b50336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055506000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16600073ffffffffffffffffffffffffffffffffffffffff167f342827c97908e5e2f71151c08502a66d44b6f758e3ac2f1de95f02eb95f0a73560405160405180910390a36102c88061010f6000396000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c80632e64cec11461005157806343d726d61461006f5780636057361d1461007957806367e404ce146100a7575b600080fd5b6100596100d5565b6040518082815260200191505060405180910390f35b610077610141565b005b6100a56004803603602081101561008f57600080fd5b81019080803590602001909291905050506101e2565b005b6100af61024c565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614610130576101096100d5565b905061014056b65b600160005081905090506000600181905550505b90565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16146101d7576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260138152602001807f43616c6c6572206973206e6f74206f776e65720000000000000000000000000081525060200191505060405180910390fd5b6101e06101e2565b565b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614610205578060016000508190555050610249565b806000600181905550505b50565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a723158209c13e5ac3477408658e2cb4a267ad5d3b7749a5fc7450075897c1650ddcaaffe64736f6c63430005100032",
+    "nonce": "0x4",
+    "to": null,
+    "transactionIndex": "0x0",
+    "value": "0x0",
+    "type": "0x0",
+    "v": "0x1b",
+    "r": "0x9db4a2414dcfac7e25b6c0fc771a4fbe5a582f640f6f8ed673970e318494e674",
+    "s": "0x6cf121d02b5fcd61cec1b8a295b9006c7b137c39162386d968e9310cc2c81b83"
+  }
+}
+```
+
+## 理解交易字段
+
+### 基本交易信息
+
+该方法返回的交易对象包含重要字段：
+
+- **blockHash/blockNumber**：标识此交易存储在区块链中的位置
+- **transactionIndex**：交易在区块内的位置（0是第一笔交易）
+- **hash**：交易的唯一标识符
+- **from**：发送者地址（谁发起并签名交易）
+- **to**：接收者地址（null表示合约创建）
+- **value**：以wei为单位转移的ETH数量（十六进制）
+- **input**：对于合约创建/交互，包含字节码或编码的函数调用
+- **nonce**：发送者的交易计数（用于防止重放）
+
+### Gas和费用信息
+
+Gas和费用字段根据交易类型而变化：
+
+- **gas**：交易可以使用的最大gas
+- **gasPrice**：每单位gas的价格（在传统和Type-1交易中）
+- **maxFeePerGas**：每单位gas的最大总费用（在Type-2交易中）
+- **maxPriorityFeePerGas**：每单位gas的最大优先费用（在Type-2交易中）
+
+### 签名组件
+
+交易签名由三部分组成：
+
+- **v**：恢复ID（帮助从签名中获取公钥）
+- **r**和**s**：ECDSA签名组件
+
+## 区分合约创建交易
+
+可以通过检查`to`字段是否为null来识别合约创建交易。例如：
+
+```javascript
+async function isContractCreation(blockHash, txIndex) {
+  const tx = await ethereum.request({
+    method: 'eth_getTransactionByBlockHashAndIndex',
+    params: [blockHash, txIndex]
+  });
+  
+  return tx.to === null;
+}
+```
+
+对于合约创建交易，合约地址可以从以下信息派生：
+- 发送者地址（`from`）
+- 发送者当时的nonce
+- 交易数据
+
+## 与相关方法的区别
+
+此方法与其他交易查询方法的区别：
+
+| 方法 | 查询键 | 使用场景 |
+|--------|-----------|----------|
+| `eth_getTransactionByHash` | 交易哈希 | 已知哈希时直接查询交易 |
+| `eth_getTransactionByBlockHashAndIndex` | 区块哈希 + 索引 | 已知区块哈希和交易位置时 |
+| `eth_getTransactionByBlockNumberAndIndex` | 区块号 + 索引 | 已知区块号和交易位置时 |
+
+基于区块哈希的方法提供了绝对确定性，即使在重组情况下也能保证查询正确的区块，而基于区块号的方法在顺序访问模式下更方便。
+
+## 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="通过哈希查询交易">eth_getTransactionByHash</Link> - 通过交易哈希获取交易信息
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockNumberAndIndex" title="通过区块号和位置查找交易">eth_getTransactionByBlockNumberAndIndex</Link> - 通过区块号和索引位置获取交易
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="通过哈希获取完整区块信息">eth_getBlockByHash</Link> - 获取包括所有交易在内的完整区块信息
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="获取交易结果和影响">eth_getTransactionReceipt</Link> - 检索包含执行结果的交易收据

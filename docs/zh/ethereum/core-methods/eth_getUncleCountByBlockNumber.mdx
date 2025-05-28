@@ -1,0 +1,78 @@
+---
+title: eth_getUncleCountByBlockNumber - 通过区块号获取叔块数量 | 以太坊 API 方法
+description: 了解如何使用 eth_getUncleCountByBlockNumber 方法检索以太坊区块链上指定区块高度中的叔块数量。
+keywords: eth_getUncleCountByBlockNumber, uncle 区块, ommer 区块, 以太坊 uncle 数量, 区块号, 挖矿统计
+---
+
+# eth_getUncleCountByBlockNumber
+
+`eth_getUncleCountByBlockNumber` 方法返回通过区块号或标签指定的区块中叔块（ommer区块）的数量。叔块是有效的区块，它们未被包含在主链中，但在以太坊中仍被引用并获得部分奖励。
+
+## 使用场景
+
+- 实时网络监控
+- 区块浏览器功能
+- 挖矿奖励计算
+- 网络健康评估
+- 历史数据分析
+- 叔块率跟踪
+- 挖矿池操作
+- 共识研究
+
+## 方法详情
+
+此方法返回通过其区块号或区块标签标识的特定区块中的叔块数量。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getUncleCountByBlockNumber',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '十六进制格式的区块号或标签: latest, earliest, pending, safe, finalized',
+			value: '0xE4E1C0', // 示例区块号 (15,000,000)
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '此区块中叔块数量的整数（十六进制）',
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null]}
+/>
+
+### 响应示例
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x0" // 此区块中没有叔块
+}
+```
+
+
+### 区块标签支持
+
+`blockNumber` 参数接受以下几种特殊标签：
+
+- `latest`: 最新区块
+- `earliest`: 创世区块
+- `pending`: 当前待处理的区块
+- `safe`: 最新安全区块
+- `finalized`: 最新最终确定的区块
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockHashAndIndex">eth_getUncleByBlockHashAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockNumberAndIndex">eth_getUncleByBlockNumberAndIndex</Link>
+- <Link to="/docs/ethereum/core-methods/eth_getUncleCountByBlockHash">eth_getUncleCountByBlockHash</Link>
+- <Link to="/docs/ethereum/guides/uncle-blocks">叔块指南</Link>

@@ -1,0 +1,199 @@
+---
+title: eth_syncing - Comprobar el Estado de Sincronización del Nodo | Métodos API de Ethereum
+description: Aprenda a usar eth_syncing para verificar si su nodo Ethereum está sincronizándose actualmente con la red blockchain, rastrear el progreso de sincronización y comprender los diferentes estados de sincronización.
+keywords: eth_syncing, estado de sincronización ethereum, sincronización de nodo, sincronización blockchain, estado de nodo ethereum, progreso de sincronización, sincronización de bloques, sincronización eth, verificación de sincronización blockchain, seguimiento de sincronización, actualización de nodo, sincronización de datos blockchain, sincronización de nodo ethereum, sincronización de red, sincronización de mainnet, sincronización geth, sincronización erigon, sincronización nethermind
+---
+
+# eth_syncing
+
+El método `eth_syncing` le permite comprobar si su nodo Ethereum está actualmente sincronizándose con la red y, si es así, seguir el progreso del proceso de sincronización. Este método simple pero potente le ayuda a monitorear el estado de actualización de su nodo.
+
+## Casos de Uso
+
+- Monitoreo del estado de sincronización de nodos en configuraciones de infraestructura
+- Seguimiento del progreso de sincronización en exploradores de bloques y paneles
+- Determinar cuándo un nodo está listo para procesar transacciones
+- Construir sistemas de monitoreo de salud para infraestructura Ethereum
+- Calcular el tiempo estimado hasta completar la sincronización completa
+- Mostrar el estado de sincronización en aplicaciones de billetera
+- Verificar que un nodo esté completamente sincronizado antes de operaciones críticas
+- Diagnosticar problemas de red o sincronización de blockchain
+- Comprobar si un nodo puede procesar solicitudes de manera confiable
+- Monitorear la sincronización inicial para nodos de archivo intensivos en recursos
+
+## Detalles del Método
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_syncing',
+		id: 1,
+		jsonrpc: '2.0',
+		params: [],
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'syncing',
+			type: 'boolean | object',
+			desc: 'Cuando el nodo no está sincronizando, devuelve `false`. Cuando está sincronizando, devuelve un objeto con datos de estado de sincronización.',
+		},
+	]}
+	getParams={(s) => s.params}
+/>
+
+## Ejemplos de Respuesta
+
+### Cuando No Está Sincronizando
+
+Si el nodo está completamente sincronizado con la red, el método devuelve `false`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": false
+}
+```
+
+### Cuando Está Sincronizando
+
+Si el nodo está actualmente sincronizándose, el método devuelve un objeto con información del estado de sincronización:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "currentBlock": "0x3b0bc5",
+    "highestBlock": "0x3b7698",
+    "knownStates": "0x21a679",
+    "pulledStates": "0x21a679",
+    "startingBlock": "0x3ad7a2"
+  }
+}
+```
+
+### Comprensión de los Campos de Estado de Sincronización
+
+#### Campos Estándar
+* **startingBlock**: Número de bloque hexadecimal donde comenzó la sincronización
+* **currentBlock**: Número de bloque hexadecimal que el nodo está procesando actualmente
+* **highestBlock**: Número de bloque hexadecimal del bloque más alto conocido en la red
+* **knownStates**: Número de entradas de estado que se sabe que existen (de información de pares)
+* **pulledStates**: Número de entradas de estado ya descargadas
+
+#### Campos Adicionales Específicos del Cliente
+
+Diferentes clientes Ethereum pueden incluir información de sincronización adicional:
+
+##### Geth
+* **healedBytecodeBytes**: Bytes de código restaurados durante la sincronización snap
+* **healedBytecodes**: Número de bytecodes recuperados durante la sincronización snap
+* **healedTrienodeBytes**: Bytes de nodos trie recuperados durante la curación
+* **healedTrienodes**: Número de nodos trie recuperados durante la curación
+* **syncedAccountBytes**: Tamaño de datos de cuenta descargados
+* **syncedAccounts**: Número de cuentas descargadas
+* **syncedBytecodeBytes**: Tamaño de bytecode descargado
+* **syncedBytecodes**: Número de bytecodes descargados
+* **syncedStorage**: Número de slots de almacenamiento sincronizados
+* **syncedStorageBytes**: Tamaño de datos de almacenamiento descargados
+
+##### Erigon
+* **syncStage**: Nombre de la etapa de sincronización actual (Headers, Bodies, Execution, etc.)
+* **syncProgress**: Porcentaje de finalización de la etapa actual (0-100)
+
+### Interpretación de Ejemplo de Datos
+
+Dado este estado de sincronización:
+```json
+{
+  "currentBlock": "0x3b0bc5",
+  "highestBlock": "0x3b7698",
+  "startingBlock": "0x3ad7a2"
+}
+```
+
+Podemos interpretarlo de la siguiente manera:
+- Bloque inicial: 3,840,930 (decimal de 0x3ad7a2)
+- Bloque actual: 3,872,709 (decimal de 0x3b0bc5)
+- Bloque más alto: 3,897,000 (decimal de 0x3b7698)
+- Progreso: ~31,779 bloques sincronizados de ~56,070 totales (56.7% completado)
+
+### Tipos y Fases de Sincronización
+
+Los nodos Ethereum pueden sincronizarse usando diferentes estrategias, cada una afectando lo que mostrará la respuesta de `eth_syncing`:
+
+#### Sincronización Completa
+Descarga todos los bloques y ejecuta todas las transacciones desde el bloque génesis.
+- Lenta pero más segura
+- Puede tomar días o semanas dependiendo del hardware
+- Proporciona datos históricos completos
+
+#### Sincronización Rápida
+Descarga bloques pero solo extrae el estado reciente sin reejecutar transacciones históricas.
+- Mucho más rápida que la sincronización completa
+- Puede tomar horas o días
+- Reduce los requisitos de almacenamiento
+- `eth_syncing` mostrará el progreso de sincronización de estado
+
+#### Sincronización Snap (Geth)
+Descarga directamente instantáneas de estado en lugar de reconstruir el estado a partir de transacciones.
+- Método de sincronización más rápido para Geth
+- Puede completarse en horas con buen hardware
+- Campos adicionales en el estado de sincronización muestran el progreso de la instantánea
+
+#### Sincronización Beam (Nethermind)
+Permite consultar datos de la cadena antes de que se complete la sincronización completa.
+- Comienza a procesar solicitudes antes de estar completamente sincronizado
+- Puede mostrarse como no sincronizando incluso mientras rellena datos
+
+### Fases Comunes de Sincronización
+
+1. **Sincronización de Cabeceras**: Descarga de cabeceras de bloques (fase más rápida)
+2. **Sincronización de Bloques**: Descarga de cuerpos de bloques
+3. **Sincronización de Recibos**: Descarga de recibos de transacciones
+4. **Sincronización de Estado**: Descarga o construcción del estado de cuentas y contratos (fase más lenta)
+5. **Curación**: Verificar la integridad de los datos y solucionar problemas
+
+### Problemas de Sincronización
+
+Al monitorear con `eth_syncing`, estos patrones pueden indicar problemas:
+
+1. **Sincronización Atascada**: No hay cambios en `currentBlock` durante períodos prolongados
+2. **Progreso Lento**: Tasa muy baja de bloques por minuto
+3. **Bloques Repetidos**: El número de bloque actual disminuye o fluctúa
+4. **Desconexión/Reconexión**: La sincronización se reinicia con un nuevo `startingBlock`
+
+### Panel de Estado de Sincronización
+
+Para aplicaciones que necesitan mostrar el estado de sincronización, considere mostrar:
+
+1. Barra de progreso visual basada en `currentBlock` vs `highestBlock`
+2. Porcentaje numérico de finalización
+3. Bloque actual vs bloque más alto
+4. Tiempo estimado restante
+5. Etapa de sincronización actual (si está disponible)
+6. Gráfico histórico de velocidad de sincronización
+7. Indicadores de salud de la red
+
+
+### Notas Importantes
+
+1. **Falsos Negativos**: Algunos clientes devuelven `false` durante ciertos tipos o etapas de sincronización incluso cuando no están completamente sincronizados
+2. **Capa de Consenso**: Este método solo informa sobre el estado de sincronización de la capa de ejecución, no de la capa de consenso (post-fusión)
+3. **Pares Requeridos**: Los nodos necesitan pares para determinar con precisión el bloque más alto
+4. **Variaciones de Cliente**: Diferentes clientes (Geth, Erigon, Nethermind, etc.) proporcionan diferente información de sincronización
+5. **Nodos de Archivo**: Los nodos de archivo completo tardan significativamente más en sincronizarse que los nodos completos con poda
+6. **IO de Disco**: La velocidad de sincronización a menudo está limitada por el rendimiento de E/S del disco más que por la red
+7. **Requisitos de Memoria**: La sincronización requiere RAM significativa, especialmente durante las fases de sincronización de estado
+8. **Múltiples Métodos de Sincronización**: Los clientes a menudo cambian entre métodos de sincronización durante el proceso
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Obtener el número de bloque actual para comparar con el estado de sincronización">eth_blockNumber</Link> - Devuelve el número de bloque actual
+- <Link to="/docs/ethereum/core-methods/eth_chainId" title="Obtener el ID de cadena de la red con la que se está sincronizando su nodo">eth_chainId</Link> - Devuelve el ID de cadena de la red actual
+- <Link to="/docs/ethereum/core-methods/net_peerCount" title="Verificar el número de pares conectados a su nodo">net_peerCount</Link> - Devuelve el número de pares actualmente conectados al nodo
+- <Link to="/docs/ethereum/core-methods/net_version" title="Identificar la red a la que está conectado su nodo">net_version</Link> - Devuelve el ID de red actual
+- <Link to="/docs/ethereum/core-methods/web3_clientVersion" title="Verificar qué cliente Ethereum y versión está ejecutando">web3_clientVersion</Link> - Devuelve la versión actual del cliente
+- <Link to="/docs/ethereum/guides/nodes-and-clients" title="Aprenda sobre diferentes clientes de nodo Ethereum y sus estrategias de sincronización">Guía de Nodos y Clientes</Link> - Descripción general de tipos de nodos Ethereum y clientes

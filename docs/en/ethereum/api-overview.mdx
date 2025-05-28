@@ -1,0 +1,133 @@
+---
+title: API Overview | Ethereum JSON-RPC Technical Documentation
+description: Comprehensive technical overview of TheRPC API architecture, including JSON-RPC 2.0 specification, request formats, authentication, response structures, and error handling
+keywords: json rpc overview, api architecture, blockchain api technical, ethereum api specification, json-rpc 2.0, blockchain communication, ethereum rpc protocol, web3 api structure
+---
+
+# API Overview
+
+## Architecture
+
+TheRPC API follows JSON-RPC 2.0 specification and provides:
+
+- Standard HTTP and WebSocket endpoints
+- Authentication via API keys
+- Unified response formats
+- Cross-network compatibility
+
+## Communication Protocols
+
+### HTTP Endpoints
+
+Best for single requests and simple integrations. See examples in our <Link to="/docs/ethereum/tools/curl" title="HTTP/Curl examples for Ethereum API integration">HTTP/Curl guide</Link>.
+
+```
+https://YOUR_API_ENDPOINT
+```
+
+### WebSocket Endpoints
+
+Ideal for subscriptions and real-time data. See <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Ethereum subscription method for real-time blockchain events">eth_subscribe</Link> for subscription examples.
+
+```
+wss://YOUR_API_ENDPOINT
+```
+
+## JSON-RPC Format
+
+### Request Structure
+
+All API calls follow the JSON-RPC 2.0 format. See complete examples in our <Link to="/docs/ethereum/basic-operations" title="Guide to common Ethereum blockchain operations">Basic Operations guide</Link>:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"method": "eth_blockNumber",
+	"params": [],
+	"id": 1
+}
+```
+
+Required fields:
+
+- `jsonrpc`: Version identifier (always "2.0")
+- `method`: The RPC method to call (see <Link to="/docs/ethereum/all-methods" title="Complete list of available Ethereum API methods">Available Methods</Link>)
+- `params`: Array of parameters (can be empty)
+- `id`: Request identifier
+
+### Response Format
+
+All responses follow a consistent structure:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x..."
+}
+```
+
+Or in case of error:
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"error": {
+		"code": -32600,
+		"message": "Invalid Request"
+	}
+}
+```
+
+## Authentication
+
+All requests require an API key in the Authorization header. See our <Link to="/docs/ethereum/authentication" title="Guide to securing your API access with authentication">Authentication guide</Link> for detailed setup:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Method Categories
+
+### Standard Methods
+
+- **eth\_**: Ethereum protocol methods (<Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Method to get the latest Ethereum block number">eth_blockNumber</Link>, <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Method to retrieve an account's ETH balance">eth_getBalance</Link>, etc.)
+- **net\_**: Network status methods (<Link to="/docs/ethereum/core-methods/net_version" title="Method to get the current network ID">net_version</Link>)
+- **web3\_**: Web3 utility methods (<Link to="/docs/ethereum/core-methods/web3_clientVersion" title="Method to get the Ethereum client version">web3_clientVersion</Link>)
+
+### Advanced Methods
+
+- **debug\_**: Debugging capabilities (<Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Method to trace an Ethereum transaction execution">debug_traceTransaction</Link>)
+- **trace\_**: Transaction tracing (<Link to="/docs/ethereum/trace-methods/trace_transaction" title="Method to get external calls made by a transaction">trace_transaction</Link>)
+- **txpool\_**: Transaction pool information (<Link to="/docs/ethereum/core-methods/txpool_status" title="Method to get pending transaction statistics">txpool_status</Link>)
+
+## Error Handling
+
+Common error codes (see <Link to="/docs/ethereum/faq" title="Frequently asked questions about Ethereum API usage">FAQ</Link> for detailed error handling strategies):
+
+- `-32700`: Parse error
+- `-32600`: Invalid request
+- `-32601`: Method not found
+- `-32602`: Invalid params
+- `-32603`: Internal error
+
+## Implementation Examples
+
+For practical implementation examples, check our language-specific guides:
+
+- <Link to="/docs/ethereum/tools/javascript-typescript" title="JavaScript and TypeScript tools for Ethereum development">JavaScript/TypeScript Guide</Link>
+- <Link to="/docs/ethereum/tools/python" title="Python tools and libraries for Ethereum development">Python Guide</Link>
+- <Link to="/docs/ethereum/tools/curl" title="Direct HTTP request examples for Ethereum API">HTTP/Curl Examples</Link>
+- View all available SDKs in our <Link to="/docs/ethereum/tools/overview" title="Overview of all available Ethereum development tools">Tools & SDKs</Link> section
+
+## Rate Limits
+
+For information about request limits and quotas, see our <Link to="/docs/ethereum/rate-limits" title="Information about API usage limits and quotas">Rate Limits documentation</Link>.
+
+## See Also
+
+- <Link to="/docs/ethereum/authentication" title="Guide to securing your API access with authentication">Authentication Guide</Link> - Detailed Auth Info
+- <Link to="/docs/ethereum/all-methods" title="Complete list of available Ethereum API methods">Available Methods</Link> - Complete Method List
+- <Link to="/docs/ethereum/basic-operations" title="Guide to common Ethereum blockchain operations">Basic Operations</Link> - Common Usage Patterns
+- <Link to="/docs/ethereum/faq" title="Frequently asked questions about Ethereum API usage">FAQ</Link> - Common Questions and Answers

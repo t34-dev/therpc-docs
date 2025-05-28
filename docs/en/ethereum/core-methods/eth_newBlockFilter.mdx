@@ -1,0 +1,114 @@
+---
+title: eth_newBlockFilter - Create Block Notification Filter | Ethereum API Methods
+description: Learn how to use eth_newBlockFilter to monitor new blocks on the Ethereum blockchain - essential for tracking transaction confirmations, syncing applications, and building real-time blockchain explorers.
+keywords: eth_newBlockFilter, ethereum block filter, new block notification, blockchain monitoring, block header filter, block tracking, ethereum notification system, chain monitoring, block alerts, ethereum polling, block watcher, blockchain synchronization, block detection, ethereum node events, real-time blockchain, block observer
+---
+
+# eth_newBlockFilter
+
+The `eth_newBlockFilter` method creates a filter in the node to notify when a new block arrives. This is a simpler and more efficient alternative to polling `eth_blockNumber` repeatedly, as it allows you to receive notifications only when new blocks are detected.
+
+## Use Cases
+
+- Block synchronization for applications and explorers
+- Triggering block-based actions in automated systems
+- Confirmation tracking for transactions in wallets
+- Chain reorganization detection for data integrity
+- Real-time blockchain monitoring for analytics
+- Gas price trend monitoring for fee optimization
+- Mining/validation tracking in network analysis
+- Detecting network stalls when blocks stop arriving
+- Alerting systems for blockchain infrastructure
+- Maintaining cache consistency with blockchain state
+
+## Method Details
+
+This method takes no parameters and returns a filter ID that can be used with `eth_getFilterChanges` to poll for new blocks.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_newBlockFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[]}
+  returns={[
+    {
+      id: 'result',
+      type: 'string',
+      desc: "Filter ID (hex string) used for polling with eth_getFilterChanges"
+    }
+  ]}
+  getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x3a85885a2facbe4b9c99d543b3e42359"
+}
+```
+
+### How Block Filters Work
+
+1. When you create a block filter, the Ethereum node assigns it a unique ID
+2. The node keeps track of the latest block it has shown to your filter
+3. When you poll using `eth_getFilterChanges`, it returns block hashes for any new blocks since your last poll
+4. If no new blocks have been produced, it returns an empty array
+
+### Return Value Format
+
+When polling with `eth_getFilterChanges`, this filter returns an array of block hashes:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    "0x1a4b5aad3a859c5c6cbbdab46f565475c5c61c163a45e0c2cb732e7221efbe77",
+    "0x2573c838b310ca595c83c20ee437139f96658f596afe8a0f726d82db3d9647c2"
+  ]
+}
+```
+
+### Block Data Retrieval
+
+The filter only returns block hashes. To get the full block data, you must make additional calls using:
+
+- `eth_getBlockByHash` - Get a block's details using its hash
+
+### Important Considerations
+
+1. **Filter Expiration**: Filters expire after a period of inactivity (typically around 5 minutes)
+2. **Polling Frequency**: Balance between timely updates and RPC call limits
+3. **Block Reorganizations**: Be aware that blocks can be reorganized, especially recent ones
+4. **Chain Consistency**: Block filters help maintain application state in sync with the blockchain
+5. **Alternative Approaches**:
+   - WebSocket `eth_subscribe` for real-time push notifications
+   - Polling `eth_blockNumber` directly (less efficient)
+6. **Rate Limits**: Excessive polling can lead to rate limiting from RPC providers
+7. **Missing Blocks**: If poll intervals are too large, you might need to handle multiple blocks at once
+8. **Filter Management**: Always uninstall filters when no longer needed
+9. **Error Handling**: Implement retry logic for temporary network issues
+10. **Block Processing**: Consider processing blocks sequentially to maintain data consistency
+
+### Comparison with Other Notification Methods
+
+| Method                           | Purpose                                   | Results                        | Best For                                 |
+|----------------------------------|-----------------------------------------|--------------------------------|------------------------------------------|
+| `eth_newBlockFilter`             | Notifies about new blocks                | Array of block hashes          | Block-level monitoring                   |
+| `eth_newFilter`                  | Notifies about specific log events       | Array of log objects           | Event-based applications                 |
+| `eth_newPendingTransactionFilter`| Notifies about pending transactions      | Array of transaction hashes    | Mempool monitoring                       |
+| WebSocket `eth_subscribe`        | Push notifications (no polling)          | Varies by subscription type    | Real-time applications                   |
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Retrieve new blocks since last poll">eth_getFilterChanges</Link> - Retrieve new block hashes since last poll
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Clean up filters when no longer needed">eth_uninstallFilter</Link> - Remove a filter when no longer needed
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="Get detailed block information using hash">eth_getBlockByHash</Link> - Get block details by hash
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Create filters for smart contract events">eth_newFilter</Link> - Create a filter for event logs
+- <Link to="/docs/ethereum/core-methods/eth_newPendingTransactionFilter" title="Monitor pending transactions in the mempool">eth_newPendingTransactionFilter</Link> - Create filter for pending transactions

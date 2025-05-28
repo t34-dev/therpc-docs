@@ -1,0 +1,267 @@
+---
+title: trace_transaction - लेनदेन ट्रेस प्राप्त करें | Ethereum API विधियां
+description: किसी विशिष्ट लेनदेन के हैश द्वारा विस्तृत निष्पादन ट्रेस जानकारी प्राप्त करने के लिए trace_transaction विधि का उपयोग करना सीखें।
+keywords: trace_transaction, ethereum trace, transaction trace, execution trace, smart contract debugging, internal calls
+---
+
+# trace_transaction
+
+`trace_transaction` विधि हैश द्वारा पहचाने गए लेनदेन के लिए विस्तृत ट्रेस जानकारी प्राप्त करती है। यह विधि लेनदेन के निष्पादन के प्रत्येक चरण में अंतर्दृष्टि प्रदान करती है, जिसमें अनुबंधों के बीच आंतरिक कॉल शामिल हैं, जिससे गहन विश्लेषण और डीबगिंग की अनुमति मिलती है।
+
+## उपयोग के मामले
+
+- त्रुटियों की पहचान के लिए विशिष्ट लेनदेनों को डीबग करना
+- व्यक्तिगत संचालन के लिए गैस खपत का विश्लेषण
+- लेनदेन के भीतर आंतरिक कॉल का पता लगाना
+- जटिल अनुबंध इंटरैक्शन को समझना
+- लेनदेन की विफलताओं की जांच
+- सुरक्षा ऑडिटिंग और कमजोरी विश्लेषण
+- अपेक्षित अनुबंध व्यवहार का सत्यापन
+- कई अनुबंधों में फंड फ्लो को ट्रैक करना
+- समान लेनदेनों के निष्पादन पैटर्न का विश्लेषण
+- विफल या वापस लिए गए लेनदेनों का डीबगिंग
+
+## विधि विवरण
+
+यह विधि लेनदेन के दौरान निष्पादित सभी संचालनों के लिए ट्रेस की एक सरणी लौटाती है।
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'trace_transaction',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'transactionHash',
+			required: true,
+			type: 'string',
+			desc: 'ट्रेस करने के लिए लेनदेन का हैश',
+			value: '0x02d4a872e096445e80d05276ee756cefef7f3b376bcec14246469c0cd97dad8f',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: 'लेनदेन में सभी संचालनों के लिए ट्रेस ऑब्जेक्ट्स की एक सरणी',
+			fields: [
+				{
+					id: 'action',
+					type: 'object',
+					desc: 'कॉल एक्शन के बारे में विवरण',
+					fields: [
+						{
+							id: 'callType',
+							type: 'string',
+							desc: 'कॉल का प्रकार (call, delegatecall, आदि)',
+						},
+						{
+							id: 'from',
+							type: 'string',
+							desc: 'प्रेषक पता',
+						},
+						{
+							id: 'gas',
+							type: 'string',
+							desc: 'कॉल के लिए प्रदान किया गया गैस (hex)',
+						},
+						{
+							id: 'input',
+							type: 'string',
+							desc: 'कॉल के लिए इनपुट डेटा (hex)',
+						},
+						{
+							id: 'to',
+							type: 'string',
+							desc: 'प्राप्तकर्ता पता',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: 'wei में स्थानांतरित मूल्य (hex)',
+						},
+					],
+				},
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: 'इस ट्रेस वाले ब्लॉक का हैश',
+				},
+				{
+					id: 'blockNumber',
+					type: 'integer',
+					desc: 'इस ट्रेस वाला ब्लॉक नंबर',
+				},
+				{
+					id: 'result',
+					type: 'object',
+					desc: 'कॉल का परिणाम',
+					fields: [
+						{
+							id: 'gasUsed',
+							type: 'string',
+							desc: 'उपयोग किए गए गैस की मात्रा (hex)',
+						},
+						{
+							id: 'output',
+							type: 'string',
+							desc: 'कॉल से आउटपुट डेटा (hex)',
+						},
+					],
+				},
+				{
+					id: 'subtraces',
+					type: 'integer',
+					desc: 'सबट्रेस की संख्या',
+				},
+				{
+					id: 'traceAddress',
+					type: 'array',
+					desc: 'कॉल ट्री में ट्रेस स्थान का पता पथ',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: 'ट्रेस किए जा रहे लेनदेन का हैश',
+				},
+				{
+					id: 'transactionPosition',
+					type: 'integer',
+					desc: 'ब्लॉक में लेनदेन की इंडेक्स स्थिति',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: 'ऑपरेशन का प्रकार (call, create, suicide)',
+				},
+				{
+					id: 'error',
+					type: 'string',
+					desc: 'यदि कॉल विफल हो गया तो त्रुटि संदेश (वैकल्पिक)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.transactionHash || null]}
+/>
+
+### प्रतिक्रिया उदाहरण
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x83806d539d4ea1c140489a06660319c9a303f874",
+				"gas": "0x1a1f8",
+				"input": "0x",
+				"to": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+				"value": "0x7a16c911b4d00000"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3068185,
+			"result": {
+				"gasUsed": "0x2982",
+				"output": "0x"
+			},
+			"subtraces": 2,
+			"traceAddress": [],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		},
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+				"gas": "0x13e99",
+				"input": "0x16c72721",
+				"to": "0x2bd2326c993dfaef84f696526064ff22eba5b362",
+				"value": "0x0"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3068185,
+			"result": {
+				"gasUsed": "0x183",
+				"output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+			},
+			"subtraces": 0,
+			"traceAddress": [0],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		},
+		{
+			"action": {
+				"callType": "call",
+				"from": "0x1c39ba39e4735cb65978d4db400ddd70a72dc750",
+				"gas": "0x8fc",
+				"input": "0x",
+				"to": "0x70faa28a6b8d6829a4b1e649d26ec9a2a39ba413",
+				"value": "0x7a16c911b4d00000"
+			},
+			"blockHash": "0x7eb25504e4c202cf3d62fd585d3e238f592c780cca82dacb2ed3cb5b38883add",
+			"blockNumber": 3068185,
+			"result": {
+				"gasUsed": "0x0",
+				"output": "0x"
+			},
+			"subtraces": 0,
+			"traceAddress": [1],
+			"transactionHash": "0x17104ac9d3312d8c136b7f44d4b8b47852618065ebfa534bd2d3b5ef218ca1f3",
+			"transactionPosition": 2,
+			"type": "call"
+		}
+	]
+}
+```
+
+### ट्रेस ट्री को समझना
+
+ट्रेस ट्री लेनदेन के निष्पादन प्रवाह का प्रतिनिधित्व करता है:
+
+1. **रूट स्तर ट्रेस**: मुख्य लेनदेन (खाली `traceAddress`)
+2. **सबट्रेस स्तर 1**: मुख्य लेनदेन से सीधे आंतरिक कॉल (`traceAddress` of `[0]`, `[1]`, आदि)
+3. **गहरे स्तर**: बाद के आंतरिक कॉल (`traceAddress` of `[0, 0]`, `[0, 1]`, आदि)
+
+### कॉल प्रकार
+
+`callType` फ़ील्ड के विभिन्न मान हो सकते हैं:
+
+- **call**: एक नियमित संदेश कॉल
+- **delegatecall**: एक कॉल जहां कोड कॉलर के संदर्भ में निष्पादित किया जाता है
+- **staticcall**: एक केवल-पढ़ने वाला कॉल (कोई स्टेट संशोधन की अनुमति नहीं)
+- **callcode**: delegatecall के समान लेकिन पारित मूल्य के साथ (विरासत)
+
+### ट्रेस प्रकार
+
+`type` फ़ील्ड ऑपरेशन प्रकार को इंगित करता है:
+
+- **call**: एक संदेश कॉल
+- **create**: एक अनुबंध निर्माण
+- **suicide**: एक अनुबंध स्व-विनाश (SELFDESTRUCT opcode)
+
+### महत्वपूर्ण नोट्स
+
+- इस विधि के लिए Ethereum नोड पर ट्रेस API सक्षम होना आवश्यक है
+- कई आंतरिक कॉल के साथ जटिल लेनदेनों के लिए प्रतिक्रिया बहुत बड़ी हो सकती है
+- विधि कम्प्यूटेशनल रूप से गहन है और जटिल लेनदेनों के लिए पूरा होने में समय लग सकता है
+- सभी Ethereum क्लाइंट इस विधि का समर्थन नहीं करते हैं
+- ऐतिहासिक लेनदेनों का पता केवल तभी लगाया जा सकता है जब नोड आर्काइव डेटा बनाए रखता है
+- कुछ क्लाइंट्स पर सीमाएँ हो सकती हैं कि लेनदेनों का कितना पीछे तक पता लगाया जा सकता है
+- अधिक विस्तृत VM-स्तरीय निष्पादन ट्रेस के लिए, `trace_replayTransaction` का उपयोग करें
+- इवेंट लॉग के विपरीत, ट्रेस सभी अनुबंध इंटरैक्शन को कैप्चर करते हैं, जिनमें वे भी शामिल हैं जो इवेंट उत्सर्जित नहीं करते हैं
+- विफल लेनदेन अभी भी विफलता के बिंदु तक ट्रेस उत्पन्न करेंगे
+- SELFDESTRUCT ऑपरेशन ऐतिहासिक कारणों से प्रकार "suicide" के साथ दिखाई देते हैं
+
+### यह भी देखें
+
+- <Link to="/docs/ethereum/trace-methods/trace_filter" title="Filter and search for transaction traces across blocks">trace_filter</Link> - मानदंडों के आधार पर ट्रेस खोजें
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="Get execution traces for all transactions in a block">trace_block</Link> - एक ब्लॉक में सभी लेनदेनों के लिए ट्रेस प्राप्त करें
+- <Link to="/docs/ethereum/trace-methods/trace_replayTransaction" title="Replay transaction with VM tracing and state changes">trace_replayTransaction</Link> - स्टेट परिवर्तनों के साथ अधिक विस्तृत ट्रेस प्राप्त करें
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Get low-level EVM execution details for a transaction">debug_traceTransaction</Link> - वैकल्पिक विस्तृत लेनदेन ट्रेसिंग

@@ -1,0 +1,124 @@
+---
+title: eth_feeHistory - Get Historical Gas Fee Data | Ethereum API Methods
+description: Learn how to use the eth_feeHistory method to retrieve historical gas fee information from the Ethereum blockchain. Includes examples of fee analysis and percentile calculations.
+keywords: eth_feeHistory, gas fees, ethereum fees, EIP-1559, base fee, priority fee, gas history, transaction costs, fee trends, gas optimization
+---
+
+# eth_feeHistory
+
+The `eth_feeHistory` method returns historical gas fee data, enabling analysis of network fee trends and helping to make informed decisions about transaction gas prices. This method became essential after the implementation of EIP-1559, which introduced a new fee market mechanism with base fees and priority fees.
+
+## Use Cases
+
+- Gas fee optimization for cost-effective transactions
+- Historical fee analysis for wallet applications
+- Transaction timing optimization based on fee patterns
+- DApp fee estimation for better user experience
+- MEV (Maximal Extractable Value) analysis and strategy
+- Gas price prediction models and algorithms
+- Fee visualization tools and dashboards
+- Economic analysis of network usage patterns
+
+## Method Details
+
+This method retrieves a collection of historical gas information, including base fees, gas utilization ratios, and priority fees (tips) at specified percentiles.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_feeHistory',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockCount',
+			required: true,
+			type: 'string',
+			desc: 'Number of blocks in the requested range (1-1024)',
+			value: '0x4',
+		},
+		{
+			id: 'newestBlock',
+			required: true,
+			type: 'string',
+			desc: 'Highest block number of the range or block tag',
+			value: 'latest',
+		},
+		{
+			id: 'rewardPercentiles',
+			required: true,
+			type: 'array',
+			desc: 'List of percentiles for priority fee calculation',
+			value: [25, 75],
+		},
+	]}
+	returns={[
+		{
+			id: 'oldestBlock',
+			type: 'string',
+			desc: 'Hex string of the oldest block in range',
+		},
+		{
+			id: 'baseFeePerGas',
+			type: 'array',
+			desc: 'Array of base fees per gas (includes next block)',
+		},
+		{
+			id: 'gasUsedRatio',
+			type: 'array',
+			desc: 'Array of block gas used ratios',
+		},
+		{
+			id: 'reward',
+			type: 'array',
+			desc: 'Array of priority fee percentile values',
+		},
+	]}
+	getParams={(fields) => [fields?.blockCount || null, fields?.newestBlock || null, fields?.rewardPercentiles || null]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"oldestBlock": "0x1B177F5",
+		"baseFeePerGas": ["0x12", "0x10", "0x11", "0xf", "0xe"],
+		"gasUsedRatio": [0.5232, 0.4521, 0.4814, 0.2891],
+		"reward": [
+			["0x12", "0x34"],
+			["0x11", "0x38"],
+			["0x15", "0x42"],
+			["0x13", "0x39"]
+		]
+	}
+}
+```
+
+### Understanding the Response
+
+- **oldestBlock**: The starting block number of the historical range
+- **baseFeePerGas**: Base fees for each block in the range (plus the next block's estimate)
+- **gasUsedRatio**: How full each block was (0.0-1.0), which affects future base fees
+- **reward**: Priority fee values at requested percentiles, useful for determining competitive tips
+
+The base fee changes according to network congestion: it increases when blocks are more than 50% full and decreases when less than 50% full. Understanding this mechanism helps predict future fees.
+
+### Common Use Case Example
+
+```javascript
+// Example of calculating average base fee from history
+const blockCount = 10;
+const result = await provider.send('eth_feeHistory', [blockCount, 'latest', [25, 75]]);
+const baseFees = result.baseFeePerGas.map((hex) => parseInt(hex, 16));
+const avgBaseFee = baseFees.reduce((a, b) => a + b) / baseFees.length;
+```
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="Get current gas price">eth_gasPrice</Link> - Returns the current gas price in wei
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="Estimate transaction gas">eth_estimateGas</Link> - Estimates gas needed for transaction execution
+- <Link to="/docs/ethereum/core-methods/eth_maxPriorityFeePerGas" title="Get suggested priority fee">eth_maxPriorityFeePerGas</Link> - Returns a suggested priority fee value

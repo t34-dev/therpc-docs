@@ -1,0 +1,159 @@
+---
+title: eth_getBlockTransactionCountByNumber - Contar Transacciones de Bloque | Métodos de API de Ethereum
+description: Aprenda a usar el método eth_getBlockTransactionCountByNumber para recuperar el número de transacciones en un bloque de Ethereum identificado por su número.
+keywords: eth_getBlockTransactionCountByNumber, recuento de transacciones, número de bloque, transacciones de bloque, bloques ethereum, actividad de red, densidad de bloque, volumen de transacciones, métricas de cadena
+---
+
+# eth_getBlockTransactionCountByNumber
+
+El método `eth_getBlockTransactionCountByNumber` devuelve el número de transacciones en un bloque, identificado por el número del bloque o etiqueta de bloque. Este método ligero proporciona una forma simple de verificar el volumen de transacciones y la actividad de red sin recuperar datos completos del bloque, haciéndolo esencial para monitorear la actividad de la cadena.
+
+## Casos de Uso
+
+- Monitoreo de congestión de red y predicción de precio de gas
+- Análisis histórico de volumen de transacciones y tendencias
+- Funcionalidad de explorador de bloques y listados de transacciones
+- Investigación de escalabilidad de red y análisis de rendimiento
+- Algoritmos de estimación de tarifas para tiempos óptimos de transacción
+- Medición de rendimiento de transacciones y escalado de red
+- Seguimiento de llenado de bloques y patrones de congestión
+- Ajuste de rendimiento de aplicaciones basado en condiciones de red
+- Optimización de tarifas de transacción en carteras
+- Análisis de correlación histórica con eventos de mercado
+
+## Detalles del Método
+
+Este método permite consultar recuentos de transacciones para cualquier bloque en la cadena, incluyendo etiquetas especiales de bloque como 'latest' y 'pending'.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBlockTransactionCountByNumber',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Número de bloque en formato hexadecimal o etiquetas: latest, earliest, pending, safe, finalized',
+			value: '0x118F61F', // Bloque 18,350,623 (alta actividad)
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'El número de transacciones en el bloque especificado (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x9B" // 155 transacciones
+}
+```
+
+### Opciones de Etiquetas de Bloque
+
+Este método admite estas etiquetas especiales de bloque como parámetros:
+
+- `latest`: Bloque minado más recientemente (uso más común)
+- `earliest`: Bloque génesis (bloque 0)
+- `pending`: Bloque actualmente pendiente (transacciones en mempool esperando ser minadas)
+- `safe`: Último bloque considerado seguro por la red (finalidad en progreso)
+- `finalized`: Último bloque que ha logrado finalidad (solo post-Merge)
+
+### Convirtiendo la Respuesta
+
+La respuesta es una cadena hexadecimal que necesita ser convertida a decimal:
+
+```javascript
+// Convertir recuento de transacciones hex a decimal
+const txCountHex = "0x9B";
+const txCountDecimal = parseInt(txCountHex, 16); // 155
+```
+
+### Importancia del Recuento de Transacciones
+
+Los recuentos de transacciones proporcionan información valiosa sobre:
+
+1. **Congestión de Red**: Recuentos más altos típicamente indican congestión de red
+2. **Precios de Gas**: El llenado de bloques impacta directamente los precios de gas en el modelo EIP-1559
+3. **Salud de la Red**: El rendimiento de transacciones refleja la utilización de capacidad de la red
+4. **Actividad de DApp**: Los picos a menudo se correlacionan con eventos importantes o promociones de DApps
+5. **Correlación de Mercado**: A menudo se correlaciona con acción de precios y volatilidad del mercado
+
+### Ejemplo Práctico
+
+```javascript
+// Ejemplo: Rastrear rendimiento de transacciones a lo largo del tiempo
+async function analyzeNetworkThroughput(startBlock, blockCount = 100) {
+	const counts = [];
+	let totalTxs = 0;
+
+	for (let i = 0; i < blockCount; i++) {
+		const blockNum = (BigInt(startBlock) + BigInt(i)).toString(16);
+		const txCount = await provider.send('eth_getBlockTransactionCountByNumber', [`0x${blockNum}`]);
+
+		const block = await provider.send('eth_getBlockByNumber', [`0x${blockNum}`, false]);
+
+		const timestamp = parseInt(block.timestamp, 16);
+		const count = parseInt(txCount, 16);
+
+		counts.push({
+			blockNumber: `0x${blockNum}`,
+			timestamp,
+			transactionCount: count,
+		});
+
+		totalTxs += count;
+	}
+
+	// Calcular promedios y tendencias
+	const avgTxPerBlock = totalTxs / blockCount;
+	const timespan = counts[counts.length - 1].timestamp - counts[0].timestamp;
+	const txPerSecond = totalTxs / timespan;
+
+	return {
+		blocks: counts,
+		averageTransactionsPerBlock: avgTxPerBlock,
+		transactionsPerSecond: txPerSecond,
+		totalTransactions: totalTxs,
+		timeSpanSeconds: timespan,
+	};
+}
+
+// Uso
+const stats = await analyzeNetworkThroughput('0x118F500', 50);
+console.log(`Average TPS: ${stats.transactionsPerSecond.toFixed(2)}`);
+console.log(`Average transactions per block: ${stats.averageTransactionsPerBlock.toFixed(2)}`);
+```
+
+### Comparación de Redes
+
+Los recuentos de transacciones varían significativamente entre diferentes redes compatibles con Ethereum:
+
+- **Ethereum Mainnet**: 100-300+ por bloque (bloques de 12 segundos)
+- **Polygon**: 50-100+ por bloque (bloques de 2 segundos)
+- **Arbitrum**: 100-1000+ por lote (transacciones L2 comprimidas)
+- **Optimism**: 50-500+ por lote (transacciones L2 comprimidas)
+- **Avalanche C-Chain**: 5-50+ por bloque (bloques de 2 segundos)
+- **BNB Smart Chain**: 50-100+ por bloque (bloques de 3 segundos)
+- **Base**: 50-300+ por lote (rollup optimista L2)
+
+Esta variación refleja diferencias en tiempos de bloque, estructuras de tarifas y patrones de uso del ecosistema.
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockTransactionCountByHash" title="Contar transacciones por hash">eth_getBlockTransactionCountByHash</Link> - Devuelve el recuento de transacciones usando hash de bloque en lugar de número
+- <Link to="/docs/ethereum/core-methods/eth_blockNumber" title="Obtener último número de bloque">eth_blockNumber</Link> - Devuelve el número de bloque más reciente
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Obtener detalles de bloque">eth_getBlockByNumber</Link> - Devuelve información completa sobre un bloque
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByBlockNumberAndIndex" title="Obtener detalles de transacción">eth_getTransactionByBlockNumberAndIndex</Link> - Devuelve detalles de transacción en la posición especificada

@@ -1,0 +1,40 @@
+---
+title: Ethereum Trace Methods | Detailed Transaction & Block Tracing API
+description: Comprehensive documentation for Ethereum trace API methods providing detailed execution traces for transactions and blocks with complete call hierarchy and state changes
+keywords: ethereum trace api, trace_transaction, trace_block, trace_call, trace_filter, trace_replayTransaction, transaction tracing, block tracing, smart contract analysis, ethereum debugging
+---
+
+# Ethereum Trace Methods
+
+This section documents Ethereum's trace API methods that provide detailed execution traces for transactions and blocks. These methods are instrumental for developers needing in-depth visibility into transaction execution, contract interactions, and state changes.
+
+## Trace Methods Overview
+
+Trace methods allow developers to obtain comprehensive execution traces for transactions and blocks, providing visibility into the complete call hierarchy, state changes, and execution flow. These powerful tools enable advanced debugging, analytics, and monitoring capabilities essential for sophisticated Ethereum applications.
+
+<DocsEndpointsTable createLink={(elem) => `/docs/ethereum/trace-methods/${elem.key}`} prefixes={['trace_']} />
+
+The trace namespace provides methods for:
+
+- Obtaining detailed traces for individual transactions
+- Tracing all transactions within a block
+- Replaying transactions with different parameters
+- Filtering traces based on specific criteria
+- Executing trace calls without modifying state
+- Analyzing internal transactions and contract calls
+
+These methods are particularly valuable for:
+- Smart contract debugging and validation
+- Transaction analysis tools
+- Monitoring contract interactions
+- Forensic blockchain analysis
+- Gas optimization research
+
+Each trace method provides structured output detailing call hierarchies, executed opcodes, gas consumption, and state modifications at each step of execution.
+
+### See also
+
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">All Available Methods</Link> - Complete Method Reference
+- <Link to="/docs/ethereum/core-methods/overview" title="Core Ethereum API methods documentation">Core Methods</Link> - Essential API Functionality
+- <Link to="/docs/ethereum/debug-methods/overview" title="Ethereum debugging methods documentation">Debug Methods</Link> - Additional Debugging Capabilities
+- <Link to="/docs/ethereum/guides/overview" title="Practical guides for Ethereum development">Development Guides</Link> - Practical Implementation Help

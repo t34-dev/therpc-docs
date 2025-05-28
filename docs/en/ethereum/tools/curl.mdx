@@ -1,0 +1,61 @@
+---
+title: Curl Examples for Ethereum API Integration | Direct HTTP Interactions Guide
+description: Comprehensive guide to interacting with Ethereum blockchain using Curl commands and HTTP requests, including authentication, request formatting, and common API operations
+keywords: curl ethereum, http ethereum api, ethereum json rpc, direct api calls, ethereum curl examples, ethereum http requests, json-rpc ethereum, curl blockchain commands, ethereum api testing, ethereum node requests, ethereum http interface
+---
+
+# Curl
+
+This guide demonstrates how to interact with Ethereum nodes directly using Curl commands. This is useful for testing, debugging, and understanding the underlying API calls.
+
+<PayAttention category="Curl/Http" />
+
+## Basic Usage
+
+Here's a basic example of getting the latest block number:
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+## Authentication
+
+When using authenticated endpoints:
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+## Common Operations
+
+### Get Balance
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_getBalance","params":["0x742d35Cc6634C0532925a3b844Bc454e4438f44e","latest"],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+### Get Transaction
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_getTransactionByHash","params":["0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b"],"id":1}' \
+  YOUR_ETHEREUM_NODE_URL
+```
+
+### See also
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">Tools Overview</Link> - All Available SDKs and Tools
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">Authentication Guide</Link> - Detailed Authentication Information
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">Basic Operations</Link> - Fundamental Blockchain Operations
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">Available Methods</Link> - Explore API Capabilities

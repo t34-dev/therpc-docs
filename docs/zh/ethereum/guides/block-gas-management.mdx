@@ -1,0 +1,50 @@
+---
+title: 区块燃气管理指南 | 以太坊交易费用优化
+description: 全面指南，介绍如何在区块级别有效管理燃气使用，优化交易成本，实施EIP-1559费用策略，以及开发燃气高效的应用程序。
+keywords: 以太坊燃气, 区块燃气限制, 燃气优化, 交易费用, eip-1559, 以太坊费用, 燃气价格, 燃气估算, 最佳燃气, 费用市场, 基础费用, 以太坊交易成本
+---
+
+# 区块燃气管理指南
+
+在区块级别理解和管理燃气消耗对于优化交易成本和确保以太坊应用程序的可靠运行至关重要。
+
+## 燃气基础
+
+- 区块燃气限制
+- 燃气价格动态
+- EIP-1559费用机制
+- 燃气估算策略
+
+## 实施策略
+
+```javascript
+// 获取区块燃气限制
+const getBlockGasLimit = async () => {
+	const block = await web3.eth.getBlock('latest');
+	return block.gasLimit;
+};
+
+// 估算最佳燃气价格
+const getOptimalGasPrice = async () => {
+	const blockCount = 10;
+	const latest = await web3.eth.getBlockNumber();
+	const blocks = await Promise.all([...Array(blockCount)].map((_, i) => web3.eth.getBlock(latest - i)));
+
+	const gasPrices = blocks.map((block) => block.baseFeePerGas);
+	return Math.floor(gasPrices.reduce((a, b) => a + b) / blockCount);
+};
+```
+
+## 优化技术
+
+1. 动态燃气价格调整
+2. 交易批处理
+3. 非高峰期执行
+4. 燃气限制优化
+5. EIP-1559费用策略
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="检索当前燃气价格的API方法">eth_gasPrice</Link> - 获取当前燃气价格
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="估算交易燃气成本的API方法">eth_estimateGas</Link> - 估算交易的燃气成本
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="学习处理以太坊区块的基本技术">使用区块</Link> - 一般区块处理

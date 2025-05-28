@@ -1,0 +1,84 @@
+---
+title: eth_gasPrice - 获取当前网络 Gas 价格 | 以太坊 API 方法
+description: 了解如何使用 eth_gasPrice 方法从以太坊网络获取当前 gas 价格。包括示例和实际应用。
+keywords: eth_gasPrice, gas 价格, 以太坊 gas, 交易费用, wei 价格, gwei, eth 费用, gas 成本计算, 交易成本
+---
+
+# eth_gasPrice
+
+`eth_gasPrice` 方法返回以 wei 为单位的当前 gas 价格。此值代表最近区块的中位数 gas 价格，为开发者提供交易费用计算的可靠基准，并帮助用户避免因 gas 价格过低导致的交易失败。
+
+## 使用场景
+
+- 钱包和 DApps 的交易费用估算
+- 为紧急交易设置适当的 gas 价格
+- 价格监控和提醒，以优化交易时机
+- 分析仪表板的 gas 价格跟踪
+- 交易优化以降低成本
+- MEV 保护策略，避免抢先交易
+- 历史 gas 价格分析
+- 费用计算器和用户友好的 gas 界面
+
+## 方法详情
+
+此方法提供了一种简单的方式来查询当前网络 gas 价格。它不需要参数，返回一个表示 wei 单位 gas 价格的十六进制值。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_gasPrice',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '以 wei 为单位的当前 gas 价格（十六进制）',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x1DCD65000" // 8 Gwei
+}
+```
+
+### 理解 Gas 单位
+
+Gas 价格通常以这些单位讨论：
+- **Wei**：最小单位（由此方法返回）
+- **Gwei**：10 亿 wei（10^9），gas 价格的常用单位
+- **Ether**：10^18 wei，主要货币单位
+
+对于用户界面，将返回值转换为 Gwei 通常提供更易读的格式。例如，`0x1DCD65000`（8 Gwei）比 8,000,000,000 wei 更容易理解。
+
+### 常见用例示例
+
+```javascript
+// 计算标准转账 gas 成本的示例
+const gasPrice = await provider.send('eth_gasPrice', []);
+const gasPriceInGwei = parseInt(gasPrice, 16) / 1e9;
+const standardTransferGas = 21000;
+const costInEth = (parseInt(gasPrice, 16) * standardTransferGas) / 1e18;
+```
+
+### 重要说明
+
+- 在启用 EIP-1559 的网络上，此方法返回适用于传统交易的值
+- 对于 EIP-1559 交易，考虑使用 `eth_feeHistory` 确定适当的 `maxFeePerGas` 和 `maxPriorityFeePerGas` 值
+- 在网络活动高峰期，Gas 价格可能会快速波动
+- 一些提供商可能会添加自己的估算或调整此值
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="计算交易所需的 gas">eth_estimateGas</Link> - 估算交易执行所需的 gas
+- <Link to="/docs/ethereum/core-methods/eth_feeHistory" title="分析历史费用数据">eth_feeHistory</Link> - 返回用于高级费用策略的历史费用数据
+- <Link to="/docs/ethereum/core-methods/eth_maxPriorityFeePerGas" title="获取建议的优先费用">eth_maxPriorityFeePerGas</Link> - 返回 EIP-1559 交易的建议优先费用（小费）

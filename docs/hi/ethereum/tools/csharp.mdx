@@ -1,0 +1,189 @@
+---
+title: Ethereum विकास के लिए C# टूल्स | Nethereum फ्रेमवर्क गाइड
+description: Nethereum फ्रेमवर्क, .NET एकीकरण, स्मार्ट कॉन्ट्रैक्ट इंटरैक्शन और Unity3D उदाहरणों सहित Ethereum ब्लॉकचेन विकास के लिए C# लाइब्रेरीज का पूर्ण गाइड
+keywords: c# ethereum, nethereum, .net ethereum, ethereum c#, dotnet blockchain, c# smart contracts, unity3d ethereum, nethereum api, ethereum unity, c# web3, blockchain .net, asp.net ethereum
+---
+
+# C# टूल्स
+
+C# डेवलपर Nethereum का उपयोग कर सकते हैं, जो Ethereum विकास के लिए एक व्यापक .NET एकीकरण लाइब्रेरी है।
+
+<PayAttention category="C#" />
+
+## # Nethereum
+
+Ethereum विकास के लिए पूर्ण .NET समाधान।
+
+```csharp
+using Nethereum.Web3;
+using Nethereum.Web3.Accounts;
+using Nethereum.Util;
+using Nethereum.Hex.HexTypes;
+
+public class EthereumService
+{
+    private readonly Web3 _web3;
+
+    public EthereumService(string url)
+    {
+        _web3 = new Web3(url);
+    }
+
+    public async Task<decimal> GetBalanceAsync(string address)
+    {
+        var balance = await _web3.Eth.GetBalance.SendRequestAsync(address);
+        return Web3.Convert.FromWei(balance.Value);
+    }
+
+    public async Task<string> SendTransactionAsync(
+        string privateKey,
+        string toAddress,
+        decimal etherAmount)
+    {
+        var account = new Account(privateKey);
+        var web3 = new Web3(account, _web3.Client.Url);
+
+        var transaction = await web3.Eth.GetEtherTransferService()
+            .TransferEtherAsync(toAddress, etherAmount);
+
+        return transaction;
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/Nethereum/Nethereum" target="_blank" absolute>Nethereum</Link>
+- **दस्तावेज़ीकरण**: <Link to="https://docs.nethereum.com" target="_blank" absolute>docs.nethereum.com</Link>
+- **विशेषताएँ**:
+  - पूर्ण Ethereum एकीकरण
+  - स्मार्ट कॉन्ट्रैक्ट डिप्लॉयमेंट और इंटरैक्शन
+  - HD वॉलेट समर्थन
+  - Unity3D समर्थन
+  - Xamarin संगतता
+  - IPC, RPC, WebSocket समर्थन
+
+## # स्मार्ट कॉन्ट्रैक्ट एकीकरण
+
+C# में स्मार्ट कॉन्ट्रैक्ट्स के साथ काम करना:
+
+```csharp
+public class SmartContractService
+{
+    private readonly Web3 _web3;
+    private readonly Contract _contract;
+
+    public SmartContractService(string url, string contractAddress, string abi)
+    {
+        _web3 = new Web3(url);
+        _contract = _web3.Eth.GetContract(abi, contractAddress);
+    }
+
+    public async Task<T> CallFunctionAsync<T>(string functionName, params object[] parameters)
+    {
+        var function = _contract.GetFunction(functionName);
+        return await function.CallAsync<T>(parameters);
+    }
+
+    public async Task<string> ExecuteFunctionAsync(
+        string functionName,
+        string fromAddress,
+        params object[] parameters)
+    {
+        var function = _contract.GetFunction(functionName);
+        return await function.SendTransactionAsync(fromAddress, parameters);
+    }
+}
+```
+
+## # ASP.NET एकीकरण
+
+ASP.NET Web API एकीकरण का उदाहरण:
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class EthereumController : ControllerBase
+{
+    private readonly EthereumService _ethereumService;
+
+    public EthereumController(EthereumService ethereumService)
+    {
+        _ethereumService = ethereumService;
+    }
+
+    [HttpGet("balance/{address}")]
+    public async Task<ActionResult<decimal>> GetBalance(string address)
+    {
+        try
+        {
+            var balance = await _ethereumService.GetBalanceAsync(address);
+            return Ok(balance);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+}
+```
+
+## # इवेंट हैंडलिंग
+
+Ethereum इवेंट्स की सदस्यता लें:
+
+```csharp
+public class EventMonitorService
+{
+    private readonly Web3 _web3;
+
+    public async Task MonitorEventsAsync(string contractAddress, string eventName)
+    {
+        var filterAll = _web3.Eth.GetEvent<YourEventDTO>(contractAddress)
+            .CreateFilterInput();
+
+        var subscription = _web3.Eth.GetEvent<YourEventDTO>(contractAddress)
+            .GetFilterChanges(filterAll);
+
+        subscription.Subscribe(evt =>
+        {
+            Console.WriteLine($"New event: {evt.Event}");
+        });
+    }
+}
+```
+
+## # Unity3D एकीकरण
+
+Unity3D एकीकरण का उदाहरण:
+
+```csharp
+public class EthereumUnityManager : MonoBehaviour
+{
+    private Web3 _web3;
+
+    private async void Start()
+    {
+        _web3 = new Web3("YOUR_ETHEREUM_NODE_URL");
+        await InitializeWalletAsync();
+    }
+
+    private async Task InitializeWalletAsync()
+    {
+        try
+        {
+            var balance = await _web3.Eth.GetBalance.SendRequestAsync("YOUR_ADDRESS");
+            Debug.Log($"Wallet Balance: {Web3.Convert.FromWei(balance.Value)} ETH");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to initialize wallet: {ex.Message}");
+        }
+    }
+}
+```
+### यह भी देखें
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">टूल्स अवलोकन</Link> - सभी उपलब्ध SDK और टूल्स
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">प्रमाणीकरण गाइड</Link> - विस्तृत प्रमाणीकरण जानकारी
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">मूल संचालन गाइड</Link> - मूलभूत संचालन
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">उपलब्ध विधियां</Link> - API क्षमताओं का अन्वेषण करें
+

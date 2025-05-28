@@ -1,0 +1,137 @@
+---
+title: 以太坊的JavaScript和TypeScript工具 | Web3.js和Ethers.js指南
+description: JavaScript和TypeScript库用于以太坊区块链开发的综合指南，包括Web3.js和Ethers.js的实用代码示例和集成模式
+keywords: javascript以太坊, web3.js, ethers.js, 以太坊javascript, web3 typescript, 以太坊typescript, javascript dapp, typescript智能合约, node.js以太坊, javascript区块链, typescript web3, 浏览器以太坊, 前端区块链
+---
+
+# JavaScript/TypeScript工具
+
+JavaScript为以太坊开发提供了几个强大的库，其中web3.js和ethers.js是最受欢迎的选择。
+
+<PayAttention category="Javascript/Typescript" />
+
+## # Web3.js
+
+原始且使用最广泛的以太坊JavaScript API。
+
+```javascript
+import Web3 from 'web3';
+const web3 = new Web3('YOUR_ETHEREUM_NODE_URL');
+
+// Get balance
+const getBalance = async (address) => {
+	const balance = await web3.eth.getBalance(address);
+	const balanceInEth = web3.utils.fromWei(balance, 'ether');
+	return balanceInEth;
+};
+
+// Send transaction
+const sendTransaction = async (from, to, value) => {
+	const tx = {
+		from,
+		to,
+		value: web3.utils.toWei(value, 'ether'),
+	};
+	return await web3.eth.sendTransaction(tx);
+};
+```
+
+- **GitHub**: <Link to="https://github.com/web3/web3.js" target="_blank" absolute>web3.js</Link>
+- **文档**: <Link to="https://web3js.readthedocs.io/" target="_blank" absolute>web3js.readthedocs.io</Link>
+- **特性**:
+  - 完整的以太坊API覆盖
+  - 广泛的社区支持
+  - WebSocket支持
+  - 合约交互
+  - ENS支持
+
+## # Ethers.js
+
+现代、完整且紧凑的库。
+
+```javascript
+import { ethers } from 'ethers';
+const provider = new ethers.JsonRpcProvider('YOUR_ETHEREUM_NODE_URL');
+
+// Get balance
+const getBalance = async (address) => {
+	const balance = await provider.getBalance(address);
+	return ethers.formatEther(balance);
+};
+
+// Send transaction
+const sendTransaction = async (wallet, to, value) => {
+	const tx = await wallet.sendTransaction({
+		to,
+		value: ethers.parseEther(value),
+	});
+	return await tx.wait();
+};
+```
+
+- **GitHub**: <Link to="https://github.com/ethers-io/ethers.js/" target="_blank" absolute>ethers.js</Link>
+- **文档**: <Link to="https://docs.ethers.org/" target="_blank" absolute>docs.ethers.org</Link>
+- **特性**:
+  - TypeScript支持
+  - 更小的打包体积
+  - 更好的安全特性
+  - ENS支持
+  - 广泛的测试
+
+## # TypeScript支持
+
+两个库都提供了出色的TypeScript支持。使用TypeScript时，您可以获得：
+
+- 开箱即用的类型定义
+- 更好的IDE支持
+- 编译时错误检查
+- 增强的代码文档
+
+```typescript
+import { BigNumber } from 'ethers';
+
+interface TransactionData {
+	to: string;
+	value: BigNumber;
+	gasLimit?: BigNumber;
+}
+
+const createTransaction = async (data: TransactionData) => {
+	// Your implementation
+};
+```
+
+## # Node.js用法
+
+这两个库在Node.js环境中都能无缝工作：
+
+```javascript
+// Web3.js in Node.js
+const Web3 = require('web3');
+const web3 = new Web3('YOUR_ETHEREUM_NODE_URL');
+
+// Ethers.js in Node.js
+const { ethers } = require('ethers');
+const provider = new ethers.JsonRpcProvider('YOUR_ETHEREUM_NODE_URL');
+```
+
+## # 浏览器用法
+
+对于浏览器环境，您可以使用webpack或vite等打包工具与任一库一起使用：
+
+```javascript
+// Using ES modules
+import { Web3 } from 'web3';
+// or
+import { ethers } from 'ethers';
+
+// Using window.ethereum (MetaMask)
+const provider = new ethers.BrowserProvider(window.ethereum);
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/tools/overview" title="可用以太坊开发工具和SDK的完整概述">工具概述</Link> - 所有可用的SDK和工具
+- <Link to="/docs/ethereum/authentication" title="与以太坊节点和API服务认证的指南">认证指南</Link> - 详细认证信息
+- <Link to="/docs/ethereum/basic-operations" title="学习开发者的基本以太坊区块链操作">基本操作</Link> - 基础区块链操作
+- <Link to="/docs/ethereum/all-methods" title="所有可用以太坊API方法的完整参考">可用方法</Link> - 探索API功能

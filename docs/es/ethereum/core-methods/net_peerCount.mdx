@@ -1,0 +1,87 @@
+---
+title: net_peerCount - Obtener Conteo de Pares Conectados | Métodos API de Ethereum
+description: Aprende a usar el método net_peerCount para verificar cuántos pares están conectados a tu nodo Ethereum, monitorear la salud de la red y diagnosticar problemas de conectividad.
+keywords: net_peerCount, conexiones de pares, red ethereum, pares del nodo, conexiones p2p, tamaño de red, conectividad blockchain, verificación de salud del nodo, conexiones ethereum, monitoreo de pares, diagnósticos de red, conteo de conexiones, estado de red del nodo, pares blockchain, salud del nodo ethereum, conexiones de red
+---
+
+# net_peerCount
+
+El método `net_peerCount` devuelve el número de pares actualmente conectados al cliente. Este método proporciona información esencial sobre la conectividad del nodo dentro de la red Ethereum y ayuda a diagnosticar problemas de red.
+
+## Casos de Uso
+
+- Monitoreo de salud de red para aplicaciones blockchain
+- Verificación de conectividad del nodo durante configuración y mantenimiento
+- Solución de problemas de sincronización cuando los bloques no se actualizan
+- Estimación del tamaño de red para propósitos de investigación
+- Análisis y optimización del rendimiento del nodo
+- Evaluación de calidad de conexión antes de operaciones críticas
+- Identificación de nodos aislados que podrían perder transacciones
+- Verificación de configuración adecuada de red
+- Monitoreo de salud del nodo en entornos de producción
+- Detección de problemas de conectividad en sistemas automatizados
+
+## Detalles del Método
+
+Este método no requiere parámetros y devuelve un entero codificado en hexadecimal.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'net_peerCount',
+		id: 67,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'El número de pares conectados (hexadecimal)',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 67,
+	"result": "0x1a" // 26 pares conectados
+}
+```
+
+### Entendiendo los Resultados
+
+La respuesta es una representación hexadecimal del número de pares conectados. Por ejemplo:
+
+- `"0x0"` = 0 pares
+- `"0xa"` = 10 pares
+- `"0x1a"` = 26 pares
+- `"0x64"` = 100 pares
+
+### Significado del Conteo de Pares
+
+El número de pares puede indicar varias cosas sobre tu nodo:
+
+- **0 pares**: El nodo está completamente aislado de la red
+- **1-5 pares**: El nodo tiene conectividad mínima
+- **10-30 pares**: Rango normal para la mayoría de los nodos Ethereum
+- **30+ pares**: Alta conectividad, típico para nodos públicos o validadores
+
+### Notas Importantes
+
+- Un conteo bajo de pares podría indicar problemas de conectividad de red
+- Algunos nodos privados podrían limitar intencionalmente las conexiones de pares
+- Los nodos públicos generalmente mantienen más conexiones de pares
+- El conteo de pares cambia constantemente a medida que los nodos se unen y abandonan la red
+- El número reportado incluye solo conexiones directas de pares
+- Para nodos alojados, el conteo de pares podría reflejar la red del proveedor en lugar de tu instancia específica
+- Un alto conteo de pares no necesariamente significa mejor rendimiento
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/net_listening" title="Comprobar si tu nodo está escuchando activamente conexiones">net_listening</Link> - Devuelve si el cliente está activamente en red
+- <Link to="/docs/ethereum/core-methods/net_version" title="Identificar a qué red Ethereum está conectado tu nodo">net_version</Link> - Devuelve el ID de red actual

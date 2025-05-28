@@ -1,0 +1,133 @@
+---
+title: 以太坊区块链开发的Python工具 | Web3.py和Eth-brownie指南
+description: Python库用于以太坊开发的综合指南，包括Web3.py和Eth-brownie，附带详细代码示例、智能合约集成和异步模式
+keywords: python以太坊, web3.py, eth-brownie, 以太坊python, python区块链, python web3, python dapp, 以太坊异步python, 智能合约python, 区块链python, python测试以太坊, python类型提示web3
+---
+
+# Python工具
+
+Python为以太坊开发提供了强大的库，适用于简单脚本和复杂应用程序。
+
+<PayAttention category="Python" />
+
+## # Web3.py
+
+官方Python以太坊库。
+
+```python
+from web3 import Web3
+from eth_account import Account
+import json
+
+# Initialize web3
+web3 = Web3(Web3.HTTPProvider('YOUR_ETHEREUM_NODE_URL'))
+
+# Get balance
+def get_balance(address):
+    balance_wei = web3.eth.get_balance(address)
+    balance_eth = web3.from_wei(balance_wei, 'ether')
+    return balance_eth
+
+# Send transaction
+def send_transaction(private_key, to_address, value_eth):
+    account = Account.from_key(private_key)
+    transaction = {
+        'nonce': web3.eth.get_transaction_count(account.address),
+        'to': to_address,
+        'value': web3.to_wei(value_eth, 'ether'),
+        'gas': 21000,
+        'gasPrice': web3.eth.gas_price
+    }
+    signed_txn = account.sign_transaction(transaction)
+    tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
+    return web3.eth.wait_for_transaction_receipt(tx_hash)
+```
+
+- **GitHub**: <Link to="https://github.com/ethereum/web3.py" target="_blank" absolute>web3.py</Link>
+- **文档**: <Link to="https://web3py.readthedocs.io/" target="_blank" absolute>web3py.readthedocs.io</Link>
+- **特性**:
+  - 完整的以太坊API支持
+  - 同步和异步接口
+  - 类型提示
+  - 中间件支持
+  - ENS支持
+
+## # Eth-brownie
+
+以太坊开发的Python框架。
+
+```python
+from brownie import *
+
+# Deploy contract
+def deploy_contract():
+    account = accounts[0]
+    return MyContract.deploy({'from': account})
+
+# Interact with contract
+def interact_with_contract(contract_address):
+    contract = MyContract.at(contract_address)
+    return contract.myFunction({'from': accounts[0]})
+
+# Test contract
+def test_contract(Contract):
+    account = accounts[0]
+    contract = account.deploy(Contract)
+    assert contract.myFunction() == expected_value
+```
+
+- **GitHub**: <Link to="https://github.com/eth-brownie/brownie" target="_blank" absolute>eth-brownie</Link>
+- **文档**: <Link to="https://eth-brownie.readthedocs.io/" target="_blank" absolute>eth-brownie.readthedocs.io</Link>
+- **特性**:
+  - 合约测试框架
+  - 部署管理
+  - 交互式控制台
+  - 网络管理
+  - Python REPL
+
+## # 异步支持
+
+Web3.py提供异步支持以获得更好的性能：
+
+```python
+from web3.auto import w3
+import asyncio
+
+async def get_latest_blocks(count):
+    latest = await w3.eth.get_block_number()
+    blocks = []
+    for i in range(count):
+        block = await w3.eth.get_block(latest - i)
+        blocks.append(block)
+    return blocks
+
+# Usage
+blocks = asyncio.run(get_latest_blocks(10))
+```
+
+## # 类型提示
+
+Web3.py包含全面的类型提示，以获得更好的IDE支持：
+
+```python
+from web3.types import TxParams, Wei, Address
+from typing import Optional
+
+def prepare_transaction(
+    to: Address,
+    value: Wei,
+    gas_price: Optional[Wei] = None
+) -> TxParams:
+    return {
+        'to': to,
+        'value': value,
+        'gasPrice': gas_price or web3.eth.gas_price
+    }
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/tools/overview" title="可用以太坊开发工具和SDK的完整概述">工具概述</Link> - 所有可用的SDK和工具
+- <Link to="/docs/ethereum/authentication" title="与以太坊节点和API服务认证的指南">认证指南</Link> - 详细认证信息
+- <Link to="/docs/ethereum/basic-operations" title="学习开发者的基本以太坊区块链操作">基本操作指南</Link> - 基础操作
+- <Link to="/docs/ethereum/all-methods" title="所有可用以太坊API方法的完整参考">可用方法</Link> - 探索API功能

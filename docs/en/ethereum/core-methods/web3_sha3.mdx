@@ -1,0 +1,116 @@
+---
+title: web3_sha3 - Calculate Keccak-256 Hash | Ethereum API Methods
+description: Learn how to use the web3_sha3 method to generate Keccak-256 hashes for various Ethereum operations including function signatures, event topics, and blockchain data verification.
+keywords: web3_sha3, keccak256, sha3, ethereum hash, ethereum keccak, web3, crypto hash, function selector, event signature, hash calculation, ethereum cryptography, blockchain hash, smart contract hash, transaction hash, ethereum signature, data verification
+---
+
+# web3_sha3
+
+The `web3_sha3` method calculates the Keccak-256 hash of the given data. Despite the name, this method returns the Keccak-256 hash, not the standardized SHA3-256 hash. Keccak-256 is the hashing algorithm used extensively in Ethereum for various cryptographic operations.
+
+## Use Cases
+
+- Generating deterministic hashes of arbitrary data
+- Creating function signatures for smart contract calls
+- Computing event topics for log filtering
+- Verifying data integrity on and off chain
+- Implementing cryptographic primitives in applications
+- Calculating event signatures for log analysis
+- Testing hash generation for smart contract development
+- Generating message digests for signing operations
+- Creating unique identifiers from input data
+- Computing deterministic addresses for contracts
+
+## Method Details
+
+This method takes one parameter, the data to be hashed, and returns the Keccak-256 hash of that data.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'web3_sha3',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'data',
+			required: true,
+			type: 'string',
+			desc: 'The data in hexadecimal format to be hashed',
+			value: '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The Keccak-256 hash of the provided data as a hexadecimal string',
+		},
+	]}
+	getParams={(fields) => [fields?.data || null]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x21276a0c70e3fde6a5a3627d2d2748bc945b7cfc86dbd4cf60f425ad5058d9b0"
+}
+```
+
+### Input Data Format
+
+The input data must be provided as a hexadecimal string with the `0x` prefix. The input can be any arbitrary data including Ethereum addresses, transaction data, or raw bytes.
+
+For example, to hash an Ethereum address:
+
+1. Take the address in hex format: `0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed`
+2. Pass this hex string to the method
+
+### Keccak-256 vs SHA3-256
+
+It's important to note that this method returns the Keccak-256 hash, not the standardized SHA3-256 hash:
+
+- **Keccak-256**: The original submission to the NIST SHA3 competition
+- **SHA3-256**: The finalized NIST standard that includes some modifications to Keccak
+
+Ethereum adopted Keccak-256 before the NIST standardization was complete, so it continued using the original Keccak algorithm rather than switching to the standardized SHA3.
+
+### Common Applications in Ethereum
+
+The Keccak-256 hash function is used extensively in Ethereum:
+
+1. **Function Signatures**: The first 4 bytes of the Keccak-256 hash of the function signature `transfer(address,uint256)` identify the function call in transaction data
+2. **Event Topics**: The Keccak-256 hash of event signatures are used as topics in event logs
+3. **Contract Addresses**: Contract addresses are derived in part using the Keccak-256 hash function
+4. **Transaction Hashes**: The unique identifier for a transaction is derived using Keccak-256
+5. **Block Hashes**: Blocks are identified by their Keccak-256 hash
+6. **Merkle Trees**: For efficient storage and verification of data
+
+### Example Conversions
+
+| Input Type         | Input (hex)                                | Keccak-256 Hash                                                    |
+| ------------------ | ------------------------------------------ | ------------------------------------------------------------------ |
+| Ethereum Address   | 0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed | 0x21276a0c70e3fde6a5a3627d2d2748bc945b7cfc86dbd4cf60f425ad5058d9b0 |
+| Function Signature | 0x095ea7b3                                 | 0xf2c0a300acb0c93fb0fdeceeac9b2c9b7f6c1413629bc2a8483bc3ca775e17ce |
+| Empty String       | 0x                                         | 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 |
+
+### Important Notes
+
+- This method works with raw bytes, not string representations
+- The input must be properly hex-encoded with a `0x` prefix
+- The returned hash is always 32 bytes (64 hex characters) plus the `0x` prefix
+- Many programming libraries implement Keccak-256 as "SHA3" despite the technical difference
+- The method is purely computational and does not affect blockchain state
+- The same input will always produce the same output
+- This method is supported by all Ethereum client implementations
+- Zero-length input is valid and produces a specific hash value
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_sign" title="Create a cryptographic signature using an Ethereum account">eth_sign</Link> - Sign a message with an Ethereum account
+- <Link to="/docs/ethereum/core-methods/personal_sign" title="Sign a personal message in a user-friendly way">personal_sign</Link> - Sign a personal message with an account
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Execute a smart contract method without creating a transaction">eth_call</Link> - Execute a smart contract method call

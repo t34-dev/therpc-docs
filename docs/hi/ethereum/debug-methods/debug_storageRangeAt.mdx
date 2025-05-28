@@ -1,0 +1,177 @@
+---
+title: debug_storageRangeAt - Inspect Contract Storage at Specified Range | Ethereum Debugging API
+description: Learn how to use the debug_storageRangeAt method to inspect and retrieve contract storage data within a specified range for comprehensive smart contract debugging, state analysis, and contract auditing on Ethereum.
+keywords: debug_storageRangeAt, ethereum debug, contract storage, smart contract debugging, storage inspection, state analysis, contract auditing, storage layout, storage slots, contract memory, state verification, ethereum development tools, contract debugging, storage examination, blockchain debugging, storage range analysis
+---
+
+# debug_storageRangeAt
+
+The `debug_storageRangeAt` method returns the contract storage for a specified range. This method is primarily used for debugging purposes and allows developers to inspect and analyze on-chain storage data. It's commonly used by development tools like Remix to implement debugging features and provides direct access to the raw storage slots of a smart contract.
+
+## Use Cases
+
+- **Smart Contract Debugging**: Inspect specific storage values to identify state-related bugs in your contracts
+- **Contract State Analysis**: Analyze how contract state changes during execution of different functions
+- **Storage Layout Verification**: Verify that your contract's storage layout matches your expectations
+- **Contract Auditing**: Examine storage slots to find security vulnerabilities or unexpected state changes
+- **Development Tool Integration**: Build debugging tools that can visualize contract state and memory
+- **Post-Mortem Analysis**: Investigate contract state after failures or exploits
+- **Proxy Contract Verification**: Verify slot assignments in upgradeable proxy patterns
+- **Governance Inspection**: Review storage state for DAO or governance contracts
+- **Historical State Analysis**: Compare storage values across different blocks to track state evolution
+
+## Method Details
+
+This method returns storage entries for a contract within a specified range.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'debug_storageRangeAt',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockHash',
+			required: true,
+			type: 'string',
+			desc: 'Hash of the block to fetch storage from',
+			value: '0x340e1e44e8f6e6b0cd8d255d4fdaec2987bb073f02c62e068ed75d80f9890d5f',
+		},
+		{
+			id: 'txIndex',
+			required: true,
+			type: 'integer',
+			desc: 'Transaction index within the block',
+			value: 3,
+		},
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: 'Contract address whose storage is to be retrieved',
+			value: '0x0a8156e7ee392d885d10eaa86afd0e323afdcd95',
+		},
+		{
+			id: 'startKey',
+			required: true,
+			type: 'string',
+			desc: 'Hash of the starting storage key',
+			value: '0xc94770007dda54cF92009BFF0dE90c06F603a09f',
+		},
+		{
+			id: 'limit',
+			required: true,
+			type: 'integer',
+			desc: 'Maximum number of storage entries to return',
+			value: 10,
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'Object containing storage entries with key-value pairs',
+			fields: [
+				{
+					id: '[storageHash]',
+					type: 'object',
+					desc: 'Object for each storage entry',
+					fields: [
+						{
+							id: 'key',
+							type: 'string',
+							desc: 'The storage key as a hex string',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: 'The storage value as a hex string',
+						},
+					],
+				},
+			],
+		},
+		{
+			id: 'nextKey',
+			type: 'string',
+			desc: 'The key to use for the next range query, or not present if no more entries',
+		},
+	]}
+	getParams={(fields) => [
+		fields?.blockHash || null,
+		Number(fields?.txIndex || null),
+		fields?.address || null,
+		fields?.startKey || null,
+		Number(fields?.limit || null),
+	]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"storage": {
+			"0x0000000000000000000000000000000000000000000000000000000000000000": {
+				"key": "0x0000000000000000000000000000000000000000000000000000000000000000",
+				"value": "0x0000000000000000000000000000000000000000000000000000000000000001"
+			},
+			"0x0000000000000000000000000000000000000000000000000000000000000001": {
+				"key": "0x0000000000000000000000000000000000000000000000000000000000000001",
+				"value": "0x000000000000000000000000d7acd2a9fd159e69bb102a1ca21c9a3e3a5f771b"
+			},
+			"0x0000000000000000000000000000000000000000000000000000000000000002": {
+				"key": "0x0000000000000000000000000000000000000000000000000000000000000002",
+				"value": "0x0000000000000000000000000000000000000000000000000000000000000064"
+			}
+		},
+		"nextKey": "0x0000000000000000000000000000000000000000000000000000000000000003"
+	}
+}
+```
+
+### Response Fields Explained
+
+- **storage**: Object containing each storage entry as a key-value pair.
+- The key is the keccak256 hash of the storage slot.
+- Each entry contains:
+- **key**: The original storage key (slot number).
+- **value**: The value stored at this key.
+- **nextKey**: The next storage key to start from when retrieving the next batch, or absent if no more entries.
+
+### Understanding Storage Slots
+
+In Ethereum smart contracts, storage is organized in 32-byte slots:
+
+- **Slot 0, 1, 2, ...**: Simple state variables are stored sequentially.
+- **Mappings**: Stored at `keccak256(key . slot)` where `.` is concatenation.
+- **Dynamic Arrays**: Length at `slot`, data at `keccak256(slot) + index`.
+- **Nested Mappings**: Use multiple hashing steps.
+
+### Performance Considerations
+
+- Querying large storage ranges can result in significant response sizes
+- Consider using smaller limits for contracts with extensive storage
+- Using a precise startKey helps reduce unnecessary data transfer
+- This method is more resource-intensive than basic storage queries
+
+### Important Notes
+
+- This method is primarily used by development tools like Remix and other Ethereum IDEs
+- Requires the debug API to be enabled on the Ethereum node
+- Not all Ethereum clients support this method (fully supported in Geth and some others)
+- For accurate results, use block hash and transaction index that reflect the desired state
+- The limit parameter helps manage response size for contracts with large storage
+- Some archive nodes might impose limits on storage range queries
+- The method returns raw storage values which may require additional parsing for complex data types
+- Cannot be used to read private variables directly as they may be packed into the same storage slot
+- Historical queries require an archive node; non-archive nodes only support recent blocks
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getStorageAt" title="Get value from specific storage slot by address and position">eth_getStorageAt</Link>
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Get full execution trace for a transaction">debug_traceTransaction</Link>

@@ -1,0 +1,202 @@
+---
+title: 以太坊区块链开发的Rust工具 | Web3-rs集成指南
+description: Rust库用于以太坊开发的综合指南，包括Web3-rs、智能合约集成、异步模式和性能优化技术
+keywords: rust以太坊, web3-rs, 以太坊rust, rust区块链, rust web3, rust智能合约, 以太坊异步rust, 区块链rust, 以太坊客户端rust, tokio以太坊, rust dapp, 高性能以太坊
+---
+
+# Rust工具
+
+Rust为以太坊开发提供了多个库，其中web3-rs是区块链交互的主要选择。
+
+<PayAttention category="Rust" />
+
+## # Web3-rs
+
+Web3库的Rust实现。
+
+```rust
+use web3::Web3;
+use web3::types::{Address, H256, TransactionParameters, U256};
+use std::str::FromStr;
+
+struct EthereumClient {
+    web3: Web3<web3::transports::Http>,
+}
+
+impl EthereumClient {
+    pub async fn new(url: &str) -> Result<Self, web3::Error> {
+        let transport = web3::transports::Http::new(url)?;
+        let web3 = Web3::new(transport);
+        Ok(Self { web3 })
+    }
+
+    pub async fn get_balance(&self, address: &str) -> Result<U256, web3::Error> {
+        let address = Address::from_str(address)
+            .map_err(|_| web3::Error::InvalidAddress)?;
+
+        self.web3.eth().balance(address, None).await
+    }
+
+    pub async fn send_transaction(
+        &self,
+        from: Address,
+        to: Address,
+        value: U256,
+    ) -> Result<H256, web3::Error> {
+        let tx = TransactionParameters {
+            to: Some(to),
+            value,
+            from,
+            ..Default::default()
+        };
+
+        self.web3.eth().send_transaction(tx).await
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/tomusdrw/rust-web3" target="_blank" absolute>rust-web3</Link>
+- **文档**: <Link to="https://docs.rs/web3" target="_blank" absolute>docs.rs/web3</Link>
+- **特性**:
+  - 异步支持
+  - 类型安全接口
+  - 合约交互
+  - 交易管理
+  - ENS支持
+  - WebSocket支持
+
+## # 合约集成
+
+在Rust中使用智能合约：
+
+```rust
+use web3::contract::{Contract, Options};
+use web3::types::{Address, U256};
+
+struct SmartContract {
+    contract: Contract<web3::transports::Http>,
+}
+
+impl SmartContract {
+    pub async fn new(
+        web3: Web3<web3::transports::Http>,
+        address: Address,
+        abi: &[u8],
+    ) -> Result<Self, web3::Error> {
+        let contract = Contract::from_json(
+            web3.eth(),
+            address,
+            abi,
+        )?;
+
+        Ok(Self { contract })
+    }
+
+    pub async fn call_method<T: serde::de::DeserializeOwned>(
+        &self,
+        method: &str,
+        params: &[web3::contract::tokens::Tokenize],
+    ) -> Result<T, web3::Error> {
+        let result = self.contract.query(
+            method,
+            params,
+            None,
+            Options::default(),
+            None,
+        ).await?;
+
+        Ok(result)
+    }
+}
+```
+
+## # 错误处理
+
+Rust中的强大错误处理：
+
+```rust
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum EthereumError {
+    #[error("Web3 error: {0}")]
+    Web3Error(#[from] web3::Error),
+
+    #[error("Invalid address: {0}")]
+    InvalidAddress(String),
+
+    #[error("Contract error: {0}")]
+    ContractError(String),
+
+    #[error("Transaction failed: {0}")]
+    TransactionError(String),
+}
+
+impl EthereumClient {
+    pub async fn safe_get_balance(&self, address: &str) -> Result<f64, EthereumError> {
+        let wei = self.get_balance(address).await?;
+        let eth = wei.as_u128() as f64 / 1e18;
+        Ok(eth)
+    }
+}
+```
+
+## # 异步事件处理
+
+订阅以太坊事件：
+
+```rust
+use futures::StreamExt;
+
+impl EthereumClient {
+    pub async fn monitor_blocks(&self) -> Result<(), web3::Error> {
+        let mut stream = self.web3.eth_subscribe().subscribe_new_heads().await?;
+
+        while let Some(block) = stream.next().await {
+            match block {
+                Ok(header) => {
+                    println!("New block: {}", header.number.unwrap_or_default());
+                }
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+```
+
+## # 测试
+
+以太坊交互测试示例：
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tokio;
+
+    #[tokio::test]
+    async fn test_balance_query() {
+        let client = EthereumClient::new("http://localhost:8545")
+            .await
+            .expect("Failed to create client");
+
+        let balance = client
+            .get_balance("0x742d35Cc6634C0532925a3b844Bc454e4438f44e")
+            .await
+            .expect("Failed to get balance");
+
+        assert!(balance > U256::zero());
+    }
+}
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/tools/overview" title="可用以太坊开发工具和SDK的完整概述">工具概述</Link> - 所有可用的SDK和工具
+- <Link to="/docs/ethereum/authentication" title="与以太坊节点和API服务认证的指南">认证指南</Link> - 详细认证信息
+- <Link to="/docs/ethereum/basic-operations" title="学习开发者的基本以太坊区块链操作">基本操作指南</Link> - 基础操作
+- <Link to="/docs/ethereum/all-methods" title="所有可用以太坊API方法的完整参考">可用方法</Link> - 探索API功能

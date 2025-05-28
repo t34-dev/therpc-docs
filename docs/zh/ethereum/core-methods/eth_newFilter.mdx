@@ -1,0 +1,178 @@
+---
+title: eth_newFilter - 为智能合约创建事件日志过滤器 | 以太坊API方法
+description: 学习如何使用eth_newFilter为以太坊事件日志创建过滤器 - 这是监控智能合约事件、跟踪代币转移和构建实时区块链应用程序的关键。
+keywords: eth_newFilter, 以太坊事件过滤器, 区块链事件监控, 智能合约事件, 事件日志过滤器, 以太坊日志, 过滤器创建, dApp开发, 索引参数, 事件跟踪, 区块链通知, web3事件, ERC20事件, 交易事件, 区块链数据索引, 代币转移事件, 合约状态变更, 以太坊事件监听器
+---
+
+# eth_newFilter
+
+`eth_newFilter`方法创建一个过滤器对象，用于在区块链中包含符合给定过滤条件的新日志（事件）时进行通知。该方法对于监控智能合约事件至关重要，是响应式dApp架构的基本构建块之一。
+
+## 使用场景
+
+- 在实时应用程序中监控智能合约事件
+- 跟踪钱包中的代币转移（ERC-20、ERC-721、ERC-1155）
+- 检测DeFi协议和流动性池中的状态变化
+- 构建高响应性的事件驱动区块链应用程序
+- 为用户活动实现实时通知
+- 从合约事件中进行分析的历史数据聚合
+- 基于区块链事件在dApps中自动更新UI
+- 监控NFT市场活动（列表、销售、竞价）
+- 跟踪治理投票和提案执行
+- 为区块链应用程序创建活动流
+
+## 方法详情
+
+此方法接受一个过滤器对象作为参数，并返回一个过滤器ID，可与`eth_getFilterChanges`和`eth_getFilterLogs`一起使用。
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_newFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterObject',
+      required: true,
+      type: 'object',
+      desc: "过滤器选项对象",
+      fields: [
+        {
+          id: 'fromBlock',
+          type: 'string',
+          desc: "开始过滤的区块号/标签（例如，\"0x1\"或\"latest\"）",
+          value: "0x1"
+        },
+        {
+          id: 'toBlock',
+          type: 'string',
+          desc: "过滤到的区块号/标签（例如，\"0x1000\"或\"latest\"）",
+          value: "latest"
+        },
+        {
+          id: 'address',
+          type: 'string',
+          desc: "过滤日志的合约地址",
+          value: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        },
+        {
+          id: 'topics',
+          type: 'array',
+          desc: "按顺序过滤的主题，使用null进行通配符匹配",
+          value: [
+            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+            null,
+            "0x00000000000000000000000023a6b9c321aba35d18ca26e66824e917778d9d2b"
+          ]
+        }
+      ]
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'string',
+      desc: "用于通过eth_getFilterChanges轮询的过滤器ID（十六进制字符串）"
+    }
+  ]}
+  getParams={(fields) => {
+    const filterObject = {};
+
+    if (fields?.filterObject?.fromBlock)
+      filterObject.fromBlock = fields.filterObject.fromBlock;
+
+    if (fields?.filterObject?.toBlock)
+      filterObject.toBlock = fields.filterObject.toBlock;
+
+    if (fields?.filterObject?.address)
+      filterObject.address = fields.filterObject.address;
+
+    if (fields?.filterObject?.topics && fields.filterObject.topics.length > 0)
+      filterObject.topics = fields.filterObject.topics;
+
+    return [filterObject];
+  }}
+/>
+
+### 响应示例
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x1a4b0d22dbb7284cf485c969d2857ab3"
+}
+```
+
+### 理解主题和事件签名
+
+`topics`数组是以太坊日志过滤的最强大特性之一。它允许您匹配特定的索引事件参数：
+
+1. **Topic[0]**：通常是事件签名哈希（事件名称和参数类型的keccak256哈希）
+2. **Topic[1]**：第一个索引参数
+3. **Topic[2]**：第二个索引参数
+4. **Topic[3]**：第三个索引参数
+
+#### 事件签名的工作原理
+
+事件签名通过对事件名称及其参数类型进行keccak256哈希计算而创建：
+
+```solidity
+// Solidity事件定义
+event Transfer(address indexed from, address indexed to, uint256 value);
+
+// 事件签名计算为：
+keccak256("Transfer(address,address,uint256)")
+// 等于：
+// 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+```
+
+以太坊事件最多可以有4个主题（1个事件签名 + 3个索引参数）。
+
+#### 主题匹配规则：
+
+- **Null**：匹配该位置的任何值
+- **字符串**：匹配该位置的确切值
+- **字符串数组**：匹配数组中的任何值（逻辑OR）
+
+### 常见事件签名
+
+| 事件类型 | 事件签名 | 事件格式 |
+|------------|-----------------|--------------|
+| ERC-20 Transfer | `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` | `Transfer(address,address,uint256)` |
+| ERC-20 Approval | `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925` | `Approval(address,address,uint256)` |
+| ERC-721 Transfer | `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` | `Transfer(address,address,uint256)` |
+| Uniswap V2 Swap | `0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822` | `Swap(address,uint256,uint256,uint256,uint256,address)` |
+| PairCreated | `0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9` | `PairCreated(address,address,address,uint256)` |
+
+### 使用过滤器ID
+
+创建过滤器后，您将收到一个可用于以下操作的过滤器ID：
+
+1. `eth_getFilterChanges` - 轮询自上次轮询以来的新日志
+2. `eth_getFilterLogs` - 获取符合过滤器条件的所有日志
+3. `eth_uninstallFilter` - 在不再需要时移除过滤器
+
+### 重要说明和最佳实践
+
+1. **过滤器过期**：过滤器在一段时间不活动后会过期（通常约为5分钟）
+2. **主题填充**：地址主题必须填充到32字节（左侧补零）
+3. **性能**：广泛的过滤器（例如，许多地址或区块）可能会占用大量资源
+4. **速率限制**：过度轮询可能导致RPC提供商的速率限制
+5. **区块范围**：非常大的区块范围可能导致超时或被拒绝
+6. **过滤器限制**：某些提供商限制每个连接的活动过滤器数量
+7. **替代方案**：在可用时考虑使用WebSocket订阅获取实时事件
+8. **索引与非索引**：只有索引参数出现在主题中；非索引参数在数据字段中
+9. **数据字段**：对于复杂事件，数据字段需要ABI解码才能提取值
+10. **主题顺序**：主题顺序至关重要，必须与索引参数的顺序匹配
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="轮询自上次检查以来的新事件">eth_getFilterChanges</Link> - 获取自上次轮询以来的新日志
+- <Link to="/docs/ethereum/core-methods/eth_getFilterLogs" title="获取过滤器的所有日志">eth_getFilterLogs</Link> - 获取符合过滤器条件的所有日志
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="移除活动过滤器">eth_uninstallFilter</Link> - 不再需要时移除过滤器
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="无需创建过滤器即可查询历史日志">eth_getLogs</Link> - 无需过滤器持久性即可查询日志
+- <Link to="/docs/ethereum/core-methods/eth_newBlockFilter" title="为新区块创建过滤器">eth_newBlockFilter</Link> - 为新区块创建过滤器
+- <Link to="/docs/ethereum/core-methods/eth_newPendingTransactionFilter" title="为待处理交易创建过滤器">eth_newPendingTransactionFilter</Link> - 为待处理交易创建过滤器

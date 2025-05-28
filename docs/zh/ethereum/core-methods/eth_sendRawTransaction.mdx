@@ -1,0 +1,152 @@
+---
+title: eth_sendRawTransaction - 提交已签名交易 | 以太坊API方法
+description: 学习如何使用eth_sendRawTransaction方法将已签名交易广播到以太坊网络 - 这是发送ETH、与智能合约交互和部署新合约的基本方法。
+keywords: eth_sendRawTransaction, 已签名交易, 交易广播, 以太坊交易, 原始交易, 交易哈希, eth转账, gas费用, nonce管理, 智能合约交互, 交易签名, 离线签名, 广播交易, 钱包集成, web3交易, 合约部署, eip1559交易, eip2930交易, 传统交易, 以太坊广播
+---
+
+# eth_sendRawTransaction
+
+`eth_sendRawTransaction`方法将预先签名的交易广播到以太坊网络。此方法用于在交易离线签名后提交所有类型的交易，使其成为区块链上任何状态改变操作的主要方法。
+
+## 使用场景
+
+- 向其他地址和钱包发送ETH转账
+- 应用程序中的代币转移（ERC-20、ERC-721、ERC-1155）
+- 开发者的智能合约部署
+- dApps中的合约函数调用和状态改变
+- 通过脚本或机器人的自动化交易
+- 需要离线签名的多重签名钱包交互
+- 元交易（无gas交易）以提供更好的用户体验
+- DeFi操作（交换、流动性提供、质押）
+- 通过合约交互的治理投票
+- 市场中的NFT铸造操作
+
+## 方法详情
+
+此方法将已签名的交易提交到网络进行处理。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_sendRawTransaction',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'data',
+			required: true,
+			type: 'string',
+			desc: '已签名的交易数据（十六进制字符串）',
+			value:
+				'0xf869018203e882520894f17f52151ebef6c7334fad080c5704d77216b732881bc16d674ec80000801ba02da1c48b670996dcb1f447ef9ef00b33033c48a4fe938f420bec3e56bfd24071a062e0aa78a81bf0290afbc3a9d8e9a068e6d74caa66c5e0fa8a46deaae96b0833',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '交易哈希，如果交易尚不可用，则为零哈希',
+		},
+	]}
+	getParams={(fields) => [
+		fields?.data ||
+			null,
+	]}
+/>
+
+### 交易签名过程
+
+在使用`eth_sendRawTransaction`之前，您需要：
+
+1. 创建未签名的交易（包含nonce、gas参数、接收者、金额、数据）
+2. 使用私钥签名交易
+3. 序列化并十六进制编码已签名的交易
+4. 将十六进制字符串提交给此方法
+
+### 了解交易类型
+
+以太坊支持不同的交易类型：
+
+| 类型 | 描述 | 结构 |
+|------|-------------|-----------|
+| 传统 (类型 0) | 带有gasPrice的前EIP-1559交易 | `{nonce, gasPrice, gasLimit, to, value, data, v, r, s}` |
+| EIP-2930 (类型 1) | 带有访问列表的交易 | `{chainId, nonce, gasPrice, gasLimit, to, value, data, accessList, v, r, s}` |
+| EIP-1559 (类型 2) | 带有优先费用的交易 | `{chainId, nonce, maxPriorityFeePerGas, maxFeePerGas, gasLimit, to, value, data, accessList, v, r, s}` |
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331"
+}
+```
+
+### 错误响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"error": {
+		"code": 3,
+		"message": "execution reverted: Dai/insufficient-balance",
+		"data": "0x08c379a00000000000000000000000000000000000000000000000000000000000000..."
+	}
+}
+```
+
+### 常见错误和故障排除
+
+| 错误 | 描述 | 解决方案 |
+|-------|-------------|----------|
+| Nonce过低 | 交易nonce已经被使用 | 使用`eth_getTransactionCount`获取最新nonce |
+| Nonce过高 | 交易nonce高于预期 | 使用正确的顺序nonce |
+| 余额不足 | ETH不足以支付gas + 价值 | 向发送者地址添加更多ETH |
+| Gas价格过低 | 提供的gas价格低于最低要求 | 增加gas价格或使用EIP-1559参数 |
+| 替换交易定价过低 | 替换交易时，新的gas价格太低 | 将gas价格至少提高10% |
+| 已知交易 | 交易已在内存池中 | 等待现有交易 |
+| 执行撤销 | 合约执行失败 | 检查合约条件和参数 |
+
+### 监控交易状态
+
+广播交易后：
+
+1. 存储返回的交易哈希
+2. 轮询`eth_getTransactionReceipt`直到它返回非空结果
+3. 检查收据中的`status`字段：
+   - `0x1`表示成功
+   - `0x0`表示失败（撤销）
+
+### Gas估算和优化
+
+在发送交易之前，您可以：
+
+1. 使用`eth_estimateGas`获取所需的大致gas量
+2. 对于EIP-1559交易，使用`eth_feeHistory`检查当前网络条件
+3. 对于时间敏感的交易，设置更高的优先费用
+4. 对于非紧急交易，设置较低的费用以节省成本
+
+### 重要说明
+
+- 交易必须在提交前用发送者的私钥签名
+- RPC端点永远不会访问您的私钥
+- 提交后使用eth_getTransactionReceipt检查状态
+- 对于合约创建，收据在contractAddress字段中包含新合约地址
+- 十六进制字符串必须格式正确，长度为偶数，并带有'0x'前缀
+- 对于高价值交易，考虑使用硬件钱包或安全密钥管理
+- nonce管理对于正确的交易排序至关重要
+- 交易替换需要比原始交易更高的gas价格
+- 交易费用即使在交易失败时也不可退还
+- EIP-1559交易在费用波动期间可能更具成本效益
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="检查交易状态和结果">eth_getTransactionReceipt</Link> - 获取已处理交易的收据
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="通过哈希查找交易详情">eth_getTransactionByHash</Link> - 通过哈希检索交易信息
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="估算交易所需的gas">eth_estimateGas</Link> - 计算交易所需的gas
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="获取交易排序的账户nonce">eth_getTransactionCount</Link> - 获取下一个可用的nonce
+- <Link to="/docs/ethereum/core-methods/eth_feeHistory" title="获取gas估算的历史费用数据">eth_feeHistory</Link> - 获取历史费用信息
+- <Link to="/docs/ethereum/core-methods/eth_call" title="测试交易执行而不挖矿">eth_call</Link> - 测试交易执行而不广播

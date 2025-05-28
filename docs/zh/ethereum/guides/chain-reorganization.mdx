@@ -1,0 +1,76 @@
+---
+title: 链重组指南 | 处理以太坊区块链重组
+description: 全面指南，介绍如何检测、处理和缓解以太坊区块链重组（reorgs），包括实施策略、共同祖先检测和交易重新提交。
+keywords: 链重组, 区块链重组, 以太坊重组, 链重构, 区块重组, 链分叉, 交易重新提交, 区块链一致性, 共同祖先, 规范链
+---
+
+# 链重组指南
+
+链重组（reorgs）发生在竞争链成为新的规范链时。了解如何处理重组对于维护应用程序一致性至关重要。
+
+## 理解重组
+
+- 重组的原因
+- 重组的类型
+- 对交易的影响
+- 检测方法
+
+## 实现示例
+
+```javascript
+// 监控重组
+const monitorReorgs = async (callback, checkInterval = 5000) => {
+	let lastBlock = await web3.eth.getBlockNumber();
+	let lastBlockHash = (await web3.eth.getBlock(lastBlock)).hash;
+
+	return setInterval(async () => {
+		const currentBlock = await web3.eth.getBlockNumber();
+		const currentBlockHash = (await web3.eth.getBlock(lastBlock)).hash;
+
+		if (currentBlockHash !== lastBlockHash) {
+			// 检测到重组
+			callback({
+				oldBlock: lastBlock,
+				oldHash: lastBlockHash,
+				newBlock: currentBlock,
+				newHash: currentBlockHash,
+			});
+		}
+
+		lastBlock = currentBlock;
+		lastBlockHash = currentBlockHash;
+	}, checkInterval);
+};
+
+// 获取共同祖先区块
+const findCommonAncestor = async (hash1, hash2) => {
+	let block1 = await web3.eth.getBlock(hash1);
+	let block2 = await web3.eth.getBlock(hash2);
+
+	while (block1.number > block2.number) {
+		block1 = await web3.eth.getBlock(block1.parentHash);
+	}
+	while (block2.number > block1.number) {
+		block2 = await web3.eth.getBlock(block2.parentHash);
+	}
+	while (block1.hash !== block2.hash) {
+		block1 = await web3.eth.getBlock(block1.parentHash);
+		block2 = await web3.eth.getBlock(block2.parentHash);
+	}
+	return block1;
+};
+```
+
+## 缓解策略
+
+1. 等待足够的确认数
+2. 实现重组检测
+3. 处理交易重新提交
+4. 维护状态一致性
+5. 使用事件监听器
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="通过哈希检索区块信息的API方法">eth_getBlockByHash</Link> - 通过哈希检索区块
+- <Link to="/docs/ethereum/guides/block-confirmations" title="理解交易最终性和确认要求">区块确认指南</Link> - 理解交易最终性
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="学习处理以太坊区块的基本技术">使用区块</Link> - 一般区块处理

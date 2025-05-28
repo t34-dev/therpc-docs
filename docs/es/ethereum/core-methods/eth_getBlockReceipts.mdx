@@ -1,0 +1,278 @@
+---
+title: eth_getBlockReceipts - Obtener Todos los Recibos de Transacciones de un Bloque | Métodos de API de Ethereum
+description: Aprenda a usar el método eth_getBlockReceipts para recuperar datos completos de recibos de transacciones para un bloque entero de Ethereum. Incluye documentación de campos y ejemplos de uso.
+keywords: eth_getBlockReceipts, recibos de transacciones, recibos de bloque, transacciones ethereum, uso de gas, estado de transacción, logs, recibos por lotes, logs de eventos, eventos ethereum
+---
+
+# eth_getBlockReceipts
+
+El método `eth_getBlockReceipts` devuelve todos los recibos de transacciones para un bloque dado en una sola llamada. Este método altamente eficiente es significativamente más eficaz que solicitar recibos individuales cuando necesitas datos para múltiples transacciones en el mismo bloque, haciéndolo esencial para indexadores de blockchain y plataformas de análisis.
+
+## Casos de Uso
+
+- Análisis y optimización de uso de gas
+- Monitoreo de éxito/fracaso de transacciones
+- Verificación y procesamiento masivo de transacciones
+- Recolección de logs y eventos para indexación
+- Análisis y depuración de ejecución de contratos inteligentes
+- Exploradores de bloques y plataformas de análisis
+- Seguimiento de transferencias de tokens y actualizaciones de billeteras
+- Análisis de MEV (Valor Máximo Extraíble)
+- Agregación de datos históricos
+- Procesamiento de eventos por lotes
+
+## Detalles del Método
+
+Este método recupera resultados completos de transacciones, incluyendo estado, uso de gas, logs y eventos para todas las transacciones en un bloque especificado.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBlockReceipts',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Número de bloque en formato hexadecimal o etiquetas: latest, earliest, pending, safe, finalized',
+			value: '0x112BDE2', // Ejemplo de bloque significativo con muchas transacciones
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'array',
+			desc: 'Array de objetos de recibo de transacción, cada uno contiene:',
+			fields: [
+				{
+					id: 'blockHash',
+					type: 'string',
+					desc: 'Hash del bloque que contiene esta transacción',
+				},
+				{
+					id: 'blockNumber',
+					type: 'string',
+					desc: 'Número de bloque en hexadecimal',
+				},
+				{
+					id: 'contractAddress',
+					type: 'string',
+					desc: 'Dirección del contrato creado (si es creación de contrato), de lo contrario null',
+				},
+				{
+					id: 'cumulativeGasUsed',
+					type: 'string',
+					desc: 'Gas total usado en el bloque hasta e incluyendo esta transacción',
+				},
+				{
+					id: 'effectiveGasPrice',
+					type: 'string',
+					desc: 'Precio por gas realmente pagado, en wei (hexadecimal)',
+				},
+				{
+					id: 'from',
+					type: 'string',
+					desc: 'Dirección del remitente',
+				},
+				{
+					id: 'gasUsed',
+					type: 'string',
+					desc: 'Gas usado por esta transacción específica',
+				},
+				{
+					id: 'logs',
+					type: 'array',
+					desc: 'Array de objetos de log generados por esta transacción',
+				},
+				{
+					id: 'logsBloom',
+					type: 'string',
+					desc: 'Filtro Bloom para que los clientes ligeros recuperen rápidamente los logs relacionados',
+				},
+				{
+					id: 'status',
+					type: 'string',
+					desc: '1 (éxito) o 0 (fracaso)',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					desc: 'Dirección del destinatario, o null para creación de contrato',
+				},
+				{
+					id: 'transactionHash',
+					type: 'string',
+					desc: 'Hash de la transacción',
+				},
+				{
+					id: 'transactionIndex',
+					type: 'string',
+					desc: 'Posición del índice de la transacción en el bloque',
+				},
+				{
+					id: 'type',
+					type: 'string',
+					desc: 'Tipo de transacción (0=legacy, 1=EIP2930, 2=EIP1559)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"blockHash": "0xb5876cd604e2234f800817ef7d744b55e3de0750679923ad3c8f3a3439f8095c",
+			"blockNumber": "0x112bde2",
+			"contractAddress": null,
+			"cumulativeGasUsed": "0x21880",
+			"effectiveGasPrice": "0x4940d0306",
+			"from": "0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe5",
+			"gasUsed": "0x21880",
+			"logs": [
+				{
+					"address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+					"topics": [
+						"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+						"0x00000000000000000000000095222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+						"0x000000000000000000000000333cb957ceaab5a7d2fd1f046f6a4481a52d7378"
+					],
+					"data": "0x000000000000000000000000000000000000000000000000000000000513cafb",
+					"blockNumber": "0x112bde2",
+					"transactionHash": "0x4e7c53bec74550e8c4bb3642c21708134f434994b122a3d6321ec718e743281d",
+					"transactionIndex": "0x0",
+					"blockHash": "0xb5876cd604e2234f800817ef7d744b55e3de0750679923ad3c8f3a3439f8095c",
+					"logIndex": "0x0",
+					"removed": false
+				}
+			],
+			"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000020000000000000000000800000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000042000000000000000000000000000000000000000000000000000020000000004000000000000000000000000000000000000000000000000000000000",
+			"status": "0x1",
+			"to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+			"transactionHash": "0x4e7c53bec74550e8c4bb3642c21708134f434994b122a3d6321ec718e743281d",
+			"transactionIndex": "0x0",
+			"type": "0x2"
+		},
+		{
+			"blockHash": "0xb5876cd604e2234f800817ef7d744b55e3de0750679923ad3c8f3a3439f8095c",
+			"blockNumber": "0x112bde2",
+			"contractAddress": null,
+			"cumulativeGasUsed": "0x36f10",
+			"effectiveGasPrice": "0x484c172f0",
+			"from": "0xE4395bc3d18B93D5F22e75bA15704e7a5B0ca77f",
+			"gasUsed": "0x15690",
+			"logs": [
+				{
+					"address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+					"topics": [
+						"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+						"0x000000000000000000000000e4395bc3d18b93d5f22e75ba15704e7a5b0ca77f",
+						"0x00000000000000000000000001d1d3b37d6a73adcbe2d6c4a330b6b244f48d5a"
+					],
+					"data": "0x0000000000000000000000000000000000000000000000000000000016be7dbf",
+					"blockNumber": "0x112bde2",
+					"transactionHash": "0x87c3f77d7c2755c9a3b94985c17b97cedd96b2afb2a916e50e4357e2188a46ec",
+					"transactionIndex": "0x1",
+					"blockHash": "0xb5876cd604e2234f800817ef7d744b55e3de0750679923ad3c8f3a3439f8095c",
+					"logIndex": "0x1",
+					"removed": false
+				}
+			],
+			"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000020000000000000000000800000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000042000000000000000000000000000000000000000000000000000020000010000000000000000000000000000000000000000000000000000000000000",
+			"status": "0x1",
+			"to": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+			"transactionHash": "0x87c3f77d7c2755c9a3b94985c17b97cedd96b2afb2a916e50e4357e2188a46ec",
+			"transactionIndex": "0x1",
+			"type": "0x2"
+		}
+		// Recibos adicionales...
+	]
+}
+```
+
+### Campos Clave de Recibos Explicados
+
+- **status**: `0x1` para transacciones exitosas, `0x0` para transacciones fallidas
+- **logs**: Contiene todos los eventos emitidos (crucial para rastrear transferencias de tokens y cambios de estado)
+- **gasUsed**: Gas real consumido por esta transacción (importante para análisis de costos)
+- **cumulativeGasUsed**: Total acumulado de gas usado en el bloque hasta esta transacción
+- **effectiveGasPrice**: Precio real pagado por unidad de gas (particularmente importante para transacciones EIP-1559)
+- **contractAddress**: Solo se completa para transacciones de creación de contratos
+- **type**: Indica el tipo de transacción (legacy, lista de acceso o EIP-1559)
+
+### Firmas de Eventos Comunes
+
+Las firmas de eventos más comunes que encontrarás en los logs:
+
+- Transferencia ERC-20: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`
+- Aprobación ERC-20: `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925`
+- Transferencia ERC-721: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` (igual que ERC-20)
+- TransferSingle ERC-1155: `0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62`
+- TransferBatch ERC-1155: `0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb`
+
+### Ventajas de Rendimiento
+
+Este método ofrece beneficios significativos de rendimiento sobre solicitudes individuales de recibos:
+
+1. **Overhead de Red Reducido**: Una solicitud en lugar de muchas llamadas API separadas
+2. **Latencia Menor**: Retrasos de ida y vuelta minimizados entre cliente y nodo
+3. **Menor Uso de Recursos**: Menos procesamiento requerido tanto por el cliente como por el nodo
+4. **Mejor Utilización de Caché**: Los datos pueden ser devueltos desde una única búsqueda en caché
+5. **Manejo de Errores Simplificado**: Una sola solicitud significa lógica de reintentos simplificada
+
+### Ejemplo Práctico
+
+```javascript
+// Ejemplo: Analizar transferencias de tokens en un bloque
+async function analyzeTokenTransfers(blockNumber) {
+	const receipts = await provider.send('eth_getBlockReceipts', [blockNumber]);
+
+	// Firma de evento común de transferencia ERC-20
+	const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+
+	// Rastrear todas las transferencias de tokens
+	const tokenTransfers = {};
+
+	receipts.forEach((receipt) => {
+		// Omitir transacciones fallidas
+		if (receipt.status !== '0x1') return;
+
+		receipt.logs.forEach((log) => {
+			if (log.topics[0] === transferTopic) {
+				const token = log.address;
+				const from = '0x' + log.topics[1].slice(26);
+				const to = '0x' + log.topics[2].slice(26);
+				const value = BigInt(log.data);
+
+				if (!tokenTransfers[token]) {
+					tokenTransfers[token] = [];
+				}
+
+				tokenTransfers[token].push({ from, to, value });
+			}
+		});
+	});
+
+	return tokenTransfers;
+}
+
+// Uso
+const transfers = await analyzeTokenTransfers('0x112BDE2');
+console.log(`Found transfers for ${Object.keys(transfers).length} different tokens`);
+```
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Obtener recibo de transacción individual">eth_getTransactionReceipt</Link> - Devuelve el recibo de una sola transacción
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Obtener bloque por número">eth_getBlockByNumber</Link> - Devuelve información sobre un bloque por número de bloque
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Consultar logs de eventos">eth_getLogs</Link> - Devuelve logs que coinciden con criterios de filtro dados
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Obtener detalles de transacción">eth_getTransactionByHash</Link> - Devuelve información sobre una transacción por hash

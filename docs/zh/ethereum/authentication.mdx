@@ -1,0 +1,135 @@
+---
+title: 身份验证指南 | 以太坊 API 安全
+description: 使用 API 密钥保护以太坊 API 请求的完整指南，包括实施示例、最佳实践和安全建议
+keywords: api 身份验证, api 密钥, bearer 令牌, api 安全, therpc 身份验证, 以太坊 api 安全, 区块链 api 安全, 安全 api 访问, 以太坊 api 密钥管理, web3 身份验证
+---
+
+# 身份验证
+
+所有对 TheRPC API 的请求都需要使用 API 密钥进行身份验证。本指南解释如何安全获取和使用您的 API 密钥。
+
+## # 获取 API 密钥
+
+1. 在 TheRPC.io 注册
+2. 导航到控制面板
+3. 进入 API 密钥部分
+4. 生成新的 API 密钥
+
+## # 使用您的 API 密钥
+
+### HTTP 头信息
+
+在每个请求中使用 Bearer 身份验证方案包含您的 API 密钥：
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+### 请求示例
+
+使用 curl：
+
+```bash
+curl --request POST 'YOUR_API_ENDPOINT' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+    "jsonrpc": "2.0",
+    "method": "eth_blockNumber",
+    "params": [],
+    "id": 1
+  }'
+```
+
+使用 JavaScript：
+
+```javascript
+const response = await fetch('YOUR_API_ENDPOINT', {
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json',
+		Authorization: `Bearer ${API_KEY}`,
+	},
+	body: JSON.stringify({
+		jsonrpc: '2.0',
+		method: 'eth_blockNumber',
+		params: [],
+		id: 1,
+	}),
+});
+```
+
+## # 安全最佳实践
+
+1. **保密密钥**
+
+- 永远不要将 API 密钥提交到源代码控制
+- 不要在公共论坛中共享密钥
+- 使用环境变量或安全保管库
+
+2. **密钥轮换**
+
+- 定期轮换密钥
+- 立即撤销已泄露的密钥
+- 为不同环境使用不同密钥
+
+3. **访问控制**
+
+- 为不同应用程序使用单独的密钥
+- 通过控制面板监控密钥使用情况
+- 实施适当的密钥管理
+
+## # 错误处理
+
+常见身份验证错误：
+
+```json
+{
+	"jsonrpc": "2.0",
+	"error": {
+		"code": -32001,
+		"message": "Invalid authentication credentials"
+	},
+	"id": 1
+}
+```
+
+- 缺少 API 密钥
+- 无效的 API 密钥格式
+- 密钥已过期或已撤销
+- 超出速率限制
+
+## # 环境设置
+
+### 环境变量
+
+```bash
+# .env 文件
+THERPC_API_KEY=your_api_key_here
+```
+
+### 配置示例
+
+Node.js：
+
+```javascript
+require('dotenv').config();
+const API_KEY = process.env.THERPC_API_KEY;
+```
+
+Python：
+
+```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+API_KEY = os.getenv('THERPC_API_KEY')
+```
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/rate-limits" title="API 使用限制和配额指南">速率限制</Link> - 了解使用配额
+- <Link to="/docs/ethereum/quick-start" title="快速开始使用以太坊 API">快速入门指南</Link> - 基本实施
+- <Link to="/docs/ethereum/basic-operations" title="以太坊区块链交互的常见操作">基本操作</Link> - 常见操作
+- <Link to="/docs/ethereum/faq" title="关于以太坊 API 使用的常见问题">常见问题解答</Link> - 常见问题和答案

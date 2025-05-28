@@ -1,0 +1,292 @@
+---
+title: debug_traceBlockByNumber - 通过区块号跟踪区块中的所有交易 | 以太坊API方法
+description: 了解如何使用debug_traceBlockByNumber方法获取由区块号标识的特定以太坊区块中所有交易执行的所有操作码的完整跟踪。
+keywords: debug_traceBlockByNumber, 区块跟踪, 操作码跟踪, 交易跟踪, 以太坊调试, 区块号, 执行跟踪
+---
+
+# debug_traceBlockByNumber
+
+`debug_traceBlockByNumber`方法返回由区块号标识的特定区块中所有交易执行的所有操作码的完整跟踪。此方法提供详细的底层执行信息，对于调试和分析交易行为非常有用。
+
+## 用途
+
+- 调试特定区块中的失败交易
+- 分析智能合约执行流程
+- 燃气使用优化和分析
+- 已部署合约的安全审计
+- 交易行为验证
+- 理解复杂的合约交互
+- 通过区块号分析历史区块
+- 监控交易执行模式
+- 发现合约设计中的边缘情况
+- 验证跨节点的确定性执行
+
+## 方法详情
+
+此方法在操作码级别跟踪区块中所有交易的执行，通过区块号识别区块。
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    "method": "debug_traceBlockByNumber",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'blockNumber',
+      required: true,
+      type: 'string',
+      desc: "区块号（十六进制格式）或字符串标签：latest, earliest, 或 pending",
+      value: "0xA1"
+    },
+    {
+      id: 'options',
+      type: 'object',
+      desc: "跟踪选项",
+      fields: [
+        {
+          id: 'disableStorage',
+          type: 'boolean',
+          desc: "设置为true禁用存储捕获",
+          value: false
+        },
+        {
+          id: 'disableMemory',
+          type: 'boolean',
+          desc: "设置为true禁用内存捕获",
+          value: false
+        },
+        {
+          id: 'disableStack',
+          type: 'boolean',
+          desc: "设置为true禁用堆栈捕获",
+          value: false
+        },
+        {
+          id: 'tracer',
+          type: 'string',
+          desc: "使用自定义跟踪器（可用：callTracer, prestateTracer等）",
+          value: "callTracer"
+        },
+        {
+          id: 'timeout',
+          type: 'string',
+          desc: "覆盖基于JavaScript跟踪的默认5秒超时",
+          value: "10s"
+        }
+      ]
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'array',
+      desc: "区块内交易跟踪的数组",
+      fields: [
+        {
+          id: 'gas',
+          type: 'integer',
+          desc: "交易使用的燃气"
+        },
+        {
+          id: 'failed',
+          type: 'boolean',
+          desc: "交易是否失败"
+        },
+        {
+          id: 'returnValue',
+          type: 'string',
+          desc: "交易的返回值"
+        },
+        {
+          id: 'structLogs',
+          type: 'array',
+          desc: "结构化的EVM操作日志数组",
+          fields: [
+            {
+              id: 'pc',
+              type: 'integer',
+              desc: "程序计数器位置"
+            },
+            {
+              id: 'op',
+              type: 'string',
+              desc: "执行的操作码"
+            },
+            {
+              id: 'gas',
+              type: 'integer',
+              desc: "剩余燃气"
+            },
+            {
+              id: 'gasCost',
+              type: 'integer',
+              desc: "此操作的燃气成本"
+            },
+            {
+              id: 'depth',
+              type: 'integer',
+              desc: "调用深度"
+            },
+            {
+              id: 'memory',
+              type: 'array',
+              desc: "EVM内存内容（如果未禁用）"
+            },
+            {
+              id: 'stack',
+              type: 'array',
+              desc: "EVM堆栈内容（如果未禁用）"
+            },
+            {
+              id: 'storage',
+              type: 'object',
+              desc: "存储变更（如果未禁用）"
+            }
+          ]
+        }
+      ]
+    }
+  ]}
+  getParams={(fields) => {
+    const params = [
+      fields?.blockNumber || null
+    ];
+
+    const options = {};
+
+    if (fields?.options?.disableStorage !== undefined) {
+      options.disableStorage = fields.options.disableStorage;
+    }
+
+    if (fields?.options?.disableMemory !== undefined) {
+      options.disableMemory = fields.options.disableMemory;
+    }
+
+    if (fields?.options?.disableStack !== undefined) {
+      options.disableStack = fields.options.disableStack;
+    }
+
+    if (fields?.options?.tracer) {
+      options.tracer = fields.options.tracer;
+    }
+
+    if (fields?.options?.timeout) {
+      options.timeout = fields.options.timeout;
+    }
+
+    if (Object.keys(options).length > 0) {
+      params.push(options);
+    } else {
+      params.push(null);
+    }
+
+    return params;
+
+}}
+/>
+
+### 响应示例（简化版）
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"gas": 21000,
+			"failed": false,
+			"returnValue": "",
+			"structLogs": [
+				{
+					"pc": 0,
+					"op": "PUSH1",
+					"gas": 68232,
+					"gasCost": 3,
+					"depth": 1,
+					"stack": [],
+					"memory": [],
+					"storage": {}
+				},
+				{
+					"pc": 2,
+					"op": "MSTORE",
+					"gas": 68229,
+					"gasCost": 12,
+					"depth": 1,
+					"stack": ["0x60", "0x40"],
+					"memory": [
+						"0000000000000000000000000000000000000000000000000000000000000000",
+						"0000000000000000000000000000000000000000000000000000000000000000"
+					],
+					"storage": {}
+				}
+				// 更多操作码日志...
+			]
+		}
+		// 额外的交易跟踪...
+	]
+}
+```
+
+### 使用callTracer格式
+
+当使用`callTracer`选项时，响应会格式化为调用图：
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": [
+		{
+			"type": "CALL",
+			"from": "0x1923f626bb8dc025849e00f99c25fe2b2f7fb0db",
+			"to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+			"value": "0x0",
+			"gas": "0x13458",
+			"gasUsed": "0x8fc",
+			"input": "0xa9059cbb0000000000000000000000001f9840a85d5af5bf1d1762f925bdaddc4201f984000000000000000000000000000000000000000000000002b5e3af16b1880000",
+			"output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+			"calls": []
+		}
+		// 额外的调用跟踪...
+	]
+}
+```
+
+### 区块号标签选项
+
+`blockNumber`参数接受几个特殊标签：
+
+- `latest`：网络确认的最新区块
+- `earliest`：创世区块（区块0）
+- `pending`：带有内存池中交易的待处理区块（尚未被挖出）
+
+### 自定义跟踪器
+
+debug_traceBlockByNumber方法支持几种内置跟踪器：
+
+- **callTracer**：捕获每个交易执行的调用图。
+- **prestateTracer**：捕获相关合约的执行前状态。
+- **4byteTracer**：收集函数选择器（调用数据的前4个字节）。
+- **noopTracer**：仅进行跟踪而不收集数据（用于性能测试）。
+
+### 重要说明
+
+- 此方法计算密集且可能需要时间完成
+- 需要在以太坊节点上启用调试API
+- 并非所有以太坊客户端都支持此方法
+- 对于含有复杂交易的区块，响应可能非常大
+- 如果需要，考虑使用跟踪选项来减小响应大小
+- 指定很久以前的区块可能需要归档节点
+- 对于不需要跟踪的常规区块信息，使用eth_getBlockByNumber
+- 不同客户端可能提供不同的跟踪器选项
+- 自定义跟踪器可显著提高特定分析需求的性能
+- 在某些节点上，可能无法获取超过特定区块年龄的历史跟踪
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/debug-methods/debug_traceBlock" title="使用区块的原始RLP编码形式跟踪区块内的所有交易">debug_traceBlock</Link> - 使用RLP编码区块跟踪区块中的交易
+- <Link to="/docs/ethereum/debug-methods/debug_traceBlockByHash" title="使用区块哈希跟踪区块内的所有交易">debug_traceBlockByHash</Link> - 使用区块哈希跟踪区块中的交易
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="获取特定交易的详细执行跟踪">debug_traceTransaction</Link> - 通过哈希跟踪单个交易

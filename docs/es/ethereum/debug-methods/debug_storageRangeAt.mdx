@@ -1,0 +1,177 @@
+---
+title: debug_storageRangeAt - Inspeccionar el Almacenamiento del Contrato en un Rango Específico | API de Depuración de Ethereum
+description: Aprenda a utilizar el método debug_storageRangeAt para inspeccionar y recuperar datos de almacenamiento de contratos dentro de un rango específico para una depuración completa de contratos inteligentes, análisis de estado y auditoría de contratos en Ethereum.
+keywords: debug_storageRangeAt, depuración ethereum, almacenamiento de contratos, depuración de contratos inteligentes, inspección de almacenamiento, análisis de estado, auditoría de contratos, diseño de almacenamiento, slots de almacenamiento, memoria de contratos, verificación de estado, herramientas de desarrollo ethereum, depuración de contratos, examen de almacenamiento, depuración de blockchain, análisis de rango de almacenamiento
+---
+
+# debug_storageRangeAt
+
+El método `debug_storageRangeAt` devuelve el almacenamiento del contrato para un rango específico. Este método se utiliza principalmente para fines de depuración y permite a los desarrolladores inspeccionar y analizar datos de almacenamiento en la cadena. Es comúnmente utilizado por herramientas de desarrollo como Remix para implementar funciones de depuración y proporciona acceso directo a los slots de almacenamiento sin procesar de un contrato inteligente.
+
+## Casos de Uso
+
+- **Depuración de Contratos Inteligentes**: Inspecciona valores específicos de almacenamiento para identificar errores relacionados con el estado en tus contratos
+- **Análisis del Estado del Contrato**: Analiza cómo cambia el estado del contrato durante la ejecución de diferentes funciones
+- **Verificación del Diseño de Almacenamiento**: Verifica que el diseño de almacenamiento de tu contrato coincida con tus expectativas
+- **Auditoría de Contratos**: Examina los slots de almacenamiento para encontrar vulnerabilidades de seguridad o cambios de estado inesperados
+- **Integración de Herramientas de Desarrollo**: Construye herramientas de depuración que puedan visualizar el estado del contrato y la memoria
+- **Análisis Post-Mortem**: Investiga el estado del contrato después de fallos o exploits
+- **Verificación de Contratos Proxy**: Verifica las asignaciones de slots en patrones de proxy actualizables
+- **Inspección de Gobernanza**: Revisa el estado de almacenamiento para contratos de DAO o gobernanza
+- **Análisis de Estado Histórico**: Compara valores de almacenamiento a través de diferentes bloques para rastrear la evolución del estado
+
+## Detalles del Método
+
+Este método devuelve entradas de almacenamiento para un contrato dentro de un rango específico.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'debug_storageRangeAt',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockHash',
+			required: true,
+			type: 'string',
+			desc: 'Hash del bloque del cual obtener el almacenamiento',
+			value: '0x340e1e44e8f6e6b0cd8d255d4fdaec2987bb073f02c62e068ed75d80f9890d5f',
+		},
+		{
+			id: 'txIndex',
+			required: true,
+			type: 'integer',
+			desc: 'Índice de la transacción dentro del bloque',
+			value: 3,
+		},
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: 'Dirección del contrato cuyo almacenamiento se va a recuperar',
+			value: '0x0a8156e7ee392d885d10eaa86afd0e323afdcd95',
+		},
+		{
+			id: 'startKey',
+			required: true,
+			type: 'string',
+			desc: 'Hash de la clave de almacenamiento inicial',
+			value: '0xc94770007dda54cF92009BFF0dE90c06F603a09f',
+		},
+		{
+			id: 'limit',
+			required: true,
+			type: 'integer',
+			desc: 'Número máximo de entradas de almacenamiento a devolver',
+			value: 10,
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'Objeto que contiene entradas de almacenamiento con pares clave-valor',
+			fields: [
+				{
+					id: '[storageHash]',
+					type: 'object',
+					desc: 'Objeto para cada entrada de almacenamiento',
+					fields: [
+						{
+							id: 'key',
+							type: 'string',
+							desc: 'La clave de almacenamiento como cadena hexadecimal',
+						},
+						{
+							id: 'value',
+							type: 'string',
+							desc: 'El valor de almacenamiento como cadena hexadecimal',
+						},
+					],
+				},
+			],
+		},
+		{
+			id: 'nextKey',
+			type: 'string',
+			desc: 'La clave a utilizar para la siguiente consulta de rango, o no presente si no hay más entradas',
+		},
+	]}
+	getParams={(fields) => [
+		fields?.blockHash || null,
+		Number(fields?.txIndex || null),
+		fields?.address || null,
+		fields?.startKey || null,
+		Number(fields?.limit || null),
+	]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"storage": {
+			"0x0000000000000000000000000000000000000000000000000000000000000000": {
+				"key": "0x0000000000000000000000000000000000000000000000000000000000000000",
+				"value": "0x0000000000000000000000000000000000000000000000000000000000000001"
+			},
+			"0x0000000000000000000000000000000000000000000000000000000000000001": {
+				"key": "0x0000000000000000000000000000000000000000000000000000000000000001",
+				"value": "0x000000000000000000000000d7acd2a9fd159e69bb102a1ca21c9a3e3a5f771b"
+			},
+			"0x0000000000000000000000000000000000000000000000000000000000000002": {
+				"key": "0x0000000000000000000000000000000000000000000000000000000000000002",
+				"value": "0x0000000000000000000000000000000000000000000000000000000000000064"
+			}
+		},
+		"nextKey": "0x0000000000000000000000000000000000000000000000000000000000000003"
+	}
+}
+```
+
+### Explicación de los Campos de Respuesta
+
+- **storage**: Objeto que contiene cada entrada de almacenamiento como un par clave-valor.
+- La clave es el hash keccak256 del slot de almacenamiento.
+- Cada entrada contiene:
+- **key**: La clave de almacenamiento original (número de slot).
+- **value**: El valor almacenado en esta clave.
+- **nextKey**: La siguiente clave de almacenamiento desde la cual comenzar al recuperar el siguiente lote, o ausente si no hay más entradas.
+
+### Entendiendo los Slots de Almacenamiento
+
+En los contratos inteligentes de Ethereum, el almacenamiento se organiza en slots de 32 bytes:
+
+- **Slot 0, 1, 2, ...**: Las variables de estado simples se almacenan secuencialmente.
+- **Mappings**: Almacenados en `keccak256(key . slot)` donde `.` es concatenación.
+- **Arrays Dinámicos**: Longitud en `slot`, datos en `keccak256(slot) + index`.
+- **Mappings Anidados**: Utilizan múltiples pasos de hash.
+
+### Consideraciones de Rendimiento
+
+- Consultar grandes rangos de almacenamiento puede resultar en tamaños de respuesta significativos
+- Considere usar límites más pequeños para contratos con almacenamiento extenso
+- Usar una startKey precisa ayuda a reducir la transferencia de datos innecesaria
+- Este método consume más recursos que las consultas básicas de almacenamiento
+
+### Notas Importantes
+
+- Este método es utilizado principalmente por herramientas de desarrollo como Remix y otros IDEs de Ethereum
+- Requiere que la API de depuración esté habilitada en el nodo Ethereum
+- No todos los clientes de Ethereum admiten este método (totalmente compatible con Geth y algunos otros)
+- Para resultados precisos, utilice el hash del bloque y el índice de transacción que reflejen el estado deseado
+- El parámetro limit ayuda a gestionar el tamaño de respuesta para contratos con gran almacenamiento
+- Algunos nodos de archivo podrían imponer límites en las consultas de rango de almacenamiento
+- El método devuelve valores de almacenamiento sin procesar que pueden requerir análisis adicional para tipos de datos complejos
+- No se puede utilizar para leer variables privadas directamente, ya que pueden estar empaquetadas en el mismo slot de almacenamiento
+- Las consultas históricas requieren un nodo de archivo; los nodos que no son de archivo solo admiten bloques recientes
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getStorageAt" title="Obtener valor de un slot de almacenamiento específico por dirección y posición">eth_getStorageAt</Link>
+- <Link to="/docs/ethereum/debug-methods/debug_traceTransaction" title="Obtener traza de ejecución completa para una transacción">debug_traceTransaction</Link>

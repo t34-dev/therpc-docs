@@ -1,0 +1,202 @@
+---
+title: Ethereum ब्लॉकचेन विकास के लिए Rust टूल्स | Web3-rs एकीकरण गाइड
+description: Web3-rs, स्मार्ट कॉन्ट्रैक्ट एकीकरण, एसिंक पैटर्न और प्रदर्शन अनुकूलन तकनीकों सहित Ethereum विकास के लिए Rust लाइब्रेरीज का व्यापक गाइड
+keywords: rust ethereum, web3-rs, ethereum rust, rust blockchain, rust web3, rust smart contracts, ethereum async rust, blockchain rust, ethereum client rust, tokio ethereum, rust dapp, high performance ethereum
+---
+
+# Rust टूल्स
+
+Rust, Ethereum विकास के लिए कई लाइब्रेरीज प्रदान करता है, जिसमें web3-rs ब्लॉकचेन इंटरैक्शन के लिए प्राथमिक पसंद है।
+
+<PayAttention category="Rust" />
+
+## # Web3-rs
+
+Web3 लाइब्रेरी का Rust कार्यान्वयन।
+
+```rust
+use web3::Web3;
+use web3::types::{Address, H256, TransactionParameters, U256};
+use std::str::FromStr;
+
+struct EthereumClient {
+    web3: Web3<web3::transports::Http>,
+}
+
+impl EthereumClient {
+    pub async fn new(url: &str) -> Result<Self, web3::Error> {
+        let transport = web3::transports::Http::new(url)?;
+        let web3 = Web3::new(transport);
+        Ok(Self { web3 })
+    }
+
+    pub async fn get_balance(&self, address: &str) -> Result<U256, web3::Error> {
+        let address = Address::from_str(address)
+            .map_err(|_| web3::Error::InvalidAddress)?;
+
+        self.web3.eth().balance(address, None).await
+    }
+
+    pub async fn send_transaction(
+        &self,
+        from: Address,
+        to: Address,
+        value: U256,
+    ) -> Result<H256, web3::Error> {
+        let tx = TransactionParameters {
+            to: Some(to),
+            value,
+            from,
+            ..Default::default()
+        };
+
+        self.web3.eth().send_transaction(tx).await
+    }
+}
+```
+
+- **GitHub**: <Link to="https://github.com/tomusdrw/rust-web3" target="_blank" absolute>rust-web3</Link>
+- **दस्तावेज़ीकरण**: <Link to="https://docs.rs/web3" target="_blank" absolute>docs.rs/web3</Link>
+- **विशेषताएँ**:
+  - एसिंक समर्थन
+  - टाइप-सेफ इंटरफेस
+  - कॉन्ट्रैक्ट इंटरैक्शन
+  - लेनदेन प्रबंधन
+  - ENS समर्थन
+  - WebSocket समर्थन
+
+## # कॉन्ट्रैक्ट एकीकरण
+
+Rust में स्मार्ट कॉन्ट्रैक्ट के साथ काम करना:
+
+```rust
+use web3::contract::{Contract, Options};
+use web3::types::{Address, U256};
+
+struct SmartContract {
+    contract: Contract<web3::transports::Http>,
+}
+
+impl SmartContract {
+    pub async fn new(
+        web3: Web3<web3::transports::Http>,
+        address: Address,
+        abi: &[u8],
+    ) -> Result<Self, web3::Error> {
+        let contract = Contract::from_json(
+            web3.eth(),
+            address,
+            abi,
+        )?;
+
+        Ok(Self { contract })
+    }
+
+    pub async fn call_method<T: serde::de::DeserializeOwned>(
+        &self,
+        method: &str,
+        params: &[web3::contract::tokens::Tokenize],
+    ) -> Result<T, web3::Error> {
+        let result = self.contract.query(
+            method,
+            params,
+            None,
+            Options::default(),
+            None,
+        ).await?;
+
+        Ok(result)
+    }
+}
+```
+
+## # त्रुटि नियंत्रण
+
+Rust में मजबूत त्रुटि नियंत्रण:
+
+```rust
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum EthereumError {
+    #[error("Web3 error: {0}")]
+    Web3Error(#[from] web3::Error),
+
+    #[error("Invalid address: {0}")]
+    InvalidAddress(String),
+
+    #[error("Contract error: {0}")]
+    ContractError(String),
+
+    #[error("Transaction failed: {0}")]
+    TransactionError(String),
+}
+
+impl EthereumClient {
+    pub async fn safe_get_balance(&self, address: &str) -> Result<f64, EthereumError> {
+        let wei = self.get_balance(address).await?;
+        let eth = wei.as_u128() as f64 / 1e18;
+        Ok(eth)
+    }
+}
+```
+
+## # एसिंक इवेंट हैंडलिंग
+
+Ethereum इवेंट्स की सदस्यता लें:
+
+```rust
+use futures::StreamExt;
+
+impl EthereumClient {
+    pub async fn monitor_blocks(&self) -> Result<(), web3::Error> {
+        let mut stream = self.web3.eth_subscribe().subscribe_new_heads().await?;
+
+        while let Some(block) = stream.next().await {
+            match block {
+                Ok(header) => {
+                    println!("New block: {}", header.number.unwrap_or_default());
+                }
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+```
+
+## # टेस्टिंग
+
+Ethereum इंटरैक्शन के परीक्षण का उदाहरण:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tokio;
+
+    #[tokio::test]
+    async fn test_balance_query() {
+        let client = EthereumClient::new("http://localhost:8545")
+            .await
+            .expect("Failed to create client");
+
+        let balance = client
+            .get_balance("0x742d35Cc6634C0532925a3b844Bc454e4438f44e")
+            .await
+            .expect("Failed to get balance");
+
+        assert!(balance > U256::zero());
+    }
+}
+```
+
+### यह भी देखें
+
+- <Link to="/docs/ethereum/tools/overview" title="Complete overview of available Ethereum development tools and SDKs">टूल्स अवलोकन</Link> - सभी उपलब्ध SDK और टूल्स
+- <Link to="/docs/ethereum/authentication" title="Guide to authenticating with Ethereum nodes and API services">प्रमाणीकरण गाइड</Link> - विस्तृत प्रमाणीकरण जानकारी
+- <Link to="/docs/ethereum/basic-operations" title="Learn fundamental Ethereum blockchain operations for developers">मूल संचालन गाइड</Link> - मूलभूत संचालन
+- <Link to="/docs/ethereum/all-methods" title="Complete reference of all available Ethereum API methods">उपलब्ध विधियां</Link> - API क्षमताओं का अन्वेषण करें

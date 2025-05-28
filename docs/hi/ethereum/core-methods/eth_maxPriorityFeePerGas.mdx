@@ -1,0 +1,82 @@
+---
+title: eth_maxPriorityFeePerGas - Get Priority Fee Estimates | Ethereum API Methods
+description: Learn how to use the eth_maxPriorityFeePerGas method to retrieve the current recommended priority fee (tip) needed for transaction inclusion on the Ethereum network.
+keywords: eth_maxPriorityFeePerGas, priority fee, transaction tip, EIP-1559, gas price, miner tip, transaction priority, ethereum gas optimization, validator tip, blockchain fee estimation, gas fee calculation, transaction fee, eth tip, ethereum priority fee, block inclusion fee, gas tip, transaction pricing
+---
+
+# eth_maxPriorityFeePerGas
+
+The `eth_maxPriorityFeePerGas` method returns the recommended priority fee (tip) per gas unit that should be included in EIP-1559 transactions. This value represents what validators are currently expecting as an incentive to include transactions in blocks.
+
+## Use Cases
+
+- Fee market analysis for blockchain researchers
+- Transaction fee optimization for wallets and dApps
+- EIP-1559 transaction construction in applications
+- Gas price strategy development for high-priority operations
+- Priority estimation for time-sensitive transactions
+- DApp gas price suggestions for better user experience
+- Monitoring validator incentives in real-time
+- Optimizing transaction costs during network congestion
+- Setting appropriate fees for smart contract deployments
+- Building fee estimators for wallet applications
+
+## Method Details
+
+This method provides the current recommended priority fee in wei.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_maxPriorityFeePerGas',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The recommended priority fee in wei (hexadecimal)',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x3b9aca00" // 1 Gwei (1,000,000,000 wei)
+}
+```
+
+### Understanding Priority Fees
+
+The priority fee is a component of the EIP-1559 fee structure:
+
+- **Base Fee**: Algorithmically determined, burned upon transaction inclusion
+- **Priority Fee (tip)**: Optional payment to validators for transaction inclusion
+- **Max Fee**: Maximum amount a user is willing to pay (includes both base fee and priority fee)
+
+The priority fee serves as an incentive for validators to include a transaction in their block. Higher priority fees generally result in faster transaction inclusion, especially during periods of network congestion.
+
+### Important Notes
+
+- Priority fees fluctuate based on network demand
+- For time-sensitive transactions, consider using a higher priority fee
+- During periods of low network activity, the minimum priority fee (often 1 Gwei) is usually sufficient
+- This method reflects the node's estimation, other nodes may have slightly different estimates
+- This method is only relevant for networks that support EIP-1559 (Ethereum post-London fork)
+- Even with a high priority fee, inclusion is not guaranteed during extreme congestion
+- Priority fees can vary significantly during NFT drops and other high-demand events
+- Different validators may have different strategies for transaction selection
+- Historical fee data (via eth_feeHistory) can provide context for current priority fee recommendations
+- Some wallets and dApps implement their own fee estimation algorithms that may differ from the node's suggestion
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_feeHistory" title="Get historical fee data for better fee estimation">eth_feeHistory</Link> - Retrieve historical fee data for more precise estimation
+- <Link to="/docs/ethereum/core-methods/eth_gasPrice" title="Get legacy gas price for pre-EIP-1559 transactions">eth_gasPrice</Link> - Get legacy gas price for pre-EIP-1559 transactions

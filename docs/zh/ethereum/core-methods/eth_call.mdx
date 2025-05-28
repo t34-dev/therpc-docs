@@ -1,0 +1,163 @@
+---
+title: eth_call - 执行智能合约调用 | 以太坊 API 方法
+description: 了解如何使用 eth_call 方法在不创建区块链交易的情况下执行消息调用。包括参数、响应格式和示例。
+keywords: eth_call, ethereum 调用, 消息调用, 智能合约读取, 合约状态, 视图函数, 区块链查询, 免 gas 调用, erc20 余额, 合约数据
+---
+
+# eth_call
+
+`eth_call` 方法可立即执行新的消息调用，而无需在区块链上创建交易。此方法非常适合在不消耗 gas 或修改区块链状态的情况下从智能合约读取数据，使其成为 DApp 开发中最常用的方法之一。
+
+## 使用场景
+
+- 从 ERC20 合约读取代币余额
+- 查询合约状态变量和映射
+- 提交前检查交易有效性
+- 调试智能合约函数
+- 使用不同输入测试合约行为
+- 模拟复杂交易结果
+- 从 DEX 合约获取价格数据
+- 在尝试状态更改前验证访问权限
+
+## 方法详情
+
+此方法允许以只读方式与已部署的智能合约进行交互，并可选择状态覆盖。状态覆盖功能对于测试"假设"场景特别有用。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_call',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'transaction',
+			required: true,
+			type: 'object',
+			desc: '交易调用对象，包含以下字段：',
+			fields: [
+				{
+					id: 'from',
+					type: 'string',
+					desc: '发送交易的地址',
+					value: '',
+				},
+				{
+					id: 'to',
+					type: 'string',
+					required: true,
+					desc: '交易接收地址',
+					value: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+				},
+				{
+					id: 'gas',
+					type: 'integer',
+					desc: '为交易执行提供的 gas 整数',
+					value: '',
+				},
+				{
+					id: 'gasPrice',
+					type: 'integer',
+					desc: '用于每个已支付 gas 的 gasPrice 整数，以十六进制编码',
+					value: '',
+				},
+				{
+					id: 'value',
+					type: 'integer',
+					desc: '与此交易一起发送的价值整数，以十六进制编码',
+					value: '',
+				},
+				{
+					id: 'data',
+					type: 'string',
+					desc: '方法签名的哈希和编码参数。更多信息，请参阅 Solidity 文档中的合约 ABI 描述',
+					value: '0x70a082310000000000000000000000006E0d01A76C3Cf4288372a29124A26D4353EE51BE',
+				},
+			],
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: '十六进制格式的区块号或以下字符串标签之一：latest, earliest, pending, safe 或 finalized（safe 和 finalized 标签仅在 Ethereum, Gnosis, Arbitrum, Arbitrum Nova 和 Avalanche C-chain 上支持）',
+			value: 'latest',
+		},
+		{
+			id: 'stateOverride',
+			type: 'object',
+			desc: '状态覆盖集选项允许您在执行调用之前更改合约的状态',
+			fields: [
+				{
+					id: 'balance',
+					type: 'string',
+					desc: '执行调用前为账户设置的虚假余额',
+					value: '0xFFFFFFFFFFFFFFFFFFFF',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: '执行调用前为账户设置的虚假 nonce',
+					value: '',
+				},
+				{
+					id: 'code',
+					type: 'string',
+					desc: '执行调用前注入账户的虚假 EVM 字节码',
+					value: '',
+				},
+				{
+					id: 'state',
+					type: 'object',
+					desc: '执行调用前覆盖账户存储中所有插槽的虚假键值映射',
+					value: '',
+				},
+				{
+					id: 'stateDiff',
+					type: 'integer',
+					desc: '执行调用前覆盖账户存储中单个插槽的虚假键值映射',
+					value: '',
+				},
+			],
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: '执行的合约方法的返回值',
+		},
+	]}
+	getParams={(fields) => {
+		const q = [fields?.transaction || null, fields?.blockNumber || null];
+		if (fields.stateOverride && fields?.transaction?.to) q.push({ [fields?.transaction?.to]: fields.stateOverride });
+		return q;
+	}}
+/>
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x00000000000000000000000000000000000000000000015af1d78b58c4000000"
+}
+```
+
+### 常见 ERC20 函数调用
+
+`eth_call` 最常见的用途之一是检查 ERC20 代币余额。数据字段通常包含函数签名，后跟参数：
+
+- **balanceOf(address)**: `0x70a08231` + 填充地址
+- **decimals()**: `0x313ce567`
+- **symbol()**: `0x95d89b41`
+- **totalSupply()**: `0x18160ddd`
+
+响应需要根据预期的返回类型进行解码。
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="估算交易 gas 成本">eth_estimateGas</Link> - 估算执行交易所需的 gas
+- <Link to="/docs/ethereum/core-methods/eth_sendTransaction" title="发送新交易">eth_sendTransaction</Link> - 创建并发送新交易
+- <Link to="/docs/ethereum/core-methods/eth_sendRawTransaction" title="提交已签名交易">eth_sendRawTransaction</Link> - 提交已签名交易

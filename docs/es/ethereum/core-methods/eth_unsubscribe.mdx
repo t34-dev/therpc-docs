@@ -1,0 +1,121 @@
+---
+title: eth_unsubscribe - Cancelar Suscripciones a Eventos | Métodos API de Ethereum
+description: Aprende a usar el método eth_unsubscribe para cancelar suscripciones basadas en WebSocket a eventos de la blockchain Ethereum y gestionar eficientemente los recursos de conexión.
+keywords: eth_unsubscribe, cancelar suscripción, websocket ethereum, desuscribir evento, terminar suscripción, gestión de websocket, eventos blockchain, limpieza de suscripción, optimización de recursos, gestión de suscripción eth, cancelación de evento en tiempo real, control de notificaciones ethereum, suscripción web3, gestión de eventos dapp, gestión de recursos websocket, ciclo de vida de suscripción, manejo de eventos eth, sistema de notificaciones blockchain, optimización de tráfico de red, flujo de eventos ethereum
+---
+
+# eth_unsubscribe
+
+El método `eth_unsubscribe` cancela una suscripción WebSocket existente para dejar de recibir notificaciones de eventos. Este método ayuda a gestionar recursos y tráfico de red eliminando suscripciones que ya no son necesarias.
+
+## Casos de Uso
+
+- Detener notificaciones de eventos cuando un usuario navega fuera de una página
+- Gestionar recursos tanto en el cliente como en el servidor para prevenir fugas de memoria
+- Limpiar suscripciones inactivas después de que el procesamiento de datos se complete
+- Manejar cambios de estado de la aplicación que requieren diferentes parámetros de suscripción
+- Mantenerse dentro de los límites del proveedor en suscripciones concurrentes
+- Implementar rotación de suscripciones para monitoreo de eventos de alto volumen
+- Asegurar un apagado correcto de componentes de monitoreo de eventos en dApps
+- Cambiar entre diferentes tipos de eventos blockchain
+- Liberar recursos del servidor para otros usuarios en entornos multi-inquilino
+- Gestionar sesiones para seguimiento de eventos específicos del usuario
+
+## Detalles del Método
+
+Este método cancela una suscripción usando su ID de suscripción.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_unsubscribe',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'subscription_id',
+			required: true,
+			type: 'string',
+			desc: 'El ID de suscripción a cancelar',
+			value: '0x9cef478923ff08bf67fde6c64013158d',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'boolean',
+			desc: 'Indica si la suscripción fue cancelada exitosamente',
+		},
+	]}
+	getParams={(fields) => [fields?.subscription_id || null]}
+/>
+
+### Ejemplo de Solicitud
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"method": "eth_unsubscribe",
+	"params": ["0x9cef478923ff08bf67fde6c64013158d"]
+}
+```
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": true
+}
+```
+
+### Valores de Respuesta
+
+- `true`: La suscripción fue cancelada exitosamente
+- `false`: No existía ninguna suscripción con el ID dado
+
+### Escenarios de Error
+
+| Código de Error | Mensaje | Descripción |
+|------------|---------|-------------|
+| -32602 | invalid subscription id | El ID de suscripción proporcionado no existe o es inválido |
+| -32000 | subscription not found | La suscripción ya fue cancelada o nunca existió |
+| -32603 | Internal error | El servidor encontró una condición inesperada |
+
+### Ejemplo de Respuesta de Error
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"error": {
+		"code": -32602,
+		"message": "invalid subscription id"
+	}
+}
+```
+
+### Notas Importantes
+
+- Este método debe llamarse sobre la misma conexión WebSocket que creó la suscripción
+- Cerrar la conexión WebSocket automáticamente cancela todas las suscripciones asociadas
+- El ID de suscripción proviene del resultado de una llamada previa a eth_subscribe
+- Debes cancelar las suscripciones que ya no necesites para liberar recursos del servidor
+- El mismo ID de suscripción no puede reutilizarse después de cancelar la suscripción
+- Algunos proveedores pueden limitar el número de suscripciones concurrentes por conexión
+- Los IDs de suscripción son únicos por conexión y no globalmente únicos
+- Si te reconectas a un servidor diferente en un entorno de carga balanceada, los antiguos IDs de suscripción no serán válidos
+- Algunos proveedores RPC pueden automáticamente cancelar suscripciones inactivas después de cierto período
+- Múltiples intentos de cancelación para el mismo ID son seguros pero devolverán false después del primer intento exitoso
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_subscribe" title="Crear suscripciones a eventos blockchain en tiempo real">eth_subscribe</Link> - Crear suscripciones a eventos WebSocket
+- <Link to="/docs/ethereum/guides/websocket-connections" title="Configurar y gestionar conexiones WebSocket">Guía de Conexión WebSocket</Link> - Trabajar con conexiones persistentes
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Consultar registros de eventos históricos">eth_getLogs</Link> - Alternativa para consultas de eventos históricos
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Crear filtros de eventos locales">eth_newFilter</Link> - Alternativa basada en HTTP para filtrado de eventos
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Sondear actualizaciones de filtros">eth_getFilterChanges</Link> - Alternativa basada en sondeo a WebSockets
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Eliminar filtros de sondeo">eth_uninstallFilter</Link> - Equivalente HTTP para limpiar filtros

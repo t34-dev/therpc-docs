@@ -1,0 +1,256 @@
+---
+title: eth_getUncleByBlockNumberAndIndex - Obtener Bloque Tío por Número de Bloque e Índice | Métodos API de Ethereum
+description: Aprenda a usar el método eth_getUncleByBlockNumberAndIndex para obtener información de bloques tío (ommer) usando un número de bloque y un índice de tío.
+keywords: eth_getUncleByBlockNumberAndIndex, bloques tío, bloques ommer, tíos ethereum, recompensas de bloque, seguridad de red, número de bloque
+---
+
+# eth_getUncleByBlockNumberAndIndex
+
+El método `eth_getUncleByBlockNumberAndIndex` devuelve información sobre un bloque tío (ommer) mediante un número de bloque y la posición del índice del tío.
+
+## Casos de Uso
+
+- Análisis de la salud de la red blockchain
+- Verificación de la distribución de recompensas de tíos
+- Investigación de competencia en minería/validación
+- Estudio del rendimiento y latencia de la blockchain
+- Comprensión de la seguridad de la red a través de la tasa de tíos
+- Investigación histórica de blockchain
+- Verificación de confirmación de bloques
+- Análisis de congestión de red
+
+## Detalles del Método
+
+Devuelve información sobre el bloque tío (ommer) mediante el número del bloque y la posición del índice del tío.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getUncleByBlockNumberAndIndex',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Número de bloque en formato hexadecimal o etiquetas: latest, earliest, pending, safe, finalized',
+			value: '0x1000000', // Example block number (16,777,216)
+		},
+		{
+			id: 'uncleIndex',
+			required: true,
+			type: 'string',
+			desc: 'La posición del índice del tío (hex)',
+			value: '0x0',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'El objeto de bloque tío, o null si no se encuentra',
+			fields: [
+				{
+					id: 'number',
+					type: 'string',
+					desc: "Número del bloque tío (hex)",
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: 'Hash del bloque tío',
+				},
+				{
+					id: 'parentHash',
+					type: 'string',
+					desc: 'Hash del bloque padre',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'Nonce usado en minería/validación de bloques (solo bloques PoW)',
+				},
+				{
+					id: 'sha3Uncles',
+					type: 'string',
+					desc: 'Hash SHA3 de los datos de tíos en el bloque',
+				},
+				{
+					id: 'logsBloom',
+					type: 'string',
+					desc: 'Filtro Bloom para que los clientes ligeros recuperen rápidamente logs relacionados',
+				},
+				{
+					id: 'transactionsRoot',
+					type: 'string',
+					desc: 'Raíz del trie de transacciones para este bloque',
+				},
+				{
+					id: 'stateRoot',
+					type: 'string',
+					desc: 'Raíz del trie de estado para este bloque',
+				},
+				{
+					id: 'receiptsRoot',
+					type: 'string',
+					desc: 'Raíz del trie de recibos para este bloque',
+				},
+				{
+					id: 'miner',
+					type: 'string',
+					desc: 'Dirección que recibió la recompensa de minería',
+				},
+				{
+					id: 'difficulty',
+					type: 'string',
+					desc: 'Objetivo de dificultad para este bloque (hex)',
+				},
+				{
+					id: 'totalDifficulty',
+					type: 'string',
+					desc: 'Dificultad total de la cadena hasta este bloque (hex)',
+				},
+				{
+					id: 'extraData',
+					type: 'string',
+					desc: 'Datos extra incluidos por el minero en el bloque',
+				},
+				{
+					id: 'size',
+					type: 'string',
+					desc: 'Tamaño del bloque en bytes (hex)',
+				},
+				{
+					id: 'gasLimit',
+					type: 'string',
+					desc: 'Gas máximo permitido en este bloque (hex)',
+				},
+				{
+					id: 'gasUsed',
+					type: 'string',
+					desc: 'Gas total usado por todas las transacciones en este bloque (hex)',
+				},
+				{
+					id: 'timestamp',
+					type: 'string',
+					desc: 'Marca de tiempo Unix cuando se recopiló el bloque (hex)',
+				},
+				{
+					id: 'uncles',
+					type: 'array',
+					desc: 'Array de hashes de tíos (estará vacío para bloques tío)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.blockNumber || null, fields?.uncleIndex || null]}
+/>
+
+### Opciones del Parámetro de Número de Bloque
+
+El parámetro `blockNumber` acepta:
+
+- Cadena hexadecimal de un número de bloque
+- `"earliest"` para el bloque génesis
+- `"latest"` para el bloque minado más recientemente
+- `"pending"` para el estado/transacciones pendientes
+- `"safe"` para el bloque más reciente que está a salvo de reorganizaciones
+- `"finalized"` para el bloque finalizado más reciente
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"difficulty": "0x57f17a09378",
+		"extraData": "0x476574682f76312e302e302f6c696e75782f676f312e342e32",
+		"gasLimit": "0x1388",
+		"gasUsed": "0x0",
+		"hash": "0x932bdf904546a2287a2c9b2ede37925f698a7657484b172d4e5184f80bdd464d",
+		"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+		"miner": "0xbb7b8287f3f0a933474a79eae42cbca977791171",
+		"mixHash": "0x4500aa4ee2b3044a155252e35273770edeb2ab6f8cb19ca8e732771484462169",
+		"nonce": "0x24732773618271bc",
+		"number": "0x299",
+		"parentHash": "0xa779859b1ee558258b7008bbabff272280136c5dd3eb3ea3bfa8f6ae03bf91e5",
+		"receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+		"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+		"size": "0x21d",
+		"stateRoot": "0x2604fbf5183f5360da249b51f1b9f1e0f315d2ff3ffa1a4143ff221ad9ca1fec",
+		"timestamp": "0x55ba4827",
+		"totalDifficulty": null,
+		"transactionsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+		"uncles": []
+	}
+}
+```
+
+## Entendiendo los Bloques Tío
+
+Los bloques tío (también llamados ommers) son bloques válidos que fueron minados pero no incluidos en la blockchain principal. Esto sucede cuando dos mineros encuentran un bloque válido casi al mismo tiempo, pero solo uno puede ser aceptado en la cadena principal.
+
+### Por Qué Importan los Bloques Tío
+
+- **Seguridad de Red**: Una tasa alta de tíos puede indicar latencia de red o alta competencia de minería
+- **Recompensas**: Los mineros de bloques tío reciben recompensas parciales (2/32 de la recompensa de bloque pre-EIP-1559)
+- **Inclusión de Bloques**: Los tíos son referenciados en bloques regulares (hasta 2 por bloque)
+- **Confirmación de Cadena**: Los tíos contribuyen a la seguridad de la blockchain a pesar de no estar en la cadena principal
+
+### Diferencias Entre eth_getUncleByBlockNumberAndIndex y eth_getUncleByBlockHashAndIndex
+
+Ambos métodos recuperan los mismos datos de bloque tío, pero utilizan diferentes métodos de referencia:
+
+- `eth_getUncleByBlockNumberAndIndex` - Usa el número de bloque (o etiqueta nombrada como "latest") para identificar el bloque que contiene al tío
+- `eth_getUncleByBlockHashAndIndex` - Usa el hash del bloque para identificar el bloque que contiene al tío
+
+El parámetro de número es a menudo más conveniente ya que permite usar etiquetas de bloque como "latest" y es más fácil trabajar secuencialmente, mientras que las búsquedas basadas en hash proporcionan certeza de referencia absoluta.
+
+### Importancia Histórica
+
+Las tasas de tíos en Ethereum han sido métricas importantes históricamente:
+
+- El Ethereum temprano tenía tasas de tío alrededor del 7-10%
+- Actualizaciones de red como Byzantium y Constantinople ajustaron las recompensas de tíos
+- Post-Fusión (transición a PoS), los bloques tío ya no existen ya que los validadores producen bloques en slots determinados
+
+## Ejemplo de Uso
+
+```javascript
+// Obtener el último bloque tío
+async function getLatestUncle() {
+  // Primero, encontrar un bloque reciente con tíos
+  let blockNumber = "latest";
+  let uncleCount = 0;
+
+  while (uncleCount === 0) {
+    // Obtener el bloque
+    const block = await provider.send("eth_getBlockByNumber", [blockNumber, false]);
+
+    // Verificar el conteo de tíos
+    uncleCount = block.uncles.length;
+
+    // Si no hay tíos, verificar el bloque anterior
+    if (uncleCount === 0) {
+      blockNumber = "0x" + (parseInt(block.number, 16) - 1).toString(16);
+    }
+  }
+
+  // Una vez que encontramos un bloque con tíos, obtener el primer tío
+  const uncleBlock = await provider.send("eth_getUncleByBlockNumberAndIndex", [
+    blockNumber,
+    "0x0"
+  ]);
+
+  return uncleBlock;
+}
+```
+
+## Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockHashAndIndex" title="Recuperar bloques tío usando hash de bloque">eth_getUncleByBlockHashAndIndex</Link> - Obtener datos de bloques tío usando el hash del bloque e índice de tío
+- <Link to="/docs/ethereum/core-methods/eth_getUncleCountByBlockNumber" title="Contar tíos en un bloque específico">eth_getUncleCountByBlockNumber</Link> - Contar el número de tíos en un bloque usando su número
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Obtener detalles completos del bloque por número">eth_getBlockByNumber</Link> - Obtener información completa del bloque incluyendo referencias a tíos

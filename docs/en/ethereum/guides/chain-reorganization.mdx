@@ -1,0 +1,76 @@
+---
+title: Chain Reorganization Guide | Handling Ethereum Blockchain Reorgs
+description: Comprehensive guide to detecting, handling, and mitigating Ethereum blockchain reorganizations (reorgs), including implementation strategies, common ancestor detection, and transaction resubmission.
+keywords: chain reorganization, blockchain reorg, ethereum reorg, chain restructuring, block reorgs, chain forks, transaction resubmission, blockchain consistency, common ancestor, canonical chain
+---
+
+# Chain Reorganization Guide
+
+Chain reorganizations (reorgs) occur when a competing chain becomes the new canonical chain. Understanding how to handle reorgs is crucial for maintaining application consistency.
+
+## Understanding Reorgs
+
+- What causes reorganizations
+- Types of reorgs
+- Impact on transactions
+- Detection methods
+
+## Implementation Examples
+
+```javascript
+// Monitor for reorgs
+const monitorReorgs = async (callback, checkInterval = 5000) => {
+	let lastBlock = await web3.eth.getBlockNumber();
+	let lastBlockHash = (await web3.eth.getBlock(lastBlock)).hash;
+
+	return setInterval(async () => {
+		const currentBlock = await web3.eth.getBlockNumber();
+		const currentBlockHash = (await web3.eth.getBlock(lastBlock)).hash;
+
+		if (currentBlockHash !== lastBlockHash) {
+			// Reorg detected
+			callback({
+				oldBlock: lastBlock,
+				oldHash: lastBlockHash,
+				newBlock: currentBlock,
+				newHash: currentBlockHash,
+			});
+		}
+
+		lastBlock = currentBlock;
+		lastBlockHash = currentBlockHash;
+	}, checkInterval);
+};
+
+// Get common ancestor block
+const findCommonAncestor = async (hash1, hash2) => {
+	let block1 = await web3.eth.getBlock(hash1);
+	let block2 = await web3.eth.getBlock(hash2);
+
+	while (block1.number > block2.number) {
+		block1 = await web3.eth.getBlock(block1.parentHash);
+	}
+	while (block2.number > block1.number) {
+		block2 = await web3.eth.getBlock(block2.parentHash);
+	}
+	while (block1.hash !== block2.hash) {
+		block1 = await web3.eth.getBlock(block1.parentHash);
+		block2 = await web3.eth.getBlock(block2.parentHash);
+	}
+	return block1;
+};
+```
+
+## Mitigation Strategies
+
+1. Wait for sufficient confirmations
+2. Implement reorg detection
+3. Handle transaction resubmission
+4. Maintain state consistency
+5. Use event listeners
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="API method to retrieve block information by hash">eth_getBlockByHash</Link> - Retrieve block by hash
+- <Link to="/docs/ethereum/guides/block-confirmations" title="Understanding transaction finality and confirmation requirements">Block Confirmations Guide</Link> - Understanding transaction finality
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="Learn fundamental techniques for working with Ethereum blocks">Working with Blocks</Link> - General block handling

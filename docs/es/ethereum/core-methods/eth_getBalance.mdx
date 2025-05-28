@@ -1,0 +1,107 @@
+---
+title: eth_getBalance - Verificar Saldo de Cuenta | Métodos de API de Ethereum
+description: Aprenda a usar el método eth_getBalance para recuperar saldos de cuentas de la blockchain de Ethereum. Incluye ejemplos y mejores prácticas.
+keywords: eth_getBalance, saldo ethereum, saldo de cuenta, saldo wei, saldo ETH, saldo de billetera, saldo crypto, saldo de dirección ethereum, saldo blockchain
+---
+
+# eth_getBalance
+
+El método `eth_getBalance` devuelve el saldo de una dirección Ethereum específica en wei. Este método esencial forma la base de aplicaciones de billetera, paneles financieros y cualquier DApp que necesite mostrar o trabajar con saldos de cuentas de usuarios.
+
+## Casos de Uso
+
+- Monitoreo de saldo de billetera y notificaciones
+- Verificación y confirmación de pagos
+- Análisis de cuentas y seguimiento de portfolio
+- Visualizaciones de saldo de DApp e interfaces de usuario interactivas
+- Validación de transacciones antes del envío
+- Informes financieros y cálculos de impuestos
+- Análisis histórico de saldos en bloques específicos
+- Monitoreo de saldo de contratos inteligentes
+
+## Detalles del Método
+
+Este método consulta el saldo de cualquier dirección Ethereum en un bloque especificado, permitiendo verificaciones de saldo tanto actuales como históricas.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBalance',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: 'La dirección a verificar para el saldo',
+			value: '0xF977814e90dA44bFA03b6295A0616a897441aceC', // Billetera Caliente Binance 8
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Número de bloque o etiqueta de bloque',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'Saldo de la cuenta en wei (hexadecimal)',
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.blockNumber || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x1B1AE4D6E2EF500000" // 500 ETH en wei
+}
+```
+
+### Entendiendo el Resultado
+
+El saldo se devuelve en wei (la unidad más pequeña de ether) como una cadena hexadecimal. Para convertir a ether:
+
+1. Convertir el hexadecimal a decimal: `parseInt("0x1B1AE4D6E2EF500000", 16)` = 500000000000000000000
+2. Dividir por 10^18: `500000000000000000000 / 1e18` = 500 ETH
+
+Para interfaces de usuario, siempre muestre los saldos en un formato legible (ETH) en lugar del valor bruto en wei.
+
+### Opciones de Etiquetas de Bloque
+
+El parámetro `blockNumber` acepta estas etiquetas especiales:
+- `latest`: El bloque minado más recientemente (saldo actual)
+- `earliest`: El bloque génesis (estado inicial)
+- `pending`: El estado/transacciones pendientes
+- `safe`: El último bloque "seguro" (solo Ethereum)
+- `finalized`: El último bloque "finalizado" (solo Ethereum)
+
+### Ejemplo de Caso de Uso Común
+
+```javascript
+// Ejemplo de verificación de saldos de múltiples cuentas
+const addresses = [
+	'0xF977814e90dA44bFA03b6295A0616a897441aceC', // Billetera caliente de Binance
+	'0x42cC527cD31Eb1479ae27Cb4A5eec6a023Cd2E', // Dirección de ejemplo
+];
+
+for (const address of addresses) {
+	const balance = await provider.send('eth_getBalance', [address, 'latest']);
+	console.log(`Balance of ${address}: ${parseInt(balance, 16) / 1e18} ETH`);
+}
+```
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getCode" title="Verificar si la dirección es un contrato">eth_getCode</Link> - Devuelve el código almacenado en una dirección específica
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="Obtener recuento de transacciones de cuenta">eth_getTransactionCount</Link> - Devuelve el número de transacciones enviadas desde una dirección
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Llamar funciones de contrato">eth_call</Link> - Ejecuta una llamada para obtener saldos de tokens u otra información
+- <Link to="/docs/ethereum/core-methods/eth_getStorageAt" title="Acceder al almacenamiento del contrato">eth_getStorageAt</Link> - Devuelve el valor del almacenamiento del contrato

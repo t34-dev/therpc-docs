@@ -1,0 +1,121 @@
+---
+title: eth_unsubscribe - 取消事件订阅 | 以太坊API方法
+description: 学习如何使用eth_unsubscribe方法取消基于WebSocket的以太坊区块链事件订阅，并有效管理连接资源。
+keywords: eth_unsubscribe, 取消订阅, 以太坊websocket, 事件取消订阅, 终止订阅, websocket管理, 区块链事件, 订阅清理, 资源优化, eth订阅管理, 实时事件取消, 以太坊通知控制, web3订阅, dapp事件管理, websocket资源管理, 订阅生命周期, eth事件处理, 区块链通知系统, 网络流量优化, 以太坊事件流
+---
+
+# eth_unsubscribe
+
+`eth_unsubscribe`方法取消现有的WebSocket订阅，以停止接收事件通知。此方法通过移除不再需要的订阅来帮助管理资源和网络流量。
+
+## 使用场景
+
+- 当用户离开页面时停止事件通知
+- 管理客户端和服务器上的资源，防止内存泄漏
+- 数据处理完成后清理不活跃的订阅
+- 处理需要不同订阅参数的应用程序状态变化
+- 保持在提供商对并发订阅的限制范围内
+- 为高容量事件监控实现订阅轮换
+- 确保dApp事件监控组件的优雅关闭
+- 在不同的区块链事件类型之间切换
+- 在多租户环境中为其他用户释放服务器资源
+- 管理用户特定事件跟踪的会话
+
+## 方法详情
+
+此方法使用订阅ID取消订阅。
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_unsubscribe',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'subscription_id',
+			required: true,
+			type: 'string',
+			desc: '要取消的订阅ID',
+			value: '0x9cef478923ff08bf67fde6c64013158d',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'boolean',
+			desc: '表示订阅是否成功取消',
+		},
+	]}
+	getParams={(fields) => [fields?.subscription_id || null]}
+/>
+
+### 请求示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"method": "eth_unsubscribe",
+	"params": ["0x9cef478923ff08bf67fde6c64013158d"]
+}
+```
+
+### 响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": true
+}
+```
+
+### 响应值
+
+- `true`：订阅成功取消
+- `false`：给定ID的订阅不存在
+
+### 错误场景
+
+| 错误代码 | 消息 | 描述 |
+|------------|---------|-------------|
+| -32602 | invalid subscription id | 提供的订阅ID不存在或无效 |
+| -32000 | subscription not found | 订阅已被取消或从未存在 |
+| -32603 | Internal error | 服务器遇到意外情况 |
+
+### 错误响应示例
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"error": {
+		"code": -32602,
+		"message": "invalid subscription id"
+	}
+}
+```
+
+### 重要说明
+
+- 必须通过创建订阅的同一WebSocket连接调用此方法
+- 关闭WebSocket连接会自动取消所有相关订阅
+- 订阅ID来自先前eth_subscribe调用的结果
+- 应该取消不再需要的订阅，以释放服务器资源
+- 取消订阅后，相同的订阅ID不能被重复使用
+- 某些提供商可能限制每个连接的并发订阅数量
+- 订阅ID对每个连接是唯一的，而不是全局唯一
+- 如果在负载均衡环境中重新连接到不同的服务器，旧的订阅ID将无效
+- 某些RPC提供商可能会在一段时间后自动取消不活跃的订阅
+- 对同一ID多次取消订阅是安全的，但在第一次成功尝试后将返回false
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_subscribe" title="创建实时区块链事件订阅">eth_subscribe</Link> - 创建WebSocket事件订阅
+- <Link to="/docs/ethereum/guides/websocket-connections" title="设置和管理WebSocket连接">WebSocket连接指南</Link> - 使用持久连接
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="查询历史事件日志">eth_getLogs</Link> - 历史事件查询的替代方案
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="创建本地事件过滤器">eth_newFilter</Link> - 基于HTTP的事件过滤替代方案
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="轮询过滤器更新">eth_getFilterChanges</Link> - 基于轮询的WebSockets替代方案
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="移除轮询过滤器">eth_uninstallFilter</Link> - 清理过滤器的HTTP等效方法

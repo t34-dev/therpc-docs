@@ -1,0 +1,152 @@
+---
+title: eth_sendRawTransaction - Enviar Transacciones Firmadas | Métodos API de Ethereum
+description: Aprenda a usar el método eth_sendRawTransaction para transmitir transacciones firmadas a la red Ethereum - el método esencial para enviar ETH, interactuar con contratos inteligentes y desplegar nuevos contratos.
+keywords: eth_sendRawTransaction, transacción firmada, transmisión de transacción, transacción ethereum, transacción raw, hash de transacción, transferencia eth, tarifas de gas, gestión de nonce, interacción con contratos inteligentes, firma de transacción, firma offline, transacción de difusión, integración de billetera, transacción web3, despliegue de contratos, transacción eip1559, transacción eip2930, transacción legacy, difusión ethereum
+---
+
+# eth_sendRawTransaction
+
+El método `eth_sendRawTransaction` transmite una transacción pre-firmada a la red Ethereum. Este método se utiliza para enviar todo tipo de transacciones después de que han sido firmadas offline, convirtiéndolo en el método principal para cualquier operación que cambie el estado en la blockchain.
+
+## Casos de Uso
+
+- Envío de transferencias de ETH a otras direcciones y billeteras
+- Transferencias de tokens (ERC-20, ERC-721, ERC-1155) en aplicaciones
+- Despliegues de contratos inteligentes para desarrolladores
+- Llamadas a funciones de contrato y cambios de estado en dApps
+- Transacciones automatizadas a través de scripts o bots
+- Interacciones con billeteras multifirma que requieren firma offline
+- Meta-transacciones (transacciones sin gas) para mejor UX
+- Operaciones DeFi (swaps, provisión de liquidez, staking)
+- Votación de gobernanza a través de interacciones con contratos
+- Operaciones de acuñación de NFT en mercados
+
+## Detalles del Método
+
+Este método envía una transacción firmada a la red para su procesamiento.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_sendRawTransaction',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'data',
+			required: true,
+			type: 'string',
+			desc: 'Los datos de la transacción firmada (cadena hexadecimal)',
+			value:
+				'0xf869018203e882520894f17f52151ebef6c7334fad080c5704d77216b732881bc16d674ec80000801ba02da1c48b670996dcb1f447ef9ef00b33033c48a4fe938f420bec3e56bfd24071a062e0aa78a81bf0290afbc3a9d8e9a068e6d74caa66c5e0fa8a46deaae96b0833',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'El hash de la transacción, o el hash cero si la transacción aún no está disponible',
+		},
+	]}
+	getParams={(fields) => [
+		fields?.data ||
+			null,
+	]}
+/>
+
+### Proceso de Firma de Transacción
+
+Antes de usar `eth_sendRawTransaction`, necesita:
+
+1. Crear una transacción sin firmar (con nonce, parámetros de gas, destinatario, valor, datos)
+2. Firmar la transacción con una clave privada
+3. Serializar y codificar en hexadecimal la transacción firmada
+4. Enviar la cadena hexadecimal a este método
+
+### Entendiendo los Tipos de Transacción
+
+Ethereum soporta diferentes tipos de transacciones:
+
+| Tipo | Descripción | Estructura |
+|------|-------------|-----------|
+| Legacy (Tipo 0) | Transacciones pre-EIP-1559 con gasPrice | `{nonce, gasPrice, gasLimit, to, value, data, v, r, s}` |
+| EIP-2930 (Tipo 1) | Transacciones con listas de acceso | `{chainId, nonce, gasPrice, gasLimit, to, value, data, accessList, v, r, s}` |
+| EIP-1559 (Tipo 2) | Transacciones con tarifa prioritaria | `{chainId, nonce, maxPriorityFeePerGas, maxFeePerGas, gasLimit, to, value, data, accessList, v, r, s}` |
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331"
+}
+```
+
+### Ejemplo de Respuesta de Error
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"error": {
+		"code": 3,
+		"message": "execution reverted: Dai/insufficient-balance",
+		"data": "0x08c379a00000000000000000000000000000000000000000000000000000000000000..."
+	}
+}
+```
+
+### Errores Comunes y Solución de Problemas
+
+| Error | Descripción | Solución |
+|-------|-------------|----------|
+| Nonce demasiado bajo | El nonce de la transacción ya ha sido utilizado | Obtener el último nonce con `eth_getTransactionCount` |
+| Nonce demasiado alto | El nonce de la transacción es más alto de lo esperado | Usar el nonce secuencial correcto |
+| Fondos insuficientes | No hay suficiente ETH para gas + valor | Añadir más ETH a la dirección remitente |
+| Precio de gas demasiado bajo | Precio de gas ofrecido por debajo del mínimo | Aumentar el precio del gas o usar parámetros EIP-1559 |
+| Reemplazo infravalorado | Al reemplazar una tx, el nuevo precio de gas es demasiado bajo | Aumentar el precio del gas al menos un 10% |
+| Ya conocido | Transacción ya en el mempool | Esperar a la transacción existente |
+| Ejecución revertida | La ejecución del contrato falló | Verificar condiciones del contrato y parámetros |
+
+### Monitoreo del Estado de la Transacción
+
+Después de transmitir una transacción:
+
+1. Almacenar el hash de transacción devuelto
+2. Consultar `eth_getTransactionReceipt` hasta que devuelva un resultado no nulo
+3. Verificar el campo `status` en el recibo:
+   - `0x1` indica éxito
+   - `0x0` indica fallo (revertido)
+
+### Estimación y Optimización de Gas
+
+Antes de enviar transacciones, puede:
+
+1. Usar `eth_estimateGas` para obtener el gas aproximado necesario
+2. Para transacciones EIP-1559, verificar las condiciones actuales de la red con `eth_feeHistory`
+3. Para transacciones sensibles al tiempo, establecer tarifas prioritarias más altas
+4. Para transacciones no urgentes, establecer tarifas más bajas para ahorrar costos
+
+### Notas Importantes
+
+- Las transacciones deben ser firmadas con la clave privada del remitente antes del envío
+- El endpoint RPC nunca tiene acceso a sus claves privadas
+- Use eth_getTransactionReceipt para verificar el estado después del envío
+- Para la creación de contratos, el recibo contiene la nueva dirección del contrato en el campo contractAddress
+- Las cadenas hexadecimales deben estar correctamente formateadas con longitud par y prefijo '0x'
+- Considere usar carteras de hardware o gestión segura de claves para transacciones de alto valor
+- La gestión de nonce es crítica para la secuenciación adecuada de transacciones
+- El reemplazo de transacciones requiere un precio de gas más alto que el original
+- Las tarifas de transacción no son reembolsables incluso si la transacción falla
+- Las transacciones EIP-1559 pueden ser más rentables durante períodos de tarifas volátiles
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionReceipt" title="Verificar estado de transacción y resultados">eth_getTransactionReceipt</Link> - Obtener el recibo de una transacción procesada
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Buscar detalles de transacción por hash">eth_getTransactionByHash</Link> - Recuperar información de transacción por hash
+- <Link to="/docs/ethereum/core-methods/eth_estimateGas" title="Estimar gas requerido para una transacción">eth_estimateGas</Link> - Calcular gas requerido para una transacción
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionCount" title="Obtener nonce de cuenta para secuenciación de transacciones">eth_getTransactionCount</Link> - Obtener el siguiente nonce disponible
+- <Link to="/docs/ethereum/core-methods/eth_feeHistory" title="Obtener datos históricos de tarifas para estimación de gas">eth_feeHistory</Link> - Obtener información histórica de tarifas
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Probar ejecución de transacción sin minar">eth_call</Link> - Probar ejecución de transacción sin transmitir

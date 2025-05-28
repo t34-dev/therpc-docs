@@ -1,0 +1,268 @@
+---
+title: eth_getBlockByHash - Retrieve Block Details by Hash | Ethereum API Methods
+description: Learn how to use the eth_getBlockByHash method to fetch detailed information about Ethereum blocks using their hash. Includes transaction details and block properties.
+keywords: eth_getBlockByHash, block hash, block information, ethereum block, transaction history, blockchain explorer, block data, block header, block details, eth block lookup
+---
+
+# eth_getBlockByHash
+
+The `eth_getBlockByHash` method returns comprehensive information about a specific block identified by its unique 32-byte hash. This powerful method provides access to all block properties including transactions, gas metrics, miner information, timestamps, and more, making it essential for blockchain explorers and data analysis.
+
+## Use Cases
+
+- Block explorers and blockchain analytics platforms
+- Transaction verification and historical analysis
+- Network monitoring and performance metrics
+- Smart contract deployments confirmation and tracking
+- Historical data analysis and time-series research
+- Consensus verification and chain reorganization detection
+- Forensic blockchain analysis
+- Cross-chain block verification
+
+## Method Details
+
+This method retrieves detailed data about a specific block using its hash as the identifier, with options to include either complete transaction details or just transaction hashes.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getBlockByHash',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'hash',
+			required: true,
+			type: 'string',
+			desc: 'The hash (32 bytes) of the block',
+			value: '0xdc0818cf78f21a8e70579cb46a43643f78291264dda342ae31049421c82d21ae',
+		},
+		{
+			id: 'transaction_detail_flag',
+			required: true,
+			type: 'boolean',
+			desc: 'If true, returns full transaction objects; if false, returns only transaction hashes',
+			value: false,
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'object',
+			desc: 'A block object, or null if no block was found',
+			fields: [
+				{
+					id: 'baseFeePerGas',
+					type: 'string',
+					desc: 'Base fee per gas in hexadecimal (post EIP-1559)',
+				},
+				{
+					id: 'difficulty',
+					type: 'string',
+					desc: 'The difficulty for this block in hexadecimal',
+				},
+				{
+					id: 'extraData',
+					type: 'string',
+					desc: 'Extra data field of this block',
+				},
+				{
+					id: 'gasLimit',
+					type: 'string',
+					desc: 'Maximum gas allowed in this block in hexadecimal',
+				},
+				{
+					id: 'gasUsed',
+					type: 'string',
+					desc: 'Total gas used by all transactions in hexadecimal',
+				},
+				{
+					id: 'hash',
+					type: 'string',
+					desc: 'Hash of the block, null if pending',
+				},
+				{
+					id: 'logsBloom',
+					type: 'string',
+					desc: 'Bloom filter for the logs, null if pending',
+				},
+				{
+					id: 'miner',
+					type: 'string',
+					desc: 'Address of the miner/validator',
+				},
+				{
+					id: 'mixHash',
+					type: 'string',
+					desc: '256-bit hash in hexadecimal',
+				},
+				{
+					id: 'nonce',
+					type: 'string',
+					desc: 'Hash of the proof-of-work, null if pending',
+				},
+				{
+					id: 'number',
+					type: 'string',
+					desc: 'Block number in hexadecimal, null if pending',
+				},
+				{
+					id: 'parentHash',
+					type: 'string',
+					desc: 'Hash of the parent block',
+				},
+				{
+					id: 'receiptsRoot',
+					type: 'string',
+					desc: 'Root of the receipts trie',
+				},
+				{
+					id: 'sha3Uncles',
+					type: 'string',
+					desc: 'SHA3 of the uncles data',
+				},
+				{
+					id: 'size',
+					type: 'string',
+					desc: 'Size of this block in bytes (hexadecimal)',
+				},
+				{
+					id: 'stateRoot',
+					type: 'string',
+					desc: 'Root of the final state trie',
+				},
+				{
+					id: 'timestamp',
+					type: 'string',
+					desc: 'Unix timestamp when the block was collated',
+				},
+				{
+					id: 'totalDifficulty',
+					type: 'string',
+					desc: 'Total difficulty of the chain until this block',
+				},
+				{
+					id: 'transactions',
+					type: 'array',
+					desc: 'Array of transaction objects or hashes',
+				},
+				{
+					id: 'transactionsRoot',
+					type: 'string',
+					desc: 'Root of the transaction trie',
+				},
+				{
+					id: 'uncles',
+					type: 'array',
+					desc: 'Array of uncle hashes',
+				},
+				{
+					id: 'withdrawals',
+					type: 'array',
+					desc: 'Array of validator withdrawals (post EIP-4895)',
+				},
+				{
+					id: 'withdrawalsRoot',
+					type: 'string',
+					desc: 'Merkle root of withdrawals (post EIP-4895)',
+				},
+			],
+		},
+	]}
+	getParams={(fields) => [fields?.hash, ['1', 'true', 'TRUE'].includes(fields?.transaction_detail_flag) ? true : false]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"baseFeePerGas": "0x41a2b3591",
+		"difficulty": "0x0",
+		"extraData": "0x556e697377617020426c6f636b20231242353045",
+		"gasLimit": "0x1c9c380",
+		"gasUsed": "0x189b1f1",
+		"hash": "0x4f32106f6ac5b44248aeda10c3e718f1048ddc274629cd1897a0ff1f7926c41e",
+		"logsBloom": "0xe54b0921498ad482b83...[truncated]",
+		"miner": "0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990",
+		"mixHash": "0x51c1b337d7ec2023e7bfd47907a1ee256668e46fb9feb0007c62f9bc2a8a19a7",
+		"nonce": "0x0000000000000000",
+		"number": "0x112a880",
+		"parentHash": "0xeea8dce30e2d7c2a7ffe35b6fc2c60782f59a123ff2812e85bf4a49839c6d5a2",
+		"receiptsRoot": "0x14a87619e588c1ef9f8c69fd8e3dff2a49b2c73f19871a74a7e1d97d67d00416",
+		"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+		"size": "0x1284d",
+		"stateRoot": "0xb87823a3aea0dd94ffe84481962c8f988e3c2ffac98a9af2b81c1c3e4fcc6dc0",
+		"timestamp": "0x65f0d46e",
+		"totalDifficulty": "0xc70d815d562d3cfa955",
+		"transactions": [
+			"0x5a8b22ab3e70ee6ee4b15b48b1c88d8c01806a677ab8938c68dc4323cf51ae7a",
+			"0x8d2fcaa1aef4f4f19aa35bf9d91b34e24902efcaf670953a0bf7e0a6dc585e53"
+			// ... additional transaction hashes
+		],
+		"transactionsRoot": "0x39f9c7a211b008becd35bfbceaf186d564fcb737a9c026f8af7b5d89a8989143",
+		"uncles": [],
+		"withdrawals": [
+			{
+				"index": "0x57ca86",
+				"validatorIndex": "0x17384",
+				"address": "0xb9d7934878b5fb9610b3fe8a5e441e8fad7e293f",
+				"amount": "0x12a05f200"
+			}
+			// ... additional withdrawals
+		],
+		"withdrawalsRoot": "0x36a75a6993b676f8196354ed14e3c77167b9ae823211706b30aa125c3a5dac28"
+	}
+}
+```
+
+### Key Block Properties Explained
+
+- **number**: The block number in the chain (height)
+- **timestamp**: Unix timestamp when the block was created (in seconds since epoch)
+- **transactions**: List of transactions included in this block
+- **gasUsed/gasLimit**: Actual gas consumed vs. maximum allowed
+- **baseFeePerGas**: Base fee per gas unit introduced in EIP-1559
+- **miner**: Address that received the block reward (validator in PoS)
+- **difficulty**: Mining difficulty (always 0 after The Merge)
+- **totalDifficulty**: Cumulative difficulty up to this block
+- **withdrawals**: Validator withdrawals available post-Shanghai upgrade
+
+### Transaction Detail Flag
+
+The second parameter determines how transaction data is returned:
+- `false`: Only transaction hashes are returned (more efficient for block scanning)
+- `true`: Complete transaction objects are returned (useful when you need transaction details)
+
+### Practical Example
+
+```javascript
+// Example of retrieving and processing a significant block
+const significantBlocks = {
+	'The Merge Block': '0x4f32106f6ac5b44248aeda10c3e718f1048ddc274629cd1897a0ff1f7926c41e',
+	'First EIP-1559 Block': '0x9b83c12c569ba25654ce34563540e58a0f8acee4645178544a2a35ccfbdba6cc',
+};
+
+async function getHistoricalBlock(label) {
+	const blockHash = significantBlocks[label];
+	const blockInfo = await provider.send('eth_getBlockByHash', [blockHash, false]);
+
+	// Analysis
+	const timestamp = new Date(parseInt(blockInfo.timestamp, 16) * 1000);
+	const gasUsedPercent = (parseInt(blockInfo.gasUsed, 16) / parseInt(blockInfo.gasLimit, 16)) * 100;
+
+	console.log(`${label} mined on ${timestamp.toUTCString()}`);
+	console.log(`Gas utilization: ${gasUsedPercent.toFixed(2)}%`);
+	console.log(`Transactions: ${blockInfo.transactions.length}`);
+}
+```
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByNumber" title="Get block by number">eth_getBlockByNumber</Link> - Retrieve block information using block number instead of hash
+- <Link to="/docs/ethereum/core-methods/eth_getTransactionByHash" title="Get transaction details">eth_getTransactionByHash</Link> - Get detailed information about a transaction
+- <Link to="/docs/ethereum/core-methods/eth_getBlockTransactionCountByHash" title="Count transactions in block">eth_getBlockTransactionCountByHash</Link> - Get the number of transactions in a block
+- <Link to="/docs/ethereum/core-methods/eth_getUncleByBlockHashAndIndex" title="Get uncle blocks">eth_getUncleByBlockHashAndIndex</Link> - Get information about uncle blocks

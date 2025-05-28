@@ -1,0 +1,49 @@
+---
+title: Guía de Timestamps de Bloques | Gestión de Tiempo en Ethereum
+description: Guía completa sobre timestamps de bloques en Ethereum, incluyendo consideraciones de precisión, implementación de operaciones basadas en tiempo y desarrollo de contratos inteligentes y aplicaciones dependientes del tiempo seguros.
+keywords: timestamps de bloques, tiempo ethereum, temporización blockchain, tiempo de bloque, reloj ethereum, timestamps de mineros, contratos basados en tiempo, cronología blockchain, manipulación de timestamps, datetime ethereum
+---
+
+# Guía de Timestamps de Bloques
+
+Los timestamps de bloques en Ethereum proporcionan información de tiempo para transacciones y contratos inteligentes. Entender cómo trabajar con ellos es esencial para aplicaciones sensibles al tiempo.
+
+## Entendiendo los Timestamps de Bloques
+
+- Cómo se determinan los timestamps
+- Precisión y limitaciones
+- Consideraciones sobre manipulación por mineros
+- Desviación de tiempo en la red
+
+## Trabajando con Timestamps
+
+```javascript
+// Obtener timestamp del bloque
+const getBlockTimestamp = async (blockNumber) => {
+	const block = await web3.eth.getBlock(blockNumber);
+	return block.timestamp;
+};
+
+// Calcular tiempo promedio de bloque
+const getAverageBlockTime = async (blockCount = 100) => {
+	const latestBlock = await web3.eth.getBlockNumber();
+	const oldBlock = await web3.eth.getBlock(latestBlock - blockCount);
+	const newBlock = await web3.eth.getBlock(latestBlock);
+
+	return (newBlock.timestamp - oldBlock.timestamp) / blockCount;
+};
+```
+
+## Mejores Prácticas
+
+1. No confiar en la precisión exacta del timestamp
+2. Considerar la posible manipulación por mineros
+3. Usar números de bloque para ordenamiento preciso
+4. Tener en cuenta la desviación de tiempo en la red
+5. Implementar buffers de tiempo seguros
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_getBlock" title="Método API para recuperar información de bloques incluyendo timestamps">eth_getBlock</Link> - Recuperar información de bloques incluyendo timestamps
+- <Link to="/docs/ethereum/guides/working-with-blocks" title="Aprende técnicas fundamentales para trabajar con bloques de Ethereum">Trabajando con Bloques</Link> - Manejo general de bloques
+- <Link to="/docs/ethereum/guides/block-gas-management" title="Guía para gestionar costos de gas a lo largo del tiempo en Ethereum">Gestión de Gas en Bloques</Link> - Gestión de costos de gas a lo largo del tiempo

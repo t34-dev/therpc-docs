@@ -1,0 +1,69 @@
+---
+title: net_listening - Verificar Estado de Escucha de Red | Métodos API de Ethereum
+description: Aprende a usar el método net_listening para comprobar si tu nodo Ethereum está escuchando activamente conexiones de red y solucionar problemas de conectividad.
+keywords: net_listening, red ethereum, conexiones p2p, estado de red, estado del nodo, cliente ethereum, conectividad blockchain, verificación de salud del nodo, escucha de red ethereum, conexiones de pares, estado online del nodo, diagnósticos de red, monitoreo de nodos ethereum, estado de red blockchain, disponibilidad del nodo, verificación de conexión ethereum
+---
+
+# net_listening
+
+El método `net_listening` devuelve un booleano que indica si el cliente está escuchando activamente conexiones de red. Esta simple verificación ayuda a comprobar el estado de conectividad de red de un nodo Ethereum y es útil para el monitoreo básico del nodo.
+
+## Casos de Uso
+
+- Monitoreo de salud del nodo en infraestructura blockchain
+- Verificación de estado de red para dApps
+- Solución de problemas de conexión cuando fallan las transacciones
+- Sistemas de monitoreo automatizado y alertas
+- Verificaciones de disponibilidad del cliente antes de operaciones críticas
+- Diagnóstico de sincronización del nodo durante la configuración
+
+## Detalles del Método
+
+Este método no requiere parámetros y devuelve una respuesta booleana simple.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'net_listening',
+		id: 67,
+		jsonrpc: '2.0',
+	}}
+	fields={[]}
+	returns={[
+		{
+			id: 'result',
+			type: 'boolean',
+			desc: 'True si el cliente está escuchando activamente conexiones de red, de lo contrario false',
+		},
+	]}
+	getParams={() => []}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 67,
+	"result": true
+}
+```
+
+### Valores de Respuesta
+
+- **true**: El cliente está escuchando activamente conexiones de red
+- **false**: El cliente no está escuchando actualmente conexiones de red
+
+### Notas Importantes
+
+- Un valor de `true` indica que el cliente está aceptando conexiones P2P entrantes
+- Un valor de `false` podría indicar problemas de conectividad de red o configuración específica del nodo
+- Este método solo verifica si el cliente está escuchando, no si tiene conexiones activas
+- Para verificar conexiones activas, use `net_peerCount`
+- El estado de escucha podría verse afectado por la configuración de red, como firewalls
+- Algunos nodos privados o configurados específicamente podrían mostrar `false` pero seguir funcionando correctamente para solicitudes RPC
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/net_peerCount" title="Comprobar cuántos pares están conectados a tu nodo">net_peerCount</Link> - Devuelve el número de pares conectados
+- <Link to="/docs/ethereum/core-methods/net_version" title="Identificar a qué red está conectado tu nodo Ethereum">net_version</Link> - Devuelve el ID de red actual

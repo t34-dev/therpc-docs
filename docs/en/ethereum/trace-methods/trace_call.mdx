@@ -1,0 +1,373 @@
+---
+title: trace_call - Execute and Trace Transaction Call | Ethereum API Methods
+description: Learn how to use the trace_call method to simulate transaction execution and trace the call without modifying the blockchain state. Perfect for smart contract testing and debugging.
+keywords: trace_call, ethereum trace call, trace api, ethereum debug transaction, smart contract trace, dry run transaction, call trace, contract execution trace, ethereum dry run, transaction simulation, debug smart contract, call tracing, transaction analysis, ethereum contract debugging, off-chain execution, contract state analysis, ethereum vm trace, contract call simulation, ethereum debug api, transaction tracing
+---
+
+# trace_call
+
+The `trace_call` method allows you to execute a new message call and get a detailed trace of its execution without adding the transaction to the blockchain. This is like `eth_call` but with detailed step-by-step execution traces.
+
+## Use Cases
+
+- Debug complex contract interactions before sending transactions
+- Analyze gas consumption patterns without spending actual gas
+- Test smart contract functions with different parameters
+- Simulate transactions in different blockchain states
+- Detect potential security vulnerabilities in contract code
+- Understand contract execution flows and state changes
+- Verify contract behavior under specific edge case conditions
+- Create contract execution visualization tools
+- Perform static analysis of contract code
+- Test transaction reverts and error conditions safely
+
+## Method Details
+
+This method simulates a transaction and returns detailed traces of its execution.
+
+<ApiMethodBlock
+    chain="ethereum"
+  scheme={{
+    "method": "trace_call",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'transaction',
+      required: true,
+      type: 'object',
+      desc: "The transaction call object",
+      fields: [
+        {
+          id: 'from',
+          type: 'string',
+          desc: "The address the transaction is sent from",
+          value: "0x6f1FB6EFDf50F34bFA3F2bC0E5576EdD71631638"
+        },
+        {
+          id: 'to',
+          type: 'string',
+          desc: "The address the transaction is directed to",
+          value: "0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e"
+        },
+        {
+          id: 'gas',
+          type: 'string',
+          desc: "The gas provided for the transaction (hex)",
+          value: "0x100000"
+        },
+        {
+          id: 'gasPrice',
+          type: 'string',
+          desc: "The gas price in wei (hex)",
+          value: "0x4A817C800"
+        },
+        {
+          id: 'value',
+          type: 'string',
+          desc: "The value transferred in wei (hex)",
+          value: "0x0"
+        },
+        {
+          id: 'data',
+          type: 'string',
+          desc: "The contract method call data",
+          value: "0xa67a6a45000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000"
+        }
+      ]
+    },
+    {
+      id: 'traceTypes',
+      required: true,
+      type: 'array',
+      desc: "Array of trace types to include in the response",
+      value: ["trace"]
+    },
+    {
+      id: 'blockParameter',
+      type: 'string',
+      desc: "Integer block number, or 'latest', 'earliest', 'pending' (optional)",
+      value: "latest"
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'object',
+      desc: "The trace result object with execution details",
+      fields: [
+        {
+          id: 'output',
+          type: 'string',
+          desc: "The return data from the call"
+        },
+        {
+          id: 'stateDiff',
+          type: 'object',
+          desc: "State changes caused by the call (if requested)"
+        },
+        {
+          id: 'trace',
+          type: 'array',
+          desc: "Array of trace objects",
+          fields: [
+            {
+              id: 'action',
+              type: 'object',
+              desc: "Details about the call action",
+              fields: [
+                {
+                  id: 'callType',
+                  type: 'string',
+                  desc: "Type of call (call, delegatecall, etc.)"
+                },
+                {
+                  id: 'from',
+                  type: 'string',
+                  desc: "Sender address"
+                },
+                {
+                  id: 'gas',
+                  type: 'string',
+                  desc: "Gas provided for the call"
+                },
+                {
+                  id: 'input',
+                  type: 'string',
+                  desc: "Input data for the call"
+                },
+                {
+                  id: 'to',
+                  type: 'string',
+                  desc: "Recipient address"
+                },
+                {
+                  id: 'value',
+                  type: 'string',
+                  desc: "Value transferred in wei"
+                }
+              ]
+            },
+            {
+              id: 'result',
+              type: 'object',
+              desc: "Result of the call",
+              fields: [
+                {
+                  id: 'gasUsed',
+                  type: 'string',
+                  desc: "Amount of gas used"
+                },
+                {
+                  id: 'output',
+                  type: 'string',
+                  desc: "Output data from the call"
+                }
+              ]
+            },
+            {
+              id: 'subtraces',
+              type: 'integer',
+              desc: "Number of subtraces"
+            },
+            {
+              id: 'traceAddress',
+              type: 'array',
+              desc: "Address path of trace location in the call tree"
+            },
+            {
+              id: 'type',
+              type: 'string',
+              desc: "Type of trace"
+            },
+            {
+              id: 'error',
+              type: 'string',
+              desc: "Error message if the call failed"
+            }
+          ]
+        },
+        {
+          id: 'vmTrace',
+          type: 'object',
+          desc: "Virtual machine execution trace (if requested)"
+        }
+      ]
+    }
+  ]}
+  getParams={(fields) => {
+    const params = [];
+
+    // Build transaction object
+    const tx = {};
+    if (fields?.transaction?.from) tx.from = fields.transaction.from;
+    if (fields?.transaction?.to) tx.to = fields.transaction.to;
+    if (fields?.transaction?.gas) tx.gas = fields.transaction.gas;
+    if (fields?.transaction?.gasPrice) tx.gasPrice = fields.transaction.gasPrice;
+    if (fields?.transaction?.value) tx.value = fields.transaction.value;
+    if (fields?.transaction?.data) tx.data = fields.transaction.data;
+
+    params.push(tx);
+
+    // Add trace types
+    params.push(fields?.traceTypes || ["trace"]);
+
+    // Add block parameter if provided
+    if (fields?.blockParameter) {
+      params.push(fields.blockParameter);
+    }
+
+    return params;
+
+}}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": {
+		"output": "0x",
+		"stateDiff": null,
+		"trace": [
+			{
+				"action": {
+					"callType": "call",
+					"from": "0x6f1fb6efdf50f34bfa3f2bc0e5576edd71631638",
+					"gas": "0x1dcd11f8",
+					"input": "0xa67a6a45000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000",
+					"to": "0x1e0447b19bb6ecfdae1e4ae1694b0c3659614e4e",
+					"value": "0x0"
+				},
+				"error": "Reverted",
+				"subtraces": 0,
+				"traceAddress": [],
+				"type": "call"
+			}
+		],
+		"vmTrace": null
+	}
+}
+```
+
+### Call Types
+
+The `callType` field in the trace action indicates the type of call:
+
+- **call**: Standard call between addresses
+- **staticcall**: Read-only call (cannot modify state)
+- **delegatecall**: Call that keeps the caller's context
+- **callcode**: Legacy call type (deprecated)
+
+### Trace Types
+
+The `type` field in the trace indicates the type of operation:
+
+- **call**: A message call
+- **create**: A contract creation
+- **suicide**: A contract self-destruct (SELFDESTRUCT opcode)
+
+### Understanding traceAddress
+
+The `traceAddress` field indicates the position in the call tree:
+
+- Empty array (`[]`) for top-level calls
+- An array of indices showing the path through nested calls
+- Helps you track the exact execution path through complex interactions
+
+### Response Example with Successful Call
+
+Here's an example response from `trace_call`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "stateDiff": { /* state changes */ },
+    "trace": [
+      {
+        "action": {
+          "callType": "call",
+          "from": "0x407d73d8a49eeb85d32cf465507dd71d507100c1",
+          "gas": "0x1dcd12f8",
+          "input": "0xa9059cbb0000000000000000000000002710000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a",
+          "to": "0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b",
+          "value": "0x0"
+        },
+        "result": {
+          "gasUsed": "0x765",
+          "output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "subtraces": 1,
+        "traceAddress": [],
+        "type": "call"
+      },
+      {
+        "action": {
+          "callType": "call",
+          "from": "0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b",
+          "gas": "0x1dcd0393",
+          "input": "0x",
+          "to": "0x2710000000000000000000000000000000000000",
+          "value": "0xa"
+        },
+        "result": {
+          "gasUsed": "0x0",
+          "output": "0x"
+        },
+        "subtraces": 0,
+        "traceAddress": [0],
+        "type": "call"
+      }
+    ],
+    "vmTrace": { /* detailed VM execution information */ }
+  }
+}
+```
+
+### Differences from eth_call
+
+While both `trace_call` and `eth_call` perform simulated calls:
+
+- `trace_call` provides detailed execution traces not available in `eth_call`
+- `trace_call` can return several types of traces (operations, VM steps, state changes)
+- `trace_call` gives more information for debugging and analysis
+- `eth_call` is more lightweight and standard across all Ethereum clients
+- `trace_call` supports historical block state simulation
+
+### Performance Considerations
+
+- Tracing is computationally intensive, especially with all trace types enabled
+- vmTrace and stateDiff particularly increase response size and computation time
+- Consider requesting only the trace types you need
+- For complex contracts, responses may be very large
+- May timeout on public nodes or rate-limited endpoints
+- Response time increases with the complexity of the transaction
+- Consider using batch requests if tracing multiple calls
+- For production applications, dedicated infrastructure is recommended
+
+### Important Notes
+
+- This method requires trace APIs to be enabled on the node
+- Not all clients support this method (primarily Geth with `--gcmode=archive` and OpenEthereum/Nethermind)
+- The method doesn't modify the blockchain or use real gas
+- Gas estimates may differ slightly from actual transactions due to simulation details
+- Different clients may return slightly different trace formats
+- Reverted transactions will include trace information up to the revert point
+- For historical blocks, the node must have archive data for that state
+- The `stateDiff` response can be very large for transactions that modify many storage slots
+- Tracing against mainnet might be unavailable on most public RPC providers
+- Traces show the actual execution path, not all possible paths
+
+### See also
+
+- <Link to="/docs/ethereum/trace-methods/trace_transaction" title="Get detailed execution traces for a specific transaction that's already on the blockchain">trace_transaction</Link> - Retrieve trace for an existing transaction
+- <Link to="/docs/ethereum/trace-methods/trace_filter" title="Search for transaction traces matching specific criteria across multiple blocks">trace_filter</Link> - Filter and search for traces across multiple blocks
+- <Link to="/docs/ethereum/trace-methods/trace_block" title="Get all transaction execution traces within a specified block">trace_block</Link> - Get traces for all transactions in a block
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Execute a new message call without creating a transaction on the blockchain">eth_call</Link> - Similar method but without detailed trace information
+- <Link to="/docs/ethereum/debug-methods/debug_traceCall" title="Low-level tracing of a call with custom tracing options">debug_traceCall</Link> - Alternative trace method with different tracing options

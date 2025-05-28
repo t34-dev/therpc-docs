@@ -1,0 +1,194 @@
+---
+title: eth_getFilterChanges - Sondear Nuevos Eventos | Métodos de API de Ethereum
+description: Aprenda a sondear eficientemente nuevos eventos de blockchain usando eth_getFilterChanges - esencial para monitorear actividad de contratos inteligentes, transferencias de tokens y cambios de estado de blockchain.
+keywords: eth_getFilterChanges, sondeo de eventos ethereum, recuperación de logs blockchain, monitoreo basado en filtros, eventos de contratos inteligentes, actualizaciones de log de eventos, estrategia de sondeo de filtros, notificación de eventos, recolección de logs, eventos blockchain
+---
+
+# eth_getFilterChanges
+
+El método `eth_getFilterChanges` devuelve un array de logs que ocurrieron desde el último sondeo para el filtro especificado. Este potente método de suscripción funciona con filtros creados por `eth_newFilter`, `eth_newBlockFilter`, y `eth_newPendingTransactionFilter`, permitiendo un monitoreo eficiente de la actividad de blockchain sin necesidad de reescanear constantemente datos históricos.
+
+## Casos de Uso
+
+- Monitoreo eficiente de eventos con uso mínimo de recursos
+- Actualizaciones y notificaciones en tiempo real para dApps
+- Seguimiento y sincronización de estados de contratos inteligentes
+- Monitoreo de confirmación de transacciones
+- Detección de transferencias de tokens y actualizaciones de monederos
+- Análisis de actividad de protocolos y paneles de métricas
+- Procesamiento por lotes de eventos de blockchain
+- Monitoreo de blockchain eficiente en recursos a escala
+- Automatización basada en logs y disparadores
+- Notificaciones de bots de trading y monitoreo de mercado
+
+## Detalles del Método
+
+Este método toma un ID de filtro y devuelve cualquier nuevo log que coincida con los criterios del filtro desde el último sondeo, proporcionando la base para aplicaciones blockchain basadas en eventos.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_getFilterChanges",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterId',
+      required: true,
+      type: 'string',
+      desc: "El ID de filtro devuelto por eth_newFilter, eth_newBlockFilter, o eth_newPendingTransactionFilter",
+      value: "0x1a4b0d22dbb7284cf485c969d2857ab3"
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'array',
+      desc: "Array de objetos log, o un array vacío si nada ha cambiado desde el último sondeo"
+    }
+  ]}
+  getParams={(fields) => [fields?.filterId || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "topics": [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x000000000000000000000000a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+        "0x00000000000000000000000023a6b9c321aba35d18ca26e66824e917778d9d2b"
+      ],
+      "data": "0x0000000000000000000000000000000000000000000000003635c9adc5dea00000",
+      "blockNumber": "0x10892bc",
+      "transactionHash": "0x56b28388cadcf4da8cbd30aa3c3f126e0513550e6fab6fc20992f3e1435846c8",
+      "transactionIndex": "0x3",
+      "blockHash": "0x6b092af2e8fbe2ceba2034ef4f334f3274a1cce5ffe955fa1895565d9278dac7",
+      "logIndex": "0x7",
+      "removed": false
+    }
+  ]
+}
+```
+
+### Entendiendo los Objetos de Log
+
+Cada objeto de log contiene los siguientes campos que proporcionan información completa del evento:
+
+- **address**: Dirección del contrato que generó el evento
+- **topics**: Array de 0-4 temas de 32 bytes (parámetros indexados)
+  - El primer tema es típicamente el hash de la firma del evento (keccak256 del nombre y parámetros del evento)
+  - Los temas subsiguientes son parámetros de eventos indexados (limitados a 32 bytes cada uno)
+- **data**: Contiene los parámetros de eventos no indexados (cadena hex)
+- **blockNumber**: Número de bloque donde se creó el log
+- **transactionHash**: Hash de la transacción que generó el log
+- **transactionIndex**: Posición del índice de la transacción en el bloque
+- **blockHash**: Hash del bloque donde se creó el log
+- **logIndex**: Posición del índice del log en el bloque
+- **removed**: `true` si el log fue eliminado debido a una reorganización de cadena (reorg)
+
+### Firmas Comunes de Eventos
+
+Algunas firmas de eventos frecuentemente monitoreadas (primer tema):
+
+- Transferencia ERC-20: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`
+- Aprobación ERC-20: `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925`
+- Transferencia ERC-721: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` (igual que ERC-20)
+- Intercambio Uniswap V2: `0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822`
+
+### Implementación Completa de Sondeo
+
+Aquí hay un patrón completo para un sondeo efectivo de eventos:
+
+```javascript
+// 1. Crear un filtro para un evento específico
+async function monitorTokenTransfers(tokenAddress, fromBlock = 'latest') {
+  // Firma del evento de Transferencia ERC-20
+  const transferEventSignature = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+  
+  // Crear el filtro
+  const filterId = await provider.send('eth_newFilter', [{
+    address: tokenAddress,
+    topics: [transferEventSignature],
+    fromBlock,
+    toBlock: 'latest'
+  }]);
+  
+  console.log(`Filtro creado: ${filterId}`);
+  return filterId;
+}
+
+// 2. Sondear cambios
+async function pollForTransfers(filterId, interval = 10000) {
+  setInterval(async () => {
+    try {
+      const logs = await provider.send('eth_getFilterChanges', [filterId]);
+      
+      if (logs.length > 0) {
+        console.log(`Encontradas ${logs.length} nuevas transferencias`);
+        
+        logs.forEach(log => {
+          // Decodificar datos de eventos de transferencia
+          const from = '0x' + log.topics[1].slice(26);
+          const to = '0x' + log.topics[2].slice(26);
+          const value = BigInt(log.data);
+          
+          console.log(`Transferencia: ${from} → ${to}: ${value}`);
+        });
+      }
+    } catch (error) {
+      console.error('El filtro puede haber expirado:', error);
+      // Recrear el filtro si es necesario
+    }
+  }, interval);
+}
+
+// 3. Limpiar cuando termine
+async function stopMonitoring(filterId) {
+  await provider.send('eth_uninstallFilter', [filterId]);
+  console.log(`Filtro ${filterId} desinstalado`);
+}
+```
+
+### Valores de Retorno para Diferentes Tipos de Filtros
+
+El formato de respuesta varía dependiendo del tipo de filtro original:
+
+1. **Filtro de Log** (creado con `eth_newFilter`):
+   - Devuelve objetos de log como se muestra en el ejemplo anterior
+   - Contiene datos completos del evento con todos los parámetros
+
+2. **Filtro de Bloque** (creado con `eth_newBlockFilter`):
+   - Devuelve hashes de bloques como un array de cadenas
+   - Ejemplo: `["0x4b7", "0x4b8", "0x4b9"]`
+
+3. **Filtro de Transacción Pendiente** (creado con `eth_newPendingTransactionFilter`):
+   - Devuelve hashes de transacciones pendientes como un array de cadenas
+   - Ejemplo: `["0xc6ef2fc5426d6ad6fd9e2a26abeab0aa2411b7ab17f30a99d3cb96aed1d1055b"]`
+
+### Notas Importantes y Mejores Prácticas
+
+- **Expiración de Filtros**: Los filtros expiran después de un período de inactividad (típicamente 5 minutos)
+- **Frecuencia de Sondeo**: 
+  - Demasiado frecuente: Puede causar limitación de tasa desde el proveedor
+  - Muy poco frecuente: Riesgo de expiración del filtro o pérdida de eventos durante reorgs
+  - Recomendado: 10-30 segundos para la mayoría de aplicaciones
+- **Manejo de Errores**: Siempre implementar un manejo de errores robusto para la expiración de filtros
+- **Alternativas**: Para conexiones persistentes, las suscripciones WebSocket son más eficientes
+- **Recreación de Filtros**: Estar preparado para recrear filtros si expiran
+- **Procesamiento de Logs**: Siempre procesar completamente todos los logs devueltos antes del siguiente sondeo
+- **Reorgs de Cadena**: Verificar la bandera `removed` para manejar correctamente eventos reordenados
+- **Respuestas Grandes**: Estar preparado para manejar lotes potencialmente grandes de logs
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Crear filtros de eventos">eth_newFilter</Link> - Crear un nuevo filtro para logs de eventos específicos
+- <Link to="/docs/ethereum/core-methods/eth_getFilterLogs" title="Obtener todos los logs de filtro">eth_getFilterLogs</Link> - Obtener todos los logs que coinciden con los criterios de un filtro
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="Eliminar un filtro">eth_uninstallFilter</Link> - Eliminar un filtro cuando ya no se necesita
+- <Link to="/docs/ethereum/core-methods/eth_getLogs" title="Consultar logs directamente">eth_getLogs</Link> - Consultar logs sin crear un filtro persistente

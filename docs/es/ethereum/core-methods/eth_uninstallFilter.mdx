@@ -1,0 +1,119 @@
+---
+title: eth_uninstallFilter - Eliminar Filtros Ethereum | Métodos API de Blockchain
+description: Aprende a usar eth_uninstallFilter para limpiar filtros no utilizados en Ethereum - evita fugas de recursos y optimiza el rendimiento del nodo eliminando adecuadamente los filtros que ya no se necesitan.
+keywords: eth_uninstallFilter, limpieza de filtros ethereum, eliminación de filtros blockchain, gestión de filtros RPC, optimización de recursos ethereum, eliminar filtro de eventos, limpiar escuchas blockchain, eliminación de filtros, gestión de filtros de eventos, gestión de recursos de nodo, optimización de memoria ethereum, sondeo blockchain, tiempo de espera de filtros, filtro api ethereum, manejo de eventos ethereum
+---
+
+# eth_uninstallFilter
+
+El método `eth_uninstallFilter` elimina un filtro con el ID dado. Debe usarse cuando un filtro ya no es necesario. Aunque los filtros caducan automáticamente después de un período de inactividad (generalmente 5 minutos), es una buena práctica desinstalar manualmente los filtros para gestionar adecuadamente los recursos.
+
+## Casos de Uso
+
+- Terminar correctamente los escuchas de eventos cuando se completa el monitoreo
+- Limpiar recursos en dApps para evitar fugas de memoria
+- Gestionar el ciclo de vida completo del filtro desde la creación hasta la eliminación
+- Optimizar recursos del nodo eliminando filtros no utilizados
+- Reducir el uso de cuota de API con proveedores de servicios
+- Prevenir errores inesperados de tiempo de espera de filtros
+- Limpiar después de que las tareas de recolección de datos finalicen
+- Implementar procedimientos adecuados de apagado de aplicaciones
+
+## Detalles del Método
+
+Este método toma un ID de filtro y elimina el filtro correspondiente.
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_uninstallFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[
+    {
+      id: 'filterId',
+      required: true,
+      type: 'string',
+      desc: "El ID del filtro a desinstalar",
+      value: "0x1a4b0d22dbb7284cf485c969d2857ab3"
+    }
+  ]}
+  returns={[
+    {
+      id: 'result',
+      type: 'boolean',
+      desc: "true si el filtro fue desinstalado exitosamente, false en caso contrario"
+    }
+  ]}
+  getParams={(fields) => [fields?.filterId || null]}
+/>
+
+### Ejemplo de Respuesta
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": true
+}
+```
+
+### Valores de Retorno
+
+- **true**: El filtro fue desinstalado exitosamente
+- **false**: El filtro no pudo ser encontrado o ya estaba desinstalado
+
+### Por Qué Desinstalar Filtros
+
+Aunque la mayoría de los nodos Ethereum expiran automáticamente los filtros después de un período de inactividad (generalmente 5 minutos), hay varias razones para desinstalar explícitamente los filtros:
+
+1. **Gestión de Recursos**: Los filtros activos consumen memoria y recursos de procesamiento en el nodo
+2. **Límites de Filtros**: Algunos nodos implementan límites en el número de filtros activos por conexión
+3. **Optimización de Uso de API**: Usar menos recursos puede reducir los costos de API con proveedores comerciales
+4. **Control de Aplicación**: La gestión explícita del ciclo de vida permite que tu aplicación sepa exactamente cuándo un filtro está activo
+5. **Prevenir Tiempos de Espera**: Evita errores inesperados de "filtro no encontrado" cuando un filtro caduca automáticamente
+6. **Apagado Limpio**: Permite que tu aplicación limpie adecuadamente al terminar
+
+### Manejo de Errores
+
+Al desinstalar filtros, podrías encontrar los siguientes escenarios:
+
+1. **Filtro Ya Eliminado**:
+   - Intentar desinstalar un filtro que ya fue desinstalado devuelve `false`
+   - No se lanza ningún error
+
+2. **ID de Filtro Inválido**:
+   - Intentar desinstalar un filtro con un formato de ID inválido puede resultar en un error
+   - La respuesta contendrá un objeto de error en lugar de un resultado
+
+3. **Filtro Expirado**:
+   - Si un filtro expiró automáticamente debido a inactividad, desinstalarlo devuelve `false`
+   - No se lanza ningún error
+
+### Mejores Prácticas
+
+1. **Siempre limpia los filtros** cuando ya no sean necesarios
+2. **Maneja interrupciones de conexión** rastreando filtros activos y reinstalándolos
+3. **Implementa manejo de tiempos de espera** para cuando los filtros expiren automáticamente
+4. **Agrega llamadas de desinstalación** a procedimientos de apagado de aplicaciones
+5. **Verifica el valor de retorno** para confirmar la desinstalación exitosa
+6. **Lleva un registro de filtros activos** en el estado de tu aplicación
+7. **No asumas que la desinstalación tendrá éxito** - verifica el resultado
+8. **Implementa lógica de reintento** para eliminación crítica de filtros
+
+### Tipos de Filtros
+
+Este método funciona con todos los tipos de filtros creados por:
+
+1. `eth_newFilter` - Filtros de registros de eventos
+2. `eth_newBlockFilter` - Filtros de notificación de nuevos bloques
+3. `eth_newPendingTransactionFilter` - Filtros de transacciones pendientes
+
+### Ver también
+
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="Crear filtros para monitorear eventos de contratos inteligentes">eth_newFilter</Link> - Crear un filtro para registros de eventos
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="Sondear nuevos eventos que coincidan con tus criterios de filtro">eth_getFilterChanges</Link> - Recuperar nuevos registros desde el último sondeo
+- <Link to="/docs/ethereum/core-methods/eth_getFilterLogs" title="Obtener todos los registros históricos para tu filtro">eth_getFilterLogs</Link> - Obtener todos los registros que coincidan con los criterios del filtro
+- <Link to="/docs/ethereum/core-methods/eth_newBlockFilter" title="Monitorear nuevos bloques en la blockchain">eth_newBlockFilter</Link> - Crear filtro para nuevos bloques
+- <Link to="/docs/ethereum/core-methods/eth_newPendingTransactionFilter" title="Rastrear nuevas transacciones pendientes en el mempool">eth_newPendingTransactionFilter</Link> - Crear filtro para transacciones pendientes

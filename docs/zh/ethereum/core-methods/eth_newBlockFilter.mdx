@@ -1,0 +1,114 @@
+---
+title: eth_newBlockFilter - 创建区块通知过滤器 | 以太坊API方法
+description: 学习如何使用eth_newBlockFilter监控以太坊区块链上的新区块 - 这对于跟踪交易确认、同步应用程序和构建实时区块链浏览器至关重要。
+keywords: eth_newBlockFilter, 以太坊区块过滤器, 新区块通知, 区块链监控, 区块头过滤器, 区块跟踪, 以太坊通知系统, 链监控, 区块提醒, 以太坊轮询, 区块观察器, 区块链同步, 区块检测, 以太坊节点事件, 实时区块链, 区块观察者
+---
+
+# eth_newBlockFilter
+
+`eth_newBlockFilter`方法在节点中创建一个过滤器，用于在新区块到达时发出通知。这是重复轮询`eth_blockNumber`的一个更简单、更高效的替代方案，因为它允许您仅在检测到新区块时接收通知。
+
+## 使用场景
+
+- 应用程序和浏览器的区块同步
+- 在自动化系统中触发基于区块的操作
+- 钱包中的交易确认跟踪
+- 数据完整性的链重组检测
+- 用于分析的实时区块链监控
+- 用于费用优化的gas价格趋势监控
+- 网络分析中的挖矿/验证跟踪
+- 在区块停止到达时检测网络停滞
+- 区块链基础设施的告警系统
+- 维护与区块链状态的缓存一致性
+
+## 方法详情
+
+此方法不接受参数，并返回一个过滤器ID，可与`eth_getFilterChanges`一起使用来轮询新区块。
+
+<ApiMethodBlock
+  chain="ethereum"
+  scheme={{
+    "method": "eth_newBlockFilter",
+    "id": 1,
+    "jsonrpc": "2.0"
+  }}
+  fields={[]}
+  returns={[
+    {
+      id: 'result',
+      type: 'string',
+      desc: "用于通过eth_getFilterChanges轮询的过滤器ID（十六进制字符串）"
+    }
+  ]}
+  getParams={() => []}
+/>
+
+### 响应示例
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x3a85885a2facbe4b9c99d543b3e42359"
+}
+```
+
+### 区块过滤器的工作原理
+
+1. 当您创建区块过滤器时，以太坊节点会为其分配一个唯一ID
+2. 节点会跟踪它向您的过滤器显示的最新区块
+3. 当您使用`eth_getFilterChanges`进行轮询时，它会返回自上次轮询以来任何新区块的区块哈希
+4. 如果没有产生新区块，它会返回一个空数组
+
+### 返回值格式
+
+使用`eth_getFilterChanges`进行轮询时，此过滤器会返回一个区块哈希数组：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    "0x1a4b5aad3a859c5c6cbbdab46f565475c5c61c163a45e0c2cb732e7221efbe77",
+    "0x2573c838b310ca595c83c20ee437139f96658f596afe8a0f726d82db3d9647c2"
+  ]
+}
+```
+
+### 区块数据检索
+
+过滤器只返回区块哈希。要获取完整的区块数据，您必须使用以下方法进行额外调用：
+
+- `eth_getBlockByHash` - 使用区块哈希获取区块详情
+
+### 重要考虑因素
+
+1. **过滤器过期**：过滤器在一段时间不活动后会过期（通常约为5分钟）
+2. **轮询频率**：在及时更新和RPC调用限制之间取得平衡
+3. **区块重组**：注意区块可能会重组，尤其是最近的区块
+4. **链一致性**：区块过滤器有助于保持应用程序状态与区块链同步
+5. **替代方法**：
+   - WebSocket `eth_subscribe`用于实时推送通知
+   - 直接轮询`eth_blockNumber`（效率较低）
+6. **速率限制**：过度轮询可能导致RPC提供商的速率限制
+7. **区块丢失**：如果轮询间隔太大，您可能需要一次处理多个区块
+8. **过滤器管理**：不再需要时始终卸载过滤器
+9. **错误处理**：为临时网络问题实现重试逻辑
+10. **区块处理**：考虑按顺序处理区块以维护数据一致性
+
+### 与其他通知方法的比较
+
+| 方法                           | 目的                                   | 结果                        | 最适合                                 |
+|----------------------------------|-----------------------------------------|--------------------------------|------------------------------------------|
+| `eth_newBlockFilter`             | 通知新区块                | 区块哈希数组          | 区块级监控                   |
+| `eth_newFilter`                  | 通知特定日志事件       | 日志对象数组           | 基于事件的应用程序                 |
+| `eth_newPendingTransactionFilter`| 通知待处理交易      | 交易哈希数组    | 内存池监控                       |
+| WebSocket `eth_subscribe`        | 推送通知（无轮询）          | 因订阅类型而异    | 实时应用程序                   |
+
+### 另请参阅
+
+- <Link to="/docs/ethereum/core-methods/eth_getFilterChanges" title="获取自上次轮询以来的新区块">eth_getFilterChanges</Link> - 获取自上次轮询以来的新区块哈希
+- <Link to="/docs/ethereum/core-methods/eth_uninstallFilter" title="不再需要时清理过滤器">eth_uninstallFilter</Link> - 不再需要时移除过滤器
+- <Link to="/docs/ethereum/core-methods/eth_getBlockByHash" title="使用哈希获取详细区块信息">eth_getBlockByHash</Link> - 通过哈希获取区块详情
+- <Link to="/docs/ethereum/core-methods/eth_newFilter" title="为智能合约事件创建过滤器">eth_newFilter</Link> - 为事件日志创建过滤器
+- <Link to="/docs/ethereum/core-methods/eth_newPendingTransactionFilter" title="监控内存池中的待处理交易">eth_newPendingTransactionFilter</Link> - 为待处理交易创建过滤器

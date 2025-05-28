@@ -1,0 +1,164 @@
+---
+title: eth_getCode - Retrieve Smart Contract Bytecode | Ethereum API Methods
+description: Learn how to use the eth_getCode method to retrieve compiled bytecode from Ethereum smart contracts. Includes examples for bytecode verification and analysis.
+keywords: eth_getCode, smart contract bytecode, contract code, ethereum contract, bytecode verification, evm code, contract analysis, solidity bytecode, contract detection, proxy contract
+---
+
+# eth_getCode
+
+The `eth_getCode` method returns the compiled bytecode of a smart contract at a specified address. This essential method allows developers to verify contract implementations, perform security audits, and distinguish between regular accounts and smart contracts on the Ethereum blockchain.
+
+## Use Cases
+
+- Smart contract verification and implementation checking
+- Contract bytecode comparison and version validation
+- Contract audit and security analysis workflows
+- Differentiating between contracts and EOAs (Externally Owned Accounts)
+- Contract implementation analysis for upgradeable systems
+- Proxy contract verification and delegate implementation checks
+- Detecting self-destructed contracts and contract existence
+- Determining if an address is a token contract
+- Smart contract reverse engineering and analysis
+- Historical bytecode analysis across different blocks
+
+## Method Details
+
+This method retrieves the EVM bytecode deployed at a specific address at the requested block height.
+
+<ApiMethodBlock
+	chain="ethereum"
+	scheme={{
+		method: 'eth_getCode',
+		id: 1,
+		jsonrpc: '2.0',
+	}}
+	fields={[
+		{
+			id: 'address',
+			required: true,
+			type: 'string',
+			desc: 'The address of the smart contract',
+			value: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', // UNI token contract
+		},
+		{
+			id: 'blockNumber',
+			required: true,
+			type: 'string',
+			desc: 'Block number in hex format or block tag',
+			value: 'latest',
+		},
+	]}
+	returns={[
+		{
+			id: 'result',
+			type: 'string',
+			desc: 'The bytecode from the given address as a hexadecimal string',
+		},
+	]}
+	getParams={(fields) => [fields?.address || null, fields?.blockNumber || null]}
+/>
+
+### Response Example
+
+```json
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"result": "0x60806040526004361061016a5763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166306fdde03811461016f578063095ea7b3146101f957806318160ddd1461023957806323b872dd14610260578063313ce567146102a..." // Truncated for brevity
+}
+```
+
+### Special Cases and Return Values
+
+- **Empty contract**: Returns "0x" if no code exists at the address
+- **EOA address**: Returns "0x" for regular wallet addresses (Externally Owned Accounts)
+- **Self-destructed contract**: Returns "0x" after a contract has been destroyed via `selfdestruct`
+- **Pre-deployment**: If checking a block before contract deployment, returns "0x"
+- **Standard contracts**: Returns the full EVM bytecode for typical contracts
+- **Proxy contracts**: Returns the proxy code, not the implementation code they delegate to
+
+### Identifying Contract Types
+
+Different types of contracts have recognizable bytecode patterns:
+
+1. **Proxy Contracts**: Often contain delegate call operations 
+2. **ERC20 Tokens**: Include transfer and approve functions
+3. **ERC721 NFTs**: Contain standard NFT interfaces
+4. **Minimal Proxies (EIP-1167)**: Start with `0x363d3d37363d73...`
+5. **Diamond Proxies (EIP-2535)**: Include facet management logic
+6. **UUPS Proxies**: Include upgrade functionality in implementation
+
+### Practical Example
+
+```javascript
+// Example: Verify if an address is a contract or EOA
+async function isContract(address) {
+	const code = await provider.send('eth_getCode', [address, 'latest']);
+	return code !== '0x';
+}
+
+// Example: Verify proxy implementation
+async function verifyProxyImplementation(proxyAddress, expectedImplementation) {
+	// For EIP-1967 proxies, the implementation address is stored at a specific slot
+	const implementationSlot = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
+
+	const storageValue = await provider.send('eth_getStorageAt', [proxyAddress, implementationSlot, 'latest']);
+
+	// Extract address from storage value (remove padding)
+	const implementationAddress = '0x' + storageValue.slice(26);
+
+	// Get implementation bytecode
+	const implementationCode = await provider.send('eth_getCode', [implementationAddress, 'latest']);
+
+	const expectedCode = await provider.send('eth_getCode', [expectedImplementation, 'latest']);
+
+	return {
+		isProxy: implementationCode !== '0x',
+		implementationAddress,
+		implementationMatches: implementationCode === expectedCode,
+	};
+}
+
+// Usage
+const addressToCheck = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'; // UNI token
+const isContractResult = await isContract(addressToCheck);
+console.log(`${addressToCheck} is ${isContractResult ? 'a contract' : 'an EOA'}`);
+```
+
+### Advanced Usage: Contract Type Detection
+
+```javascript
+// Simple contract type detector based on bytecode patterns
+async function detectContractType(address) {
+    const code = await provider.send('eth_getCode', [address, 'latest']);
+    
+    if (code === '0x') return 'Not a contract (EOA or self-destructed)';
+    
+    // Check for proxy patterns
+    if (code.includes('363d3d37363d73')) return 'EIP-1167 Minimal Proxy';
+    if (code.includes('5c60806040527f360894')) return 'EIP-1967 Transparent Proxy';
+    
+    // Check common ERC standards (simplified)
+    if (code.includes('6e0a6eecd9d3362a2dcfb7fac5fea5d4bd0a73001ddb12dd96e21df6ab138d72')) 
+        return 'Likely ERC-20 Token';
+    if (code.includes('80ac58cd')) return 'Likely ERC-721 NFT';
+    if (code.includes('d9b67a26')) return 'Likely ERC-1155 Multi-Token';
+    
+    return 'Standard contract (type unknown)';
+}
+```
+
+### Common Contract Bytecode Prefixes
+
+- **0x60806040**: Common EVM bytecode prefix for Solidity contracts (version 0.4.x-0.8.x)
+- **0x6080604052**: Another common prefix for Solidity contracts
+- **0x363d3d373d3d3d363d73**: Common prefix for proxy contracts
+- **0x363d3d37363d73**: Common minimal proxy pattern (EIP-1167)
+- **0x3d602d80600a3d3981f3**: Another variation of minimal proxy
+
+### See also
+
+- <Link to="/docs/ethereum/core-methods/eth_getStorageAt" title="Access contract storage">eth_getStorageAt</Link> - Returns the value from a specific storage position
+- <Link to="/docs/ethereum/core-methods/eth_call" title="Execute contract calls">eth_call</Link> - Execute a read-only call to a contract
+- <Link to="/docs/ethereum/core-methods/eth_getBalance" title="Check account balance">eth_getBalance</Link> - Returns an account's ether balance
+- <Link to="/docs/ethereum/core-methods/eth_getProof" title="Generate contract state proofs">eth_getProof</Link> - Generate proof of account and storage values
